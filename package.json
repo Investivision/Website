@@ -1,0 +1,17 @@
+***REMOVED***
+  "name": "investivision-site-2.0",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": ***REMOVED***
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  ***REMOVED***,
+  "dependencies": ***REMOVED***
+    "firebase": "^8.4.3",
+    "next": "10.2.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "socket.io-client": "^4.0.1"
+  ***REMOVED***
+***REMOVED***
