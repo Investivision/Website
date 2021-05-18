@@ -1,19 +1,19 @@
 import Document, ***REMOVED*** Html, Head, Main, NextScript ***REMOVED*** from "next/document";
 
 class MyDocument extends Document ***REMOVED***
-  static async getInitialProps(ctx) ***REMOVED***
-    const initialProps = await Document.getInitialProps(ctx);
-    return ***REMOVED*** ...initialProps ***REMOVED***;
-  ***REMOVED***
-
   render() ***REMOVED***
     return (
       <Html>
         <Head>
+          <link rel="preconnect" href="https://fonts.gstatic.com" />
           <link
+            href="https://fonts.googleapis.com/css2?family=Asap:wght@400;500&display=swap"
             rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
           />
+          ***REMOVED***/* <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          /> */***REMOVED***
         </Head>
         <body>
           <Main />

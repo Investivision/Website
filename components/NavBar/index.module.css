@@ -1,3 +1,87 @@
+.container ***REMOVED***
+  width: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  height: 48px;
+***REMOVED***
+
+.linksContainer ***REMOVED***
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+***REMOVED***
+
 .link ***REMOVED***
-  padding: 0 20px;
+  padding: 8px 14px;
+
+  font-size: 14px;
+  font-weight: 1000;
+***REMOVED***
+
+.logoContainer ***REMOVED***
+  position: absolute;
+  left: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+***REMOVED***
+
+.logoContainer img ***REMOVED***
+  width: 26px;
+  aspect-ratio: 1;
+***REMOVED***
+
+.logoContainer h1 ***REMOVED***
+  font-size: 18px;
+  margin-left: 10px;
+  letter-spacing: 2px;
+***REMOVED***
+
+.rightContainer ***REMOVED***
+  position: absolute;
+  right: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 50px; */
+***REMOVED***
+
+.rightContainer * ***REMOVED***
+  border-width: 2px !important;
+  text-transform: none;
+***REMOVED***
+
+.rightContainer :global(.loginButton) ***REMOVED***
+  padding: 3px 14px;
+  border-radius: 7px;
+***REMOVED***
+
+@media screen and (max-width: 750px) ***REMOVED***
+  .container ***REMOVED***
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  ***REMOVED***
+  .logoContainer ***REMOVED***
+    position: relative;
+    left: 0;
+  ***REMOVED***
+  .linksContainer ***REMOVED***
+    margin-bottom: -7px;
+    /* padding-bottom: -6px; */
+  ***REMOVED***
+  .link ***REMOVED***
+    padding: 12px 14px;
+  ***REMOVED***
+  .rightContainer ***REMOVED***
+    top: 8px;
+  ***REMOVED***
+  .rightContainer .loginButton ***REMOVED***
+    font-size: 12px !important;
+  ***REMOVED***
 ***REMOVED***

@@ -1,0 +1,115 @@
+.page ***REMOVED***
+  padding: 50px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+***REMOVED***
+
+.inputContainer ***REMOVED***
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  /* background-color: white; */
+***REMOVED***
+
+.inputContainer h2 ***REMOVED***
+  margin: 0 12px;
+***REMOVED***
+
+.inputContainer h2 ***REMOVED***
+  font-size: 28px;
+  line-height: 60px;
+***REMOVED***
+
+.page :global(.MuiTextField-root) ***REMOVED***
+  /* margin-top: -20px; */
+***REMOVED***
+
+.page :global(.MuiTextField-root) ***REMOVED***
+  width: 100px;
+***REMOVED***
+
+/* .page :global(.textField) label,
+.page :global(.textField) input ***REMOVED***
+  padding: 9px 10px 5px 10px;
+***REMOVED****/
+
+.page :global(.textField) label ***REMOVED***
+  line-height: 130% !important;
+  /* margin-top: -5px; */
+***REMOVED***
+
+.page :global(.textField) input ***REMOVED***
+  /* padding: 10px 10px; */
+  font-size: 18px;
+***REMOVED***
+/*
+.page :global(.textField) input ***REMOVED***
+  padding: 10px 10px 8px 10px;
+***REMOVED*** */
+
+.page :global(.actionButton) ***REMOVED***
+  margin-top: 26px;
+  font-size: 18px;
+***REMOVED***
+
+.placeholderContainer ***REMOVED***
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 100px;
+***REMOVED***
+
+.page :global(.icon) ***REMOVED***
+  margin-bottom: 20px !important;
+  font-size: 50px;
+  animation: rotate 5s ease 1s infinite;
+***REMOVED***
+
+/* .page :global(.select) * ***REMOVED***
+  border-color: red;
+***REMOVED*** */
+
+.page :global(.MuiSelect-select) ***REMOVED***
+  /* margin-top: -7.8px; */
+  /* height: 40px; */
+  padding: 11px 10px 9px 10px;
+***REMOVED***
+
+.page :global(.MuiSelect-root) ***REMOVED***
+  /* padding: 7px 19px 2.7px 10px; */
+  font-size: 18px;
+***REMOVED***
+
+@keyframes rotate ***REMOVED***
+  0% ***REMOVED***
+    transform: rotate(0deg);
+  ***REMOVED***
+  5% ***REMOVED***
+    transform: rotate(-20deg);
+  ***REMOVED***
+  15% ***REMOVED***
+    transform: rotate(100deg);
+  ***REMOVED***
+  20% ***REMOVED***
+    transform: rotate(90deg);
+  ***REMOVED***
+  50% ***REMOVED***
+    transform: rotate(90deg);
+  ***REMOVED***
+  55% ***REMOVED***
+    transform: rotate(70deg);
+  ***REMOVED***
+  65% ***REMOVED***
+    transform: rotate(200deg);
+  ***REMOVED***
+  70% ***REMOVED***
+    transform: rotate(180deg);
+  ***REMOVED***
+  100% ***REMOVED***
+    transform: rotate(180deg);
+  ***REMOVED***
+***REMOVED***

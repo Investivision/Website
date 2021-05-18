@@ -1,9 +1,20 @@
-html,
-body ***REMOVED***
+* ***REMOVED***
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+***REMOVED***
+
+html ***REMOVED***
+  background-color: white;
+***REMOVED***
+
+body ***REMOVED***
+  background-color: #f7f7f7;
+  min-height: 100vh;
+***REMOVED***
+
+* ***REMOVED***
+  font-family: "Asap", sans-serif;
+  font-weight: 100;
 ***REMOVED***
 
 a ***REMOVED***
