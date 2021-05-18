@@ -1,3 +1,87 @@
+.container {
+  width: 100%;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  height: 48px;
+}
+
+.linksContainer {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .link {
-  padding: 0 20px;
+  padding: 8px 14px;
+
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.logoContainer {
+  position: absolute;
+  left: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logoContainer img {
+  width: 26px;
+  aspect-ratio: 1;
+}
+
+.logoContainer h1 {
+  font-size: 18px;
+  margin-left: 10px;
+  letter-spacing: 2px;
+}
+
+.rightContainer {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 50px; */
+}
+
+.rightContainer * {
+  border-width: 2px !important;
+  text-transform: none;
+}
+
+.rightContainer :global(.loginButton) {
+  padding: 3px 14px;
+  border-radius: 7px;
+}
+
+@media screen and (max-width: 750px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
+  .logoContainer {
+    position: relative;
+    left: 0;
+  }
+  .linksContainer {
+    margin-bottom: -7px;
+    /* padding-bottom: -6px; */
+  }
+  .link {
+    padding: 12px 14px;
+  }
+  .rightContainer {
+    top: 8px;
+  }
+  .rightContainer .loginButton {
+    font-size: 12px !important;
+  }
 }
