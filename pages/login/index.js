@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import NavBar from "../../components/NavBar";
-import { auth } from "/utils/firebase";
+import { auth, functions } from "/utils/firebase";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   const router = useRouter();
 
@@ -27,12 +31,44 @@ export default function Home() {
           setEmail(event.target.value);
         }}
       />
+      <p>First Name</p>
+      <input
+        type="text"
+        value={firstName}
+        onChange={(event) => {
+          setFirstName(event.target.value);
+        }}
+      />
+      <p>Last Name</p>
+      <input
+        type="text"
+        value={lastName}
+        onChange={(event) => {
+          setLastName(event.target.value);
+        }}
+      />
+      <p>Phone Number</p>
+      <input
+        type="text"
+        value={phoneNumber}
+        onChange={(event) => {
+          setPhoneNumber(event.target.value);
+        }}
+      />
       <p>password</p>
       <input
         type="text"
         value={password}
         onChange={(event) => {
           setPassword(event.target.value);
+        }}
+      />
+      <p>confirm password</p>
+      <input
+        type="text"
+        value={confirmPassword}
+        onChange={(event) => {
+          setConfirmPassword(event.target.value);
         }}
       />
       <h4
@@ -47,12 +83,26 @@ export default function Home() {
         Login
       </h4>
       <h4
-        onClick={async () => {
-          try {
-            await auth.createUserWithEmailAndPassword(email, password);
-          } catch (e) {
-            alert(e.message);
-          }
+        onClick={() => {
+          functions
+            .httpsCallable("signup")({
+              email,
+              password,
+              firstName,
+              lastName,
+              confirmPassword,
+              phoneNumber,
+            })
+            .then(async (result) => {
+              try {
+                await auth.signInWithEmailAndPassword(email, password);
+              } catch (e) {
+                alert(e.message);
+              }
+            })
+            .catch((e) => {
+              alert(e.message);
+            });
         }}
       >
         Signup

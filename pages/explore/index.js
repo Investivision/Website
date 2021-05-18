@@ -11,16 +11,11 @@ import NavBar from "../../components/NavBar";
 let socket;
 
 export default function Explore() {
-  const models = {
-    Prophet: 10,
-    Range: 15,
-    Arima: 8,
-  };
-
-  const [selectedModel, setSelectedModel] = useState(Object.keys(models)[0]);
+  const [selectedModel, setSelectedModel] = useState(undefined);
   const [symbol, setSymbol] = useState("");
   const [messages, setMessages] = useState([]);
   const [userLoaded, setUserLoaded] = useState(false);
+  const [models, setModels] = useState(undefined);
 
   auth.onAuthStateChanged((user) => {
     setUserLoaded(true);
@@ -29,6 +24,7 @@ export default function Explore() {
   useEffect(() => {
     console.log("inside use state", userLoaded);
     if (userLoaded) {
+      console.log(socket);
       if (socket) {
         socket.disconnect();
       }
@@ -44,6 +40,18 @@ export default function Explore() {
       });
 
       socket.on("message", (data) => {
+        console.log(data);
+        setMessages([...messages, JSON.stringify(data)]);
+        if ("models" in data) {
+          console.log(models, selectedModel);
+          if (!models) {
+            setSelectedModel(selectedModel || Object.keys(data.models)[0]);
+          }
+          setModels(data.models);
+        }
+      });
+
+      socket.on("message2", (data) => {
         console.log(data);
         setMessages([...messages, JSON.stringify(data)]);
       });
@@ -62,6 +70,15 @@ export default function Explore() {
       symbol: symbol,
     });
   };
+
+  if (!models) {
+    return (
+      <div>
+        <NavBar />
+        <p>have not received model menu</p>
+      </div>
+    );
+  }
 
   return (
     <div>

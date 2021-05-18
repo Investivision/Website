@@ -1,7 +1,10 @@
-import firebase from "firebase/app";
+import firebase, { getApp, initializeApp } from "firebase/app";
 import "firebase/auth";
 import "firebase/database";
 import "firebase/firestore";
+import "firebase/functions";
+import "firebase/functions";
+import { production } from "./production";
 
 const config = {
   apiKey: "AIzaSyDsh36JtqHCOf9RoE8W_IHEyiDt0vOBTQc",
@@ -13,14 +16,20 @@ const config = {
   measurementId: "G-1KW4VBZRH8",
 };
 
+let app;
 if (!firebase.apps.length) {
-  firebase.initializeApp(config);
+  app = firebase.initializeApp(config);
 } else {
-  firebase.app(); // if already initialized, use that one
+  app = firebase.app(); // if already initialized, use that one
+}
+
+if (!production) {
+  firebase.functions().useEmulator("localhost", 5001);
 }
 
 module.exports = {
   auth: firebase.auth(),
   db: firebase.database(),
   firestore: firebase.firestore(),
+  functions: firebase.functions(),
 };
