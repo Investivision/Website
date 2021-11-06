@@ -1,0 +1,85 @@
+.body {
+  /* align-items: center; */
+  padding: 40px;
+  padding-top: 20px;
+  padding-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  /* max-width: 900px; */
+}
+
+.content h2 {
+  text-align: center;
+  margin: 30px 0;
+}
+
+.content > div {
+  /* width: 100%; */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 20px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.content > div > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  /* box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.07); */
+  justify-content: center;
+  align-items: center;
+  /* max-width: 200px !important; */
+
+  /* border: 1px solid red; */
+}
+
+.content > div > div > * {
+  margin: 10px 10px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.content :global(.MuiAlert-action) {
+  padding: 0 0px;
+  margin: 0;
+}
+
+.content :global(.MuiAlert-action) > button {
+  margin: 0 4px;
+}
+
+.content :global(.MuiAlert-root) > * {
+  margin: 0;
+}
+
+.content :global(.MuiAlert-root) {
+  padding: 8px 14px;
+  min-width: 250px;
+}
+
+.content :global(.MuiAlert-message) {
+  padding: 9px 10px;
+}
+
+.skeletonGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 40px;
+}
+
+.skeletonGroup > * {
+  margin-top: 20px;
+}
