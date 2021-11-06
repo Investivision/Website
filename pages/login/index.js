@@ -1,112 +1,191 @@
-import ***REMOVED*** useState ***REMOVED*** from "react";
-import ***REMOVED*** useRouter ***REMOVED*** from "next/router";
-import NavBar from "../../components/NavBar";
-import ***REMOVED*** auth, functions ***REMOVED*** from "/utils/firebase";
+import HeaderAndFooter from "../../components/HeaderAndFooter";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
+import Button from "@mui/material/Button";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import styles from "./index.module.css";
+import ***REMOVED*** useState, useEffect ***REMOVED*** from "react";
+import Wave from "react-wavify";
+import ***REMOVED***
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+***REMOVED*** from "firebase/auth";
+import ***REMOVED*** auth, formatErrorCode ***REMOVED*** from "../../firebase";
+import LoadingButton from "@mui/lab/LoadingButton";
 
-export default function Home() ***REMOVED***
+export default function Login() ***REMOVED***
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [checked, setChecked] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarIsOpen, setSnackbarIsOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
 
-  const router = useRouter();
+  useEffect(() => ***REMOVED***
+    onAuthStateChanged(auth, (user) => ***REMOVED***
+      if (user) ***REMOVED***
+        window.location.href = "/account";
+      ***REMOVED***
+    ***REMOVED***);
+    window.addEventListener("keydown", (event) => ***REMOVED***
+      if (event.keyCode === 13) ***REMOVED***
+        document.getElementById("submit").click();
+      ***REMOVED***
+    ***REMOVED***);
+  ***REMOVED***, []);
 
-  auth.onAuthStateChanged((user) => ***REMOVED***
-    if (user) ***REMOVED***
-      router.push("/");
+  const handleSubmit = async () => ***REMOVED***
+    if (email && password) ***REMOVED***
+      setSubmitLoading(true);
+      try ***REMOVED***
+        if (isLogin) ***REMOVED***
+          await signInWithEmailAndPassword(auth, email, password);
+        ***REMOVED*** else if (checked) ***REMOVED***
+          await createUserWithEmailAndPassword(auth, email, password);
+        ***REMOVED***
+      ***REMOVED*** catch (e) ***REMOVED***
+        const message = formatErrorCode(e.code);
+        setSnackbarMessage(message);
+        setSnackbarSeverity("error");
+        setSnackbarIsOpen(true);
+      ***REMOVED***
+      setSubmitLoading(false);
     ***REMOVED***
-  ***REMOVED***);
+  ***REMOVED***;
 
   return (
-    <div>
-      <NavBar />
-      <h1>login</h1>
-      <p>email</p>
-      <input
-        type="text"
-        value=***REMOVED***email***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setEmail(event.target.value);
+    <HeaderAndFooter bodyClassName=***REMOVED***styles.body***REMOVED*** hideFooterWave>
+      ***REMOVED***[1, 2].map((i) => ***REMOVED***
+        return (
+          <Wave
+            key=***REMOVED***i***REMOVED***
+            className=***REMOVED***`absoluteBottom $***REMOVED***styles.wave***REMOVED***`***REMOVED***
+            fill="url(#gradient)"
+            paused=***REMOVED***false***REMOVED***
+            options=***REMOVED******REMOVED***
+              height: 50,
+              amplitude: 170,
+              speed: 0.07,
+              points: 4,
+            ***REMOVED******REMOVED***
+          >
+            <defs>
+              <linearGradient id="gradient" gradientTransform="rotate(90)">
+                <stop offset="0%" stopColor="#81A3FFc0" />
+                <stop offset="100%" stopColor="#81A3F124" />
+              </linearGradient>
+            </defs>
+          </Wave>
+        );
+      ***REMOVED***)***REMOVED***
+      ***REMOVED***/* <h1 className=***REMOVED***styles.title***REMOVED***>Account</h1> */***REMOVED***
+      <ToggleButtonGroup
+        color="primary"
+        exclusive
+        onChange=***REMOVED***(event, nextView) => ***REMOVED***
+          setIsLogin(nextView == "login");
         ***REMOVED******REMOVED***
-      />
-      <p>First Name</p>
-      <input
-        type="text"
-        value=***REMOVED***firstName***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setFirstName(event.target.value);
-        ***REMOVED******REMOVED***
-      />
-      <p>Last Name</p>
-      <input
-        type="text"
-        value=***REMOVED***lastName***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setLastName(event.target.value);
-        ***REMOVED******REMOVED***
-      />
-      <p>Phone Number</p>
-      <input
-        type="text"
-        value=***REMOVED***phoneNumber***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setPhoneNumber(event.target.value);
-        ***REMOVED******REMOVED***
-      />
-      <p>password</p>
-      <input
-        type="text"
-        value=***REMOVED***password***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setPassword(event.target.value);
-        ***REMOVED******REMOVED***
-      />
-      <p>confirm password</p>
-      <input
-        type="text"
-        value=***REMOVED***confirmPassword***REMOVED***
-        onChange=***REMOVED***(event) => ***REMOVED***
-          setConfirmPassword(event.target.value);
-        ***REMOVED******REMOVED***
-      />
-      <h4
-        onClick=***REMOVED***async () => ***REMOVED***
-          try ***REMOVED***
-            await auth.signInWithEmailAndPassword(email, password);
-          ***REMOVED*** catch (e) ***REMOVED***
-            alert(e.message);
-          ***REMOVED***
-        ***REMOVED******REMOVED***
+        className=***REMOVED***styles.toggle***REMOVED***
       >
-        Login
-      </h4>
-      <h4
-        onClick=***REMOVED***() => ***REMOVED***
-          functions
-            .httpsCallable("signup")(***REMOVED***
-              email,
-              password,
-              firstName,
-              lastName,
-              confirmPassword,
-              phoneNumber,
-            ***REMOVED***)
-            .then(async (result) => ***REMOVED***
-              try ***REMOVED***
-                await auth.signInWithEmailAndPassword(email, password);
-              ***REMOVED*** catch (e) ***REMOVED***
-                alert(e.message);
-              ***REMOVED***
-            ***REMOVED***)
-            .catch((e) => ***REMOVED***
-              alert(e.message);
-            ***REMOVED***);
+        <ToggleButton value="login" selected=***REMOVED***isLogin***REMOVED***>
+          Login
+        </ToggleButton>
+        <ToggleButton value="signup" selected=***REMOVED***!isLogin***REMOVED*** color="primary">
+          Sign Up
+        </ToggleButton>
+      </ToggleButtonGroup>
+      <div className=***REMOVED***styles.box***REMOVED***>
+        <TextField
+          autoComplete="email"
+          label="Email"
+          variant="outlined"
+          value=***REMOVED***email***REMOVED***
+          onChange=***REMOVED***(e) => ***REMOVED***
+            setEmail(e.target.value);
+          ***REMOVED******REMOVED***
+          className=***REMOVED***styles.textInput***REMOVED***
+          color="primary"
+        />
+        <TextField
+          autoComplete=***REMOVED***`$***REMOVED***isLogin ? "current" : "new"***REMOVED***-password`***REMOVED***
+          label="Password"
+          variant="outlined"
+          value=***REMOVED***password***REMOVED***
+          onChange=***REMOVED***(e) => ***REMOVED***
+            setPassword(e.target.value);
+          ***REMOVED******REMOVED***
+          className=***REMOVED***styles.textInput***REMOVED***
+          color="primary"
+          type="password"
+        />
+        ***REMOVED***isLogin ? (
+          <div className=***REMOVED***styles.checkboxContainer***REMOVED***>
+            <p
+              onClick=***REMOVED***async () => ***REMOVED***
+                try ***REMOVED***
+                  await sendPasswordResetEmail(auth, email);
+                  setSnackbarMessage(`Sent password reset email to $***REMOVED***email***REMOVED***`);
+                  setSnackbarSeverity("success");
+                ***REMOVED*** catch (e) ***REMOVED***
+                  setSnackbarMessage(formatErrorCode(e.code));
+                  setSnackbarSeverity("error");
+                ***REMOVED***
+                setSnackbarIsOpen(true);
+              ***REMOVED******REMOVED***
+              style=***REMOVED******REMOVED***
+                cursor: "pointer",
+              ***REMOVED******REMOVED***
+            >
+              Forgot login? Reset password
+            </p>
+          </div>
+        ) : (
+          <div className=***REMOVED***styles.checkboxContainer***REMOVED***>
+            <Checkbox
+              checked=***REMOVED***checked***REMOVED***
+              onChange=***REMOVED***(e) => ***REMOVED***
+                console.log(e.target.checked);
+                setChecked(e.target.checked);
+              ***REMOVED******REMOVED***
+            />
+            <p>
+              I have read and acknowledged the <a>Terms and Conditions</a>.
+            </p>
+          </div>
+        )***REMOVED***
+        <LoadingButton
+          loading=***REMOVED***submitLoading***REMOVED***
+          variant="contained"
+          className=***REMOVED***styles.submit***REMOVED***
+          color="primary"
+          type="submit"
+          disabled=***REMOVED***!(email && password && (isLogin || checked))***REMOVED***
+          onClick=***REMOVED***handleSubmit***REMOVED***
+          id="submit"
+        >
+          ***REMOVED***isLogin ? "Login" : "Sign Up"***REMOVED***
+        </LoadingButton>
+      </div>
+      <Snackbar
+        open=***REMOVED***snackbarIsOpen***REMOVED***
+        anchorOrigin=***REMOVED******REMOVED*** vertical: "top", horizontal: "right", zIndex: 9999 ***REMOVED******REMOVED***
+        onClose=***REMOVED***() => ***REMOVED***
+          setSnackbarIsOpen(false);
         ***REMOVED******REMOVED***
+        autoHideDuration=***REMOVED***3000***REMOVED***
+        message=***REMOVED***snackbarMessage***REMOVED***
       >
-        Signup
-      </h4>
-    </div>
+        <Alert severity=***REMOVED***snackbarSeverity***REMOVED*** sx=***REMOVED******REMOVED*** zIndex: 99999 ***REMOVED******REMOVED***>
+          ***REMOVED***snackbarMessage***REMOVED***
+        </Alert>
+      </Snackbar>
+    </HeaderAndFooter>
   );
 ***REMOVED***

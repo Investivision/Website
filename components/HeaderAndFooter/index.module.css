@@ -1,0 +1,82 @@
+.header ***REMOVED***
+  width: 100%;
+  height: 80px;
+  display: flex;
+  flex-wrap: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 999;
+***REMOVED***
+
+.header > * ***REMOVED***
+  display: flex;
+  flex-wrap: row;
+  flex-wrap: nowrap;
+  align-items: center;
+***REMOVED***
+
+.header img ***REMOVED***
+  width: 46px;
+  margin-right: 14px;
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 50%;
+  padding: 3px;
+***REMOVED***
+
+.nav a ***REMOVED***
+  padding: 0 12px;
+  font-size: 16px;
+***REMOVED***
+
+.header h1 ***REMOVED***
+  font-size: 26px;
+***REMOVED***
+
+.footer ***REMOVED***
+  padding: 30px 40px;
+***REMOVED***
+
+.disclaimer ***REMOVED***
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+  opacity: 0.3;
+***REMOVED***
+
+.footerLinks ***REMOVED***
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+***REMOVED***
+
+.linksGroup ***REMOVED***
+  display: flex;
+  flex-direction: column;
+  padding: 10px 20px;
+***REMOVED***
+
+.linksGroup p ***REMOVED***
+  font-size: 16px;
+  margin-bottom: 10px;
+***REMOVED***
+
+.linksGroup a ***REMOVED***
+  font-size: 14px;
+  padding: 3px 0;
+  opacity: 0.5;
+***REMOVED***
+
+.body ***REMOVED***
+  flex: 1;
+  /* flex-direction: column;
+  align-items: center; */
+***REMOVED***
+
+.page ***REMOVED***
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+***REMOVED***
