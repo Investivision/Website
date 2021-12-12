@@ -1,7 +1,8 @@
 import "../styles/globals.css";
 import Head from "next/head";
+import Theme from "./Theme";
 
-function MyApp(***REMOVED*** Component, pageProps ***REMOVED***) ***REMOVED***
+function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
@@ -16,9 +17,12 @@ function MyApp(***REMOVED*** Component, pageProps ***REMOVED***) ***REMOVED***
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
       </Head>
-      <Component ***REMOVED***...pageProps***REMOVED*** />
+
+      <Theme>
+        <Component {...pageProps} />
+      </Theme>
     </>
   );
-***REMOVED***
+}
 
 export default MyApp;

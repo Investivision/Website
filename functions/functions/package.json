@@ -1,24 +1,24 @@
-***REMOVED***
+{
   "name": "functions",
   "description": "Cloud Functions for Firebase",
-  "scripts": ***REMOVED***
+  "scripts": {
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"
-  ***REMOVED***,
-  "engines": ***REMOVED***
+  },
+  "engines": {
     "node": "14"
-  ***REMOVED***,
+  },
   "main": "index.js",
-  "dependencies": ***REMOVED***
+  "dependencies": {
     "cors": "^2.8.5",
     "firebase-admin": "^9.8.0",
     "firebase-functions": "^3.14.1"
-  ***REMOVED***,
-  "devDependencies": ***REMOVED***
+  },
+  "devDependencies": {
     "firebase-functions-test": "^0.2.0"
-  ***REMOVED***,
+  },
   "private": true
-***REMOVED***
+}

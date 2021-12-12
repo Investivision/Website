@@ -5,27 +5,40 @@ import Button from "@mui/material/Button";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
-import ***REMOVED*** useState, useEffect ***REMOVED*** from "react";
+import { useState, useEffect } from "react";
 import Skeleton from "@mui/material/Skeleton";
 import MuiPhoneNumber from "material-ui-phone-number";
-import ***REMOVED*** auth, formatErrorCode, getFunction ***REMOVED*** from "../../firebase";
-import ***REMOVED***
+import { auth, formatErrorCode, getFunction } from "../../firebase";
+import {
   onAuthStateChanged,
   updateProfile,
   updateEmail,
   sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
-***REMOVED*** from "firebase/auth";
+  GoogleAuthProvider,
+  linkWithPopup,
+  unlink,
+} from "firebase/auth";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
-export default function Account() ***REMOVED***
+const googleIsConnected = (currentUser) => {
+  if (!currentUser) return false;
+  for (const provider of currentUser.providerData) {
+    if (provider.providerId === "google.com") {
+      return provider.email;
+    }
+  }
+  return false;
+};
+
+export default function Account() {
   // console.log(auth);
-  // if (!auth.currentUser) ***REMOVED***
+  // if (!auth.currentUser) {
   //   // window.location.hef = "/login";
   //   // return null;
-  // ***REMOVED***
+  // }
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,234 +53,241 @@ export default function Account() ***REMOVED***
   const [resetLoading, setResetLoading] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [unlinkLoading, setUnlinkLoading] = useState(false);
 
-  useEffect(() => ***REMOVED***
-    onAuthStateChanged(auth, (user) => ***REMOVED***
-      if (user) ***REMOVED***
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
         setUser(user);
         setName(user.displayName || "");
         setEmail(user.email);
         // setPhoneNumber(user.phoneNumber || "");
         console.log(user);
-        try ***REMOVED***
-          chrome.runtime.sendMessage(extId, ***REMOVED*** uid: user.uid ***REMOVED***, function (res) ***REMOVED***
+        try {
+          chrome.runtime.sendMessage(extId, { uid: user.uid }, function (res) {
             setExtStatus(res.synced ? "synced" : "not synced");
-          ***REMOVED***);
-        ***REMOVED*** catch (e) ***REMOVED***
+          });
+        } catch (e) {
           setExtStatus("not installed");
-        ***REMOVED***
-      ***REMOVED*** else ***REMOVED***
+        }
+      } else {
         window.location.href = "/login";
-      ***REMOVED***
-    ***REMOVED***);
-  ***REMOVED***, []);
+      }
+    });
+  }, []);
+
+  const googleEmail = googleIsConnected(auth.currentUser);
 
   return (
-    <HeaderAndFooter bodyClassName=***REMOVED***styles.body***REMOVED***>
-      ***REMOVED***!user ? (
+    <HeaderAndFooter bodyClassName={styles.body}>
+      {!user ? (
         <>
           <Skeleton
             variant="text"
             animation="wave"
-            height=***REMOVED***60***REMOVED***
-            style=***REMOVED******REMOVED***
-              width: 300,
+            height={60}
+            style={{
+              width: "100%",
+              maxWidth: 300,
               marginTop: 20,
-            ***REMOVED******REMOVED***
-            sx=***REMOVED******REMOVED***
+            }}
+            sx={{
               transform: "none",
-            ***REMOVED******REMOVED***
+            }}
           />
-          ***REMOVED***[1, 1, 1].map((e, i) => (
-            <div className=***REMOVED***styles.skeletonGroup***REMOVED*** key=***REMOVED***i***REMOVED***>
+          {[1, 1, 1].map((e, i) => (
+            <div className={styles.skeletonGroup} key={i}>
               <Skeleton
                 variant="text"
                 animation="wave"
-                height=***REMOVED***30***REMOVED***
-                style=***REMOVED******REMOVED***
-                  width: 400,
-                ***REMOVED******REMOVED***
-                sx=***REMOVED******REMOVED***
+                height={30}
+                style={{
+                  width: "100%",
+                  maxWidth: 400,
+                }}
+                sx={{
                   transform: "none",
-                ***REMOVED******REMOVED***
+                }}
               />
               <Skeleton
                 animation="wave"
-                height=***REMOVED***160***REMOVED***
-                style=***REMOVED******REMOVED***
+                height={160}
+                style={{
                   width: "100%",
                   maxWidth: 900,
-                ***REMOVED******REMOVED***
-                sx=***REMOVED******REMOVED***
+                }}
+                sx={{
                   transform: "none",
-                ***REMOVED******REMOVED***
+                }}
               />
             </div>
-          ))***REMOVED***
+          ))}
         </>
       ) : (
         <>
           <h1 className="pageHeader">Account</h1>
-          <div className=***REMOVED***styles.content***REMOVED***>
+          <div className={styles.content}>
             <h2>Profile</h2>
+            <h3>You know, the basics</h3>
             <div>
               <div>
                 <TextField
                   label="Full Name"
                   variant="outlined"
-                  value=***REMOVED***name***REMOVED***
-                  onChange=***REMOVED***(e) => ***REMOVED***
+                  value={name}
+                  onChange={(e) => {
                     setName(e.target.value);
-                  ***REMOVED******REMOVED***
-                  className=***REMOVED***styles.textInput***REMOVED***
+                  }}
+                  className={styles.textInput}
                   color="primary"
-                  onBlur=***REMOVED***async () => ***REMOVED***
+                  onBlur={async () => {
                     const trimmed = name.trim();
-                    if (trimmed) ***REMOVED***
-                      if (trimmed != user.displayName) ***REMOVED***
-                        try ***REMOVED***
-                          await updateProfile(user, ***REMOVED***
+                    if (trimmed) {
+                      if (trimmed != user.displayName) {
+                        try {
+                          await updateProfile(user, {
                             displayName: trimmed,
-                          ***REMOVED***);
+                          });
                           setSnackbarSeverity("success");
-                          setSnackbarMessage(`Changed Full Name to $***REMOVED***name***REMOVED***`);
-                        ***REMOVED*** catch (e) ***REMOVED***
+                          setSnackbarMessage(`Changed Full Name to ${name}`);
+                        } catch (e) {
                           setSnackbarSeverity("error");
                           setSnackbarMessage(formatErrorCode(e.code));
-                        ***REMOVED***
+                        }
                         setSnackbarIsOpen(true);
-                      ***REMOVED***
+                      }
                       // think about case with oringal + spaces, still need to trim
-                      if (trimmed.length != name.length) ***REMOVED***
+                      if (trimmed.length != name.length) {
                         setName(trimmed);
-                      ***REMOVED***
-                    ***REMOVED*** else ***REMOVED***
+                      }
+                    } else {
                       setName(user.displayName);
-                    ***REMOVED***
-                  ***REMOVED******REMOVED***
+                    }
+                  }}
                 />
                 <TextField
                   label="Email"
                   variant="outlined"
-                  value=***REMOVED***email***REMOVED***
-                  onChange=***REMOVED***(e) => ***REMOVED***
+                  value={email}
+                  onChange={(e) => {
                     setEmail(e.target.value);
-                  ***REMOVED******REMOVED***
-                  className=***REMOVED***styles.textInput***REMOVED***
+                  }}
+                  className={styles.textInput}
                   color="primary"
-                  onBlur=***REMOVED***async () => ***REMOVED***
+                  onBlur={async () => {
                     const trimmed = email.trim();
-                    if (trimmed) ***REMOVED***
-                      if (trimmed != user.email) ***REMOVED***
-                        try ***REMOVED***
+                    if (trimmed) {
+                      if (trimmed != user.email) {
+                        try {
                           await updateEmail(user, email);
                           setSnackbarSeverity("success");
-                          setSnackbarMessage(`Changed email to $***REMOVED***email***REMOVED***`);
-                        ***REMOVED*** catch (e) ***REMOVED***
+                          setSnackbarMessage(`Changed email to ${email}`);
+                        } catch (e) {
                           setSnackbarSeverity("error");
                           setSnackbarMessage(formatErrorCode(e.code));
                           setEmail(user.email);
-                        ***REMOVED***
+                        }
                         setSnackbarIsOpen(true);
-                      ***REMOVED***
-                      if (trimmed.length != email.length) ***REMOVED***
+                      }
+                      if (trimmed.length != email.length) {
                         setEmail(trimmed);
-                      ***REMOVED***
-                    ***REMOVED*** else ***REMOVED***
+                      }
+                    } else {
                       setEmail(user.email);
-                    ***REMOVED***
-                  ***REMOVED******REMOVED***
+                    }
+                  }}
                 />
-                ***REMOVED***/* <MuiPhoneNumber
-              defaultCountry=***REMOVED***"us"***REMOVED***
-              onChange=***REMOVED***setPhoneNumber***REMOVED***
-              value=***REMOVED***phoneNumber***REMOVED***
+                {/* <MuiPhoneNumber
+              defaultCountry={"us"}
+              onChange={setPhoneNumber}
+              value={phoneNumber}
               variant="outlined"
               label="Phone Number"
-              onBlur=***REMOVED***async () => ***REMOVED***
-                await updateProfile(user, ***REMOVED***
+              onBlur={async () => {
+                await updateProfile(user, {
                   phoneNumber: phoneNumber,
-                ***REMOVED***);
+                });
                 alert("changed phone number");
-              ***REMOVED******REMOVED***
-            /> */***REMOVED***
+              }}
+            /> */}
               </div>
               <div>
-                ***REMOVED***user?.emailVerified ? (
+                {user?.emailVerified ? (
                   <Alert severity="success">Email Verified</Alert>
                 ) : (
                   <Alert
                     severity="warning"
-                    action=***REMOVED***
+                    action={
                       <LoadingButton
-                        loading=***REMOVED***verifyLoading***REMOVED***
+                        loading={verifyLoading}
                         color="inherit"
                         size="medium"
-                        onClick=***REMOVED***async () => ***REMOVED***
+                        onClick={async () => {
                           setVerifyLoading(true);
-                          try ***REMOVED***
+                          try {
                             await sendEmailVerification(user);
                             setSnackbarSeverity("success");
                             setSnackbarMessage("Sent verification email");
-                          ***REMOVED*** catch (e) ***REMOVED***
+                          } catch (e) {
                             setSnackbarSeverity("warning");
                             setSnackbarMessage(formatErrorCode(e.code));
-                          ***REMOVED***
+                          }
                           setVerifyLoading(false);
                           setSnackbarIsOpen(true);
-                        ***REMOVED******REMOVED***
+                        }}
                       >
                         Verify
                       </LoadingButton>
-                    ***REMOVED***
+                    }
                   >
                     Email not Verified
                   </Alert>
-                )***REMOVED***
+                )}
               </div>
               <div>
                 <LoadingButton
                   variant="contained"
-                  loading=***REMOVED***resetLoading***REMOVED***
-                  onClick=***REMOVED***async () => ***REMOVED***
+                  loading={resetLoading}
+                  onClick={async () => {
                     setResetLoading(true);
                     await sendPasswordResetEmail(auth, user.email);
                     setResetLoading(false);
                     setSnackbarSeverity("success");
                     setSnackbarMessage("Sent password reset email");
                     setSnackbarIsOpen(true);
-                  ***REMOVED******REMOVED***
+                  }}
                 >
                   Reset Password
                 </LoadingButton>
                 <LoadingButton
                   variant="contained"
-                  loading=***REMOVED***signOutLoading***REMOVED***
-                  onClick=***REMOVED***() => ***REMOVED***
+                  loading={signOutLoading}
+                  onClick={() => {
                     setSignOutLoading(true);
                     signOut(auth);
-                  ***REMOVED******REMOVED***
+                  }}
                 >
                   Sign Out
                 </LoadingButton>
               </div>
             </div>
-            ***REMOVED***/* <h2>Subscription</h2>
+            {/* <h2>Subscription</h2>
             <div>
               <div>
                 <Alert
                   severity="warning"
-                  action=***REMOVED***
+                  action={
                     <Button color="inherit" size="medium">
                       Subscribe now
                     </Button>
-                  ***REMOVED***
+                  }
                 >
                   Currently not subscribed
                 </Alert>
                 <Alert
                   severity="success"
-                  action=***REMOVED***
+                  action={
                     <>
                       <Button color="inherit" size="medium">
                         View Plans
@@ -276,7 +296,7 @@ export default function Account() ***REMOVED***
                         Manage subscription on Stripe
                       </Button>
                     </>
-                  ***REMOVED***
+                  }
                 >
                   Subscribed
                 </Alert>
@@ -284,31 +304,109 @@ export default function Account() ***REMOVED***
               <div>
                 <Button variant="contained">View Pricing</Button>
               </div>
-            </div> */***REMOVED***
-            <h2>Extension</h2>
+            </div> */}
+            <h2>Google Integration</h2>
+            <h3>For smooth interaction with third-party tools</h3>
+            <div>
+              {googleEmail ? (
+                <Alert
+                  severity="success"
+                  action={
+                    user.providerData.length == 1 &&
+                    user.providerData[0].providerId === "google.com" ? null : (
+                      <LoadingButton
+                        loading={unlinkLoading}
+                        color="inherit"
+                        size="medium"
+                        onClick={async () => {
+                          setUnlinkLoading(true);
+                          try {
+                            const result = await unlink(user, "google.com");
+                            console.log(result);
+                            setSnackbarMessage(
+                              `Unlinked Google account: ${googleEmail}`
+                            );
+                            setSnackbarSeverity("success");
+                            setSnackbarIsOpen(true);
+                          } catch (e) {
+                            setSnackbarMessage(formatErrorCode(e.code));
+                            setSnackbarSeverity("error");
+                            setSnackbarIsOpen(true);
+                          }
+                          setUnlinkLoading(false);
+                        }}
+                      >
+                        Unlink Account
+                      </LoadingButton>
+                    )
+                  }
+                >
+                  {`Linked to ${googleEmail}`}
+                </Alert>
+              ) : (
+                <Alert
+                  severity="warning"
+                  action={
+                    <LoadingButton
+                      loading={googleLoading}
+                      color="inherit"
+                      size="medium"
+                      onClick={async () => {
+                        setGoogleLoading(true);
+                        try {
+                          const result = await linkWithPopup(
+                            user,
+                            new GoogleAuthProvider()
+                          );
+                          console.log(result);
+                          setSnackbarMessage(
+                            `Linked Google account: ${googleIsConnected(
+                              result.user
+                            )}`
+                          );
+                          setSnackbarSeverity("success");
+                          setSnackbarIsOpen(true);
+                        } catch (e) {
+                          setSnackbarMessage(formatErrorCode(e.code));
+                          setSnackbarSeverity("error");
+                          setSnackbarIsOpen(true);
+                        }
+                        setGoogleLoading(false);
+                      }}
+                    >
+                      Link Account
+                    </LoadingButton>
+                  }
+                >
+                  Not linked to a Google account
+                </Alert>
+              )}
+            </div>
+            <h2>Chrome Extension</h2>
+            <h3>Activate your assistant</h3>
             <div>
               <div>
-                ***REMOVED***!extStatus ? (
+                {!extStatus ? (
                   <Skeleton
                     variant="text"
                     animation="wave"
-                    height=***REMOVED***50***REMOVED***
-                    style=***REMOVED******REMOVED***
+                    height={50}
+                    style={{
                       width: 300,
                       marginTop: 20,
-                    ***REMOVED******REMOVED***
-                    sx=***REMOVED******REMOVED***
+                    }}
+                    sx={{
                       transform: "none",
-                    ***REMOVED******REMOVED***
+                    }}
                   />
                 ) : extStatus == "not installed" ? (
                   <Alert
                     severity="warning"
-                    action=***REMOVED***
+                    action={
                       <Button color="inherit" size="medium">
                         Install now
                       </Button>
-                    ***REMOVED***
+                    }
                   >
                     Browser Extension not installed
                   </Alert>
@@ -319,21 +417,21 @@ export default function Account() ***REMOVED***
                 ) : (
                   <Alert
                     severity="warning"
-                    action=***REMOVED***
+                    action={
                       <LoadingButton
-                        loading=***REMOVED***syncLoading***REMOVED***
+                        loading={syncLoading}
                         color="inherit"
                         size="medium"
-                        onClick=***REMOVED***async () => ***REMOVED***
+                        onClick={async () => {
                           setSyncLoading(true);
-                          try ***REMOVED***
-                            const ***REMOVED*** token ***REMOVED*** = (
-                              await getFunction("generateToken")(***REMOVED******REMOVED***)
+                          try {
+                            const { token } = (
+                              await getFunction("generateToken")({})
                             ).data;
                             chrome.runtime.sendMessage(
                               extId,
-                              ***REMOVED*** token: token ***REMOVED***,
-                              function (res) ***REMOVED***
+                              { token: token },
+                              function (res) {
                                 setExtStatus(
                                   res.synced ? "synced" : "not synced"
                                 );
@@ -342,24 +440,25 @@ export default function Account() ***REMOVED***
                                   "Synced Account with Extension"
                                 );
                                 setSnackbarIsOpen(true);
-                              ***REMOVED***
+                              }
                             );
-                          ***REMOVED*** catch (e) ***REMOVED***
+                          } catch (e) {
                             console.error(e);
-                          ***REMOVED***
+                          }
                           setSyncLoading(false);
-                        ***REMOVED******REMOVED***
+                        }}
                       >
                         Sync Now
                       </LoadingButton>
-                    ***REMOVED***
+                    }
                   >
                     Browser Extension not synced
                   </Alert>
-                )***REMOVED***
+                )}
               </div>
             </div>
             <h2>Danger Zone</h2>
+            <h3>Be very, very careful</h3>
             <div>
               <div>
                 <Button variant="outlined" color="error">
@@ -369,23 +468,23 @@ export default function Account() ***REMOVED***
             </div>
           </div>
           <Snackbar
-            open=***REMOVED***snackbarIsOpen***REMOVED***
-            anchorOrigin=***REMOVED******REMOVED***
+            open={snackbarIsOpen}
+            anchorOrigin={{
               vertical: "top",
               horizontal: "right",
               zIndex: 9999,
-            ***REMOVED******REMOVED***
-            onClose=***REMOVED***() => ***REMOVED***
+            }}
+            onClose={() => {
               setSnackbarIsOpen(false);
-            ***REMOVED******REMOVED***
-            autoHideDuration=***REMOVED***3000***REMOVED***
+            }}
+            autoHideDuration={3000}
           >
-            <Alert severity=***REMOVED***snackbarSeverity***REMOVED*** sx=***REMOVED******REMOVED*** zIndex: 99999 ***REMOVED******REMOVED***>
-              ***REMOVED***snackbarMessage***REMOVED***
+            <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
+              {snackbarMessage}
             </Alert>
           </Snackbar>
         </>
-      )***REMOVED***
+      )}
     </HeaderAndFooter>
   );
-***REMOVED***
+}

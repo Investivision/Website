@@ -1,0 +1,127 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 24px;
+  padding-bottom: 100px;
+}
+
+.toggle {
+  margin-top: 20px;
+  margin-bottom: 50px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.05);
+  border: 6px solid transparent;
+  border-radius: 14px;
+}
+
+:global(.dark-mode) .toggle {
+  background-color: rgba(0, 6, 26, 0.8);
+}
+
+.toggle button {
+  font-size: 22px;
+  padding: 7px 30px;
+  transition: background-color 0.2s ease;
+  border: none !important;
+}
+
+.pricing {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 0 40px 0 rgba(0, 26, 255, 0.1);
+}
+
+:global(.dark-mode) .plan {
+  box-shadow: 0 0 40px 0 rgba(215, 219, 255, 0.06);
+}
+
+.plan h3 {
+  font-size: 36px;
+}
+
+.plan h4 {
+  font-size: 24px;
+  margin-top: 20px;
+}
+
+.discount {
+  font-size: 14px;
+  background-color: #ff480080;
+  padding: 8px 20px;
+  border-radius: 8px;
+  margin-top: 14px;
+}
+
+.featureContainer {
+  display: flex;
+  text-align: left;
+  flex-direction: column;
+  margin-top: 30px;
+  /* width: 100%; */
+  justify-content: center;
+  gap: 16px;
+}
+
+.feature {
+  display: flex;
+}
+
+.feature p {
+  font-size: 18px;
+  align-items: center;
+  flex: 1;
+}
+
+.plan button {
+  margin-top: 30px;
+}
+
+.featureContainer svg {
+  margin-right: 10px;
+}
+
+.featureContainer path {
+  fill: rgba(0, 184, 61, 0.8);
+}
+
+:global(.dark-mode) .featureContainer path {
+  fill: rgb(0, 255, 85, 0.5);
+}
+
+@media screen and (max-width: 920px) {
+  .pricing {
+    align-items: stretch;
+  }
+  .plan {
+    flex: 1;
+    min-width: 270px;
+  }
+  .featureContainer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+  }
+  .feature {
+    /* flex: 1; */
+    min-width: 220px;
+  }
+  .feature p {
+    /* text-align: center;   */
+  }
+}

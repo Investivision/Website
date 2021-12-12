@@ -7,18 +7,21 @@ import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import styles from "./index.module.css";
-import ***REMOVED*** useState, useEffect ***REMOVED*** from "react";
+import { useState, useEffect } from "react";
 import Wave from "react-wavify";
-import ***REMOVED***
+import { useTheme } from "@mui/material/styles";
+import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-***REMOVED*** from "firebase/auth";
-import ***REMOVED*** auth, formatErrorCode ***REMOVED*** from "../../firebase";
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
+import { auth, formatErrorCode } from "../../firebase";
 import LoadingButton from "@mui/lab/LoadingButton";
 
-export default function Login() ***REMOVED***
+export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,164 +31,215 @@ export default function Login() ***REMOVED***
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  useEffect(() => ***REMOVED***
-    onAuthStateChanged(auth, (user) => ***REMOVED***
-      if (user) ***REMOVED***
-        window.location.href = "/account";
-      ***REMOVED***
-    ***REMOVED***);
-    window.addEventListener("keydown", (event) => ***REMOVED***
-      if (event.keyCode === 13) ***REMOVED***
-        document.getElementById("submit").click();
-      ***REMOVED***
-    ***REMOVED***);
-  ***REMOVED***, []);
+  const theme = useTheme();
 
-  const handleSubmit = async () => ***REMOVED***
-    if (email && password) ***REMOVED***
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "/account";
+      }
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.keyCode === 13) {
+        document.getElementById("submit").click();
+      }
+    });
+  }, []);
+
+  const handleSubmit = async () => {
+    if (email && password) {
       setSubmitLoading(true);
-      try ***REMOVED***
-        if (isLogin) ***REMOVED***
+      try {
+        if (isLogin) {
           await signInWithEmailAndPassword(auth, email, password);
-        ***REMOVED*** else if (checked) ***REMOVED***
+        } else if (checked) {
           await createUserWithEmailAndPassword(auth, email, password);
-        ***REMOVED***
-      ***REMOVED*** catch (e) ***REMOVED***
+        }
+      } catch (e) {
         const message = formatErrorCode(e.code);
         setSnackbarMessage(message);
         setSnackbarSeverity("error");
         setSnackbarIsOpen(true);
-      ***REMOVED***
+      }
       setSubmitLoading(false);
-    ***REMOVED***
-  ***REMOVED***;
+    }
+  };
 
   return (
-    <HeaderAndFooter bodyClassName=***REMOVED***styles.body***REMOVED*** hideFooterWave>
-      ***REMOVED***[1, 2].map((i) => ***REMOVED***
+    <HeaderAndFooter bodyClassName={styles.body} hideFooterWave>
+      {[0, 1].map((i) => {
         return (
           <Wave
-            key=***REMOVED***i***REMOVED***
-            className=***REMOVED***`absoluteBottom $***REMOVED***styles.wave***REMOVED***`***REMOVED***
+            key={i}
+            className={`absoluteBottom ${styles.wave}`}
             fill="url(#gradient)"
-            paused=***REMOVED***false***REMOVED***
-            options=***REMOVED******REMOVED***
+            paused={false}
+            options={{
               height: 50,
-              amplitude: 170,
-              speed: 0.07,
+              amplitude: 120,
+              speed: 0.08 - i * 0.02,
               points: 4,
-            ***REMOVED******REMOVED***
+            }}
           >
             <defs>
               <linearGradient id="gradient" gradientTransform="rotate(90)">
-                <stop offset="0%" stopColor="#81A3FFc0" />
-                <stop offset="100%" stopColor="#81A3F124" />
+                <stop
+                  offset="0%"
+                  stopColor={
+                    theme.palette.mode == "dark" ? "#45ADEB" : "#7BC1FFa0"
+                  }
+                />
+                <stop
+                  offset="100%"
+                  stopColor={
+                    theme.palette.mode == "dark" ? "#456BEBa0" : "#638CDE50"
+                  }
+                />
               </linearGradient>
             </defs>
           </Wave>
         );
-      ***REMOVED***)***REMOVED***
-      ***REMOVED***/* <h1 className=***REMOVED***styles.title***REMOVED***>Account</h1> */***REMOVED***
+      })}
+      {/* <h1 className={styles.title}>Account</h1> */}
       <ToggleButtonGroup
-        color="primary"
+        color={theme.palette.mode == "dark" ? "secondary" : "primary"}
         exclusive
-        onChange=***REMOVED***(event, nextView) => ***REMOVED***
+        onChange={(event, nextView) => {
           setIsLogin(nextView == "login");
-        ***REMOVED******REMOVED***
-        className=***REMOVED***styles.toggle***REMOVED***
+        }}
+        className={styles.toggle}
       >
-        <ToggleButton value="login" selected=***REMOVED***isLogin***REMOVED***>
+        <ToggleButton
+          value="login"
+          selected={isLogin}
+          // color={!isLogin ? "primary" : "secondary"}
+        >
           Login
         </ToggleButton>
-        <ToggleButton value="signup" selected=***REMOVED***!isLogin***REMOVED*** color="primary">
+        <ToggleButton
+          value="signup"
+          selected={!isLogin}
+          // color={isLogin ? "primary" : "secondary"}
+        >
           Sign Up
         </ToggleButton>
       </ToggleButtonGroup>
-      <div className=***REMOVED***styles.box***REMOVED***>
+      <div className={styles.box}>
         <TextField
           autoComplete="email"
           label="Email"
           variant="outlined"
-          value=***REMOVED***email***REMOVED***
-          onChange=***REMOVED***(e) => ***REMOVED***
+          value={email}
+          onChange={(e) => {
             setEmail(e.target.value);
-          ***REMOVED******REMOVED***
-          className=***REMOVED***styles.textInput***REMOVED***
-          color="primary"
+          }}
+          className={styles.textInput}
+          color={theme.palette.mode == "dark" ? "secondary" : "primary"}
         />
         <TextField
-          autoComplete=***REMOVED***`$***REMOVED***isLogin ? "current" : "new"***REMOVED***-password`***REMOVED***
+          autoComplete={`${isLogin ? "current" : "new"}-password`}
           label="Password"
           variant="outlined"
-          value=***REMOVED***password***REMOVED***
-          onChange=***REMOVED***(e) => ***REMOVED***
+          value={password}
+          onChange={(e) => {
             setPassword(e.target.value);
-          ***REMOVED******REMOVED***
-          className=***REMOVED***styles.textInput***REMOVED***
-          color="primary"
+          }}
+          className={styles.textInput}
+          color={theme.palette.mode == "dark" ? "secondary" : "primary"}
           type="password"
         />
-        ***REMOVED***isLogin ? (
-          <div className=***REMOVED***styles.checkboxContainer***REMOVED***>
+
+        {isLogin ? (
+          <div className={styles.checkboxContainer}>
             <p
-              onClick=***REMOVED***async () => ***REMOVED***
-                try ***REMOVED***
+              onClick={async () => {
+                try {
                   await sendPasswordResetEmail(auth, email);
-                  setSnackbarMessage(`Sent password reset email to $***REMOVED***email***REMOVED***`);
+                  setSnackbarMessage(`Sent password reset email to ${email}`);
                   setSnackbarSeverity("success");
-                ***REMOVED*** catch (e) ***REMOVED***
+                } catch (e) {
                   setSnackbarMessage(formatErrorCode(e.code));
                   setSnackbarSeverity("error");
-                ***REMOVED***
+                }
                 setSnackbarIsOpen(true);
-              ***REMOVED******REMOVED***
-              style=***REMOVED******REMOVED***
+              }}
+              style={{
                 cursor: "pointer",
-              ***REMOVED******REMOVED***
+              }}
             >
-              Forgot login? Reset password
+              Reset or generate password
             </p>
           </div>
         ) : (
-          <div className=***REMOVED***styles.checkboxContainer***REMOVED***>
+          <div className={styles.checkboxContainer}>
             <Checkbox
-              checked=***REMOVED***checked***REMOVED***
-              onChange=***REMOVED***(e) => ***REMOVED***
+              checked={checked}
+              onChange={(e) => {
                 console.log(e.target.checked);
                 setChecked(e.target.checked);
-              ***REMOVED******REMOVED***
+              }}
             />
             <p>
               I have read and acknowledged the <a>Terms and Conditions</a>.
             </p>
           </div>
-        )***REMOVED***
+        )}
         <LoadingButton
-          loading=***REMOVED***submitLoading***REMOVED***
+          loading={submitLoading}
           variant="contained"
-          className=***REMOVED***styles.submit***REMOVED***
+          className={styles.submit}
           color="primary"
           type="submit"
-          disabled=***REMOVED***!(email && password && (isLogin || checked))***REMOVED***
-          onClick=***REMOVED***handleSubmit***REMOVED***
+          disabled={!(email && password && (isLogin || checked))}
+          onClick={handleSubmit}
           id="submit"
         >
-          ***REMOVED***isLogin ? "Login" : "Sign Up"***REMOVED***
+          {isLogin ? "Login" : "Sign Up"}
         </LoadingButton>
+        <div
+          onClick={async () => {
+            // sign in with google firebase
+            setSubmitLoading(true);
+            var provider = new GoogleAuthProvider();
+            provider.addScope("profile");
+            provider.addScope("email");
+            // get password scope
+
+            try {
+              const res = await signInWithPopup(auth, provider);
+              console.log(res);
+            } catch (e) {
+              setSnackbarMessage(formatErrorCode(e.code));
+              setSnackbarSeverity("error");
+              setSnackbarIsOpen(true);
+              setSubmitLoading(false);
+            }
+          }}
+          className={styles.google}
+        >
+          <img src="https://cdn.icon-icons.com/icons2/836/PNG/512/Google_icon-icons.com_66793.png" />
+          <p
+          // style={{
+          //   color: theme.palette.primary.main,
+          // }}
+          >
+            Continue with Google
+          </p>
+        </div>
       </div>
       <Snackbar
-        open=***REMOVED***snackbarIsOpen***REMOVED***
-        anchorOrigin=***REMOVED******REMOVED*** vertical: "top", horizontal: "right", zIndex: 9999 ***REMOVED******REMOVED***
-        onClose=***REMOVED***() => ***REMOVED***
+        open={snackbarIsOpen}
+        anchorOrigin={{ vertical: "top", horizontal: "right", zIndex: 9999 }}
+        onClose={() => {
           setSnackbarIsOpen(false);
-        ***REMOVED******REMOVED***
-        autoHideDuration=***REMOVED***3000***REMOVED***
-        message=***REMOVED***snackbarMessage***REMOVED***
+        }}
+        autoHideDuration={3000}
+        message={snackbarMessage}
       >
-        <Alert severity=***REMOVED***snackbarSeverity***REMOVED*** sx=***REMOVED******REMOVED*** zIndex: 99999 ***REMOVED******REMOVED***>
-          ***REMOVED***snackbarMessage***REMOVED***
+        <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </HeaderAndFooter>
   );
-***REMOVED***
+}

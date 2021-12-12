@@ -1,39 +1,85 @@
-import ***REMOVED*** createTheme ***REMOVED*** from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
 
-export default createTheme(***REMOVED***
-  typography: ***REMOVED***
+export default createTheme({
+  typography: {
     fontFamily: "Rubik",
-    button: ***REMOVED***
+    button: {
       textTransform: "none",
       boxShadow: "none",
-    ***REMOVED***,
-  ***REMOVED***,
-  palette: ***REMOVED***
+    },
+  },
+  palette: {
     type: "light",
-    primary: ***REMOVED***
+    primary: {
       main: "#5179EA",
-    ***REMOVED***,
-    secondary: ***REMOVED***
+    },
+    secondary: {
       main: "#ABC1FF",
-    ***REMOVED***,
-    error: ***REMOVED***
+    },
+    error: {
       main: "#ff0000",
-    ***REMOVED***,
-  ***REMOVED***,
+    },
+  },
   shadows: ["none"],
-  shape: ***REMOVED***
+  shape: {
     borderRadius: 8,
-  ***REMOVED***,
-  overrides: ***REMOVED***
-    MuiInput: ***REMOVED***
-      root: ***REMOVED***
+  },
+  overrides: {
+    MuiInput: {
+      root: {
         borderRadius: 0,
         backgroundColor: "#fff",
         border: "1px solid pink",
         fontSize: 16,
         padding: "10px 12px",
         width: "calc(100% - 24px)",
-      ***REMOVED***,
-    ***REMOVED***,
-  ***REMOVED***,
-***REMOVED***);
+      },
+    },
+  },
+});
+
+/*
+
+return createTheme({
+      typography: {
+        fontFamily: "Rubik",
+        button: {
+          textTransform: "none",
+          boxShadow: "none",
+        },
+      },
+      palette: {
+        type: prefersDarkMode ? "dark" : "light",
+        ...(prefersDarkMode
+          ? {}
+          : {
+              primary: {
+                main: "#5179EA",
+              },
+              secondary: {
+                main: "#ABC1FF",
+              },
+              error: {
+                main: "#ff0000",
+              },
+            }),
+      },
+      shadows: ["none"],
+      shape: {
+        borderRadius: 8,
+      },
+      overrides: {
+        MuiInput: {
+          root: {
+            borderRadius: 0,
+            backgroundColor: "#fff",
+            border: "1px solid pink",
+            fontSize: 16,
+            padding: "10px 12px",
+            width: "calc(100% - 24px)",
+          },
+        },
+      },
+    });
+
+    */

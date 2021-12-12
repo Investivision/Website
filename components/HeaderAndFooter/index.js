@@ -1,93 +1,140 @@
 import styles from "./index.module.css";
 import Link from "next/link";
 import Wave from "react-wavify";
-import theme from "../../theme";
-import ***REMOVED*** ThemeProvider ***REMOVED*** from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
+import ThemeToggle from "../ThemeToggle";
 
 const bottomWaveHeight = 50;
-const footerColor = "#f5f5f5";
 
-export default function HeaderAndFooter(props) ***REMOVED***
-  return (
-    <ThemeProvider theme=***REMOVED***theme***REMOVED***>
-      <div className=***REMOVED***styles.page***REMOVED***>
-        <header
-          className=***REMOVED***styles.header***REMOVED***
-          style=***REMOVED******REMOVED***
-            position: props.overlayHeader === true ? "absolute" : "relative",
-            backgroundColor: `rgba(255,255,255,$***REMOVED***
-              props.overlayHeader === true ? 0 : 255
-            ***REMOVED***)`,
-            height: props.overlayHeader === true ? 80 : 60,
-          ***REMOVED******REMOVED***
-        >
-          <a href="/">
-            <img src="/images/logo.svg" />
-            <h1>Investivision</h1>
-          </a>
-          <div className=***REMOVED***styles.nav***REMOVED***>
-            <Link href="/Features">Features</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/account">Account</Link>
-          </div>
-        </header>
-        <div
-          style=***REMOVED******REMOVED***
-            flex: 1,
-          ***REMOVED******REMOVED***
-          className=***REMOVED***`$***REMOVED***props.bodyClassName***REMOVED***`***REMOVED***
-        >
-          ***REMOVED***props.children***REMOVED***
-        </div>
-        <footer
-          className=***REMOVED***styles.footer***REMOVED***
-          style=***REMOVED******REMOVED***
-            // marginTop: bottomWaveHeight,
-            backgroundColor: footerColor,
-            // border: props.hideFooterWave ? "1px solid #dadada" : "none",
-          ***REMOVED******REMOVED***
-        >
-          ***REMOVED***props.hideFooterWave ? null : (
-            <Wave
-              style=***REMOVED******REMOVED***
-                height: bottomWaveHeight,
-                marginBottom: 0,
-                position: "absolute",
-                top: 0,
-                left: 0,
-                transform: "translateY(-100%)",
-              ***REMOVED******REMOVED***
-              fill=***REMOVED***footerColor***REMOVED***
-              paused=***REMOVED***false***REMOVED***
-              options=***REMOVED******REMOVED***
-                amplitude: bottomWaveHeight / 2.5,
-                speed: 0.17,
-                points: 3,
-              ***REMOVED******REMOVED***
-            />
-          )***REMOVED***
-          <div className=***REMOVED***styles.footerLinks***REMOVED***>
-            <div className=***REMOVED***styles.linksGroup***REMOVED***>
-              <p>Browse</p>
-              <Link href="/">Home</Link>
-              <Link href="/">Extension</Link>
-              <Link href="/">Explorer</Link>
-              <Link href="/">Pricing</Link>
-            </div>
-            <div className=***REMOVED***styles.linksGroup***REMOVED***>
-              <p>Account</p>
-              <Link href="/">Sign in</Link>
-              <Link href="/">Sign up</Link>
-              <Link href="/">View Acccount</Link>
-            </div>
-          </div>
-          <p className=***REMOVED***styles.disclaimer***REMOVED***>
-            Disclaimer: All investment strategies and investments involve risk
-            of loss. Nothing contained in this platform or its services should
-            be construed as investment advice.
-          </p>
-        </footer>
-      </div>
-    </ThemeProvider>
+export default function HeaderAndFooter(props) {
+  const theme = useTheme();
+
+  console.log(
+    props,
+    `#${theme.palette.mode == "dark" ? "000000" : "ffffff"}${
+      props.overlayHeader === true ? "00" : "ff"
+    })`
   );
-***REMOVED***
+
+  const footerColor = theme.palette.mode == "dark" ? "#ffffff10" : "#f5f5f5";
+
+  const headerBackground = `#ffffff${
+    props.overlayHeader === true
+      ? "00"
+      : theme.palette.mode == "dark"
+      ? "00"
+      : "00"
+  }`;
+
+  return (
+    <div className={styles.page}>
+      <header
+        className={styles.header}
+        style={{
+          position: props.overlayHeader === true ? "absolute" : "relative",
+          backgroundColor: headerBackground,
+          height: props.overlayHeader === true ? 80 : 60,
+        }}
+      >
+        <a href="/">
+          <div
+            className={styles.imgWrapper}
+            style={{
+              backgroundColor:
+                theme.palette.mode == "light" || props.overlayHeader === true
+                  ? "white"
+                  : "black",
+              boxShadow: `0 0 20px 0 ${
+                theme.palette.mode == "light" || props.overlayHeader === true
+                  ? `rgba(0, 0, 0, 0.1)`
+                  : `rgba(255, 255, 255, 0.05)`
+              }`,
+            }}
+          >
+            <img
+              src={`/images/${
+                theme.palette.mode == "light" || props.overlayHeader === true
+                  ? ""
+                  : "dark_"
+              }logo.svg`}
+            />
+          </div>
+          <h1>Investivision</h1>
+        </a>
+        <div className={styles.nav}>
+          <Link href="/">Insights</Link>
+          <Link href="/">Extension</Link>
+          <Link href="/pricing">Pricing</Link>
+          <Link href="/account">Account</Link>
+          <ThemeToggle />
+        </div>
+      </header>
+      <div
+        style={{
+          flex: 1,
+        }}
+        className={`${props.bodyClassName}`}
+      >
+        {props.children}
+      </div>
+      <footer
+        className={styles.footer}
+        style={{
+          // marginTop: bottomWaveHeight,
+          backgroundColor: footerColor,
+          // border: props.hideFooterWave ? "1px solid #dadada" : "none",
+        }}
+      >
+        {props.hideFooterWave ? null : (
+          <Wave
+            style={{
+              height: bottomWaveHeight,
+              marginBottom: 0,
+              position: "absolute",
+              top: 0,
+              left: 0,
+              transform: "translateY(-100%)",
+            }}
+            fill={footerColor}
+            paused={false}
+            options={{
+              amplitude: bottomWaveHeight / 2.5,
+              speed: 0.17,
+              points: 3,
+            }}
+          />
+        )}
+        <div className={styles.footerLinks}>
+          <div className={styles.linksGroup}>
+            <p>Browse</p>
+            <Link href="/">Home</Link>
+            <Link href="/">Extension</Link>
+            <Link href="/">Pricing</Link>
+          </div>
+          <div className={styles.linksGroup}>
+            <p>Account</p>
+            <Link href="/">Sign in</Link>
+            <Link href="/">Sign up</Link>
+            <Link href="/">View Account</Link>
+            <Link href="/">Subscription</Link>
+          </div>
+          <div className={styles.linksGroup}>
+            <p>Contact</p>
+            <Link href="/">Twitter</Link>
+            <Link href="/">Support</Link>
+          </div>
+          <div className={styles.linksGroup}>
+            <p>Legal</p>
+            <Link href="/">Terms of Service</Link>
+            <Link href="/">Data Privacy</Link>
+          </div>
+        </div>
+        <p className={styles.disclaimer}>
+          Disclaimer: All investment strategies and investments involve risk of
+          loss. Nothing contained in this platform or its services should be
+          construed as investment advice.
+        </p>
+      </footer>
+    </div>
+  );
+}

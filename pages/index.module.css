@@ -1,5 +1,6 @@
-.cover ***REMOVED***
+.cover {
   height: 100vh;
+  min-height: 650px;
   width: 100vw;
   background: linear-gradient(to bottom right, #a1e3ff, #a4a8ff);
   display: flex;
@@ -7,17 +8,60 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-***REMOVED***
+}
 
-.flipY ***REMOVED***
+.demo {
+  width: 300px;
+  height: max(calc(100vh - 220px), 300px);
+  overflow-y: scroll;
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+}
+
+.demoDisclaimer {
+  padding: 20px 30px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.spacer {
+  width: min(calc(-35px + 7vw), 100px);
+  height: 5vh;
+}
+
+@media screen and (max-width: 800px) {
+  .cover {
+    flex-direction: column;
+  }
+  .demo {
+    width: min(440px, calc(100vw - 40px));
+    height: max(220px, 36vh);
+    margin-bottom: -70px;
+  }
+}
+
+@media screen and (max-width: 400px) and (max-height: 650px) {
+  /* .spacer {
+    display: none;
+  } */
+  .demo {
+    margin-bottom: -20px !important;
+  }
+}
+
+:global(.dark-mode) .cover {
+  background: linear-gradient(to bottom right, #008496, #29359e);
+}
+
+.flipY {
   transform: scaleY(-1);
-***REMOVED***
+}
 
-.flipX ***REMOVED***
+.flipX {
   transform: scaleX(-1);
-***REMOVED***
+}
 
-.cover h2 ***REMOVED***
+.cover h2 {
   font-size: 40px;
   /* max-width: 400px; */
   text-align: center;
@@ -25,95 +69,167 @@
   font-weight: 400;
   line-height: 150%;
   font-size: 34px;
-***REMOVED***
+}
 
-.cover h2 span ***REMOVED***
+:global(.dark-mode) .cover h2 {
+  color: #8dacff;
+}
+
+.cover h2 span {
   color: black;
-  font-size: 40px;
-***REMOVED***
+  font-size: 120%;
+}
 
-.cover > div ***REMOVED***
-  margin: 0 20px;
-***REMOVED***
+:global(.dark-mode) .cover h2 span {
+  color: white;
+}
 
-.addButton ***REMOVED***
+.addButton {
   background-color: rgba(255, 255, 255, 0.7);
   font-size: 20px;
   padding: 13px 20px;
   margin-top: 27px;
   border-radius: 8px;
   /* border: 2px solid black; */
-***REMOVED***
+}
 
-.flexCenter ***REMOVED***
+:global(.dark-mode) .addButton {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.flexCenter {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-***REMOVED***
+}
 
-.about ***REMOVED***
+.cover .flexCenter {
+  margin: 0 20px;
+}
+
+.about {
   padding: 100px 60px;
   text-align: center;
-***REMOVED***
+}
 
-.about h3 ***REMOVED***
-  font-size: 24px;
+.about h3 {
+  font-size: 28px;
   color: rgb(158, 158, 158);
   line-height: 160%;
   margin: 40px 0;
-***REMOVED***
+}
 
-.about h3 span ***REMOVED***
+:global(.dark-mode) .about h3 {
+  color: rgb(105, 105, 105);
+}
+
+.about h3 span {
   color: rgb(54, 67, 180);
-***REMOVED***
+}
 
-.techContainer ***REMOVED***
+:global(.dark-mode) .about h3 span {
+  color: #779cff;
+}
+
+.techContainer {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 30px;
   margin-bottom: 50px;
-***REMOVED***
+}
 
-.tech ***REMOVED***
-  padding: 18px 24px;
+.tech {
+  padding: 16px 24px;
   margin: 12px;
   border-radius: 8px;
   box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.06);
-  background-color: #ffffffc0;
-***REMOVED***
+  background-color: rgb(236, 238, 255);
+}
 
-.techTitle ***REMOVED***
-  font-size: 20px;
-  margin: 6px 0;
-***REMOVED***
+.tech svg path {
+  color: rgb(54, 67, 180);
+}
 
-.techFor ***REMOVED***
+.tech svg {
+  height: 38px;
+  width: 38px;
+}
+
+:global(.dark-mode) .tech svg path {
+  color: #779cff;
+}
+
+:global(.dark-mode) .tech {
+  background-color: #19233f;
+}
+
+.techTitle {
+  font-size: 18px;
+  margin-top: 7px;
+}
+
+.techFor {
   font-size: 14px;
   margin-top: 2px;
   opacity: 0.5;
-***REMOVED***
+}
 
-.tsparticles ***REMOVED***
+.tsparticles {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
-***REMOVED***
+}
 
-.brokerages ***REMOVED***
+.brokerages {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   margin-top: 22px;
-***REMOVED***
+}
 
-.brokerages img ***REMOVED***
+.brokerages img {
   height: 30px;
-  margin: 30px 40px;
-***REMOVED***
+  margin: 12px;
+  background-color: #ffefd1;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-sizing: content-box;
+}
+
+:global(.dark-mode) .brokerages img {
+  background-color: #a5906a;
+}
+
+@media screen and (max-width: 600px) {
+  .cover h2 {
+    font-size: calc(7px + 5vmin);
+  }
+  .demo {
+    margin-bottom: -100px;
+  }
+  .about {
+    padding: 70px 24px;
+  }
+  .about h3 {
+    font-size: 20px;
+    margin: 20px 0;
+  }
+  .tech {
+    min-width: 180px;
+    flex: 1;
+  }
+  .techTitle {
+    font-size: 14px;
+  }
+  .tech svg {
+    height: 28px;
+    width: 28px;
+  }
+}

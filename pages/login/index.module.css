@@ -1,4 +1,4 @@
-.box ***REMOVED***
+.box {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,77 +10,132 @@
   background-color: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(5px);
   margin-top: 40px;
-***REMOVED***
-/* 
-.box * ***REMOVED***
-  text-transform: none !important;
-***REMOVED*** */
+}
 
-.toggle ***REMOVED***
+:global(.dark-mode) .box {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+/* 
+.box * {
+  text-transform: none !important;
+} */
+
+.toggle {
   margin-bottom: 10px;
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(5px);
   box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-***REMOVED***
+  border: 6px solid transparent;
+  border-radius: 14px;
+}
 
-.toggle button ***REMOVED***
+:global(.dark-mode) .toggle {
+  background-color: rgba(0, 6, 26, 0.8);
+}
+
+.toggle button {
   font-size: 22px;
   padding: 7px 30px;
   transition: background-color 0.2s ease;
   border: none !important;
-***REMOVED***
+}
 
-.textInput ***REMOVED***
-  margin-top: 14px;
+.textInput {
+  margin: 7px 0;
   width: 100%;
-***REMOVED***
+}
 
-.textInput > * > * ***REMOVED***
+.textInput > * > * {
   transition: border-color 0.15s ease;
-***REMOVED***
+}
 
-.checkboxContainer ***REMOVED***
+.checkboxContainer {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 13px;
   height: 16px;
-***REMOVED***
+}
 
-.checkboxContainer p ***REMOVED***
+.checkboxContainer p {
   font-size: 12px;
   opacity: 0.4;
-***REMOVED***
+}
 
-.body ***REMOVED***
+.body {
   /* background-color: red; */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 70px 50px;
-  padding-bottom: 150px;
-  min-height: 400px;
-***REMOVED***
+  padding: 50px 30px;
+  padding-bottom: 100px;
+  min-height: 700px;
+}
 
-.submit ***REMOVED***
+.submit {
   margin-top: 20px;
   font-size: 20px;
   padding: 8px 26px;
   width: 160px;
-***REMOVED***
+}
 
-.wave ***REMOVED***
-  height: 94%;
-***REMOVED***
+.wave {
+  height: 110%;
+}
 
-.wave:first-of-type ***REMOVED***
-  height: 50%;
+:global(.dark-mode) .wave {
+  opacity: 0.5;
+}
+
+.wave:first-of-type {
+  height: 60%;
   transform: scaleX(-1);
-***REMOVED***
+}
 
-.body h1 ***REMOVED***
+.body h1 {
   font-size: 40px;
-***REMOVED***
+}
+
+.google {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  background-color: #0000000c; /*#5179ea40;*/
+  /* border: 1px solid #00000010; */
+  cursor: pointer;
+  /* width: 100%; */
+  padding: 14px 30px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+:global(.dark-mode) .google {
+  background-color: #ffffff20;
+}
+
+.google img {
+  height: 30px;
+  margin-right: 20px;
+}
+
+.google p {
+  font-size: 18px;
+}
+
+@media screen and (max-width: 600px) {
+  .box {
+    padding: 20px 20px;
+  }
+  .box {
+    margin-top: 20px;
+  }
+  .body {
+    padding: 20px 24px;
+    min-height: 0px;
+    padding-bottom: 40px;
+  }
+}

@@ -1,38 +1,68 @@
-* ***REMOVED***
+* {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
   font-family: "Rubik", sans-serif;
   font-weight: 400;
   position: relative;
-***REMOVED***
+}
+
+.dark-mode * {
+  color: white;
+}
+.dark-mode svg text {
+  fill: white !important;
+}
+
+/* .dark-mode a,
+a:visited {
+  color: white;
+  text-decoration: none;
+} */
 
 a,
-a:visited ***REMOVED***
-  color: black;
+a:visited {
   text-decoration: none;
-***REMOVED***
+}
 
-.absoluteBottom ***REMOVED***
+a {
+  color: black !important;
+}
+
+.dark-mode a {
+  color: white !important;
+}
+
+.absoluteBottom {
   position: absolute;
   bottom: 0;
-***REMOVED***
+}
 
-.absoluteTop ***REMOVED***
+.absoluteTop {
   position: absolute;
   top: 0;
-***REMOVED***
+}
 
-.pageHeader ***REMOVED***
+.pageHeader {
   font-size: 32px;
   margin-bottom: 30px;
-***REMOVED***
+  margin-top: 30px;
+}
 
-.MuiInputBase-root * ***REMOVED***
+.MuiInputBase-root * {
   /* transition: border-color 0.5s ease; */
   /* border-color: initial !important; */
-***REMOVED***
+}
 
-.MuiAlert-root ***REMOVED***
-  filter: saturate(180%);
-***REMOVED***
+.MuiAlert-root {
+  filter: saturate(200%);
+  /* background-color: #444; */
+}
+
+.dark-mode .MuiAlert-root {
+  filter: saturate(200%) brightness(3);
+}
+
+.dark-mode .MuiAlert-root > * {
+  filter: brightness(0.33334);
+}
