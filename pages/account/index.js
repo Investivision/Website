@@ -16,9 +16,22 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
+  GoogleAuthProvider,
+  linkWithPopup,
+  unlink,
 } from "firebase/auth";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
+
+const googleIsConnected = (currentUser) => {
+  if (!currentUser) return false;
+  for (const provider of currentUser.providerData) {
+    if (provider.providerId === "google.com") {
+      return provider.email;
+    }
+  }
+  return false;
+};
 
 export default function Account() {
   // console.log(auth);
@@ -40,6 +53,8 @@ export default function Account() {
   const [resetLoading, setResetLoading] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [unlinkLoading, setUnlinkLoading] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -62,6 +77,8 @@ export default function Account() {
     });
   }, []);
 
+  const googleEmail = googleIsConnected(auth.currentUser);
+
   return (
     <HeaderAndFooter bodyClassName={styles.body}>
       {!user ? (
@@ -71,7 +88,8 @@ export default function Account() {
             animation="wave"
             height={60}
             style={{
-              width: 300,
+              width: "100%",
+              maxWidth: 300,
               marginTop: 20,
             }}
             sx={{
@@ -85,7 +103,8 @@ export default function Account() {
                 animation="wave"
                 height={30}
                 style={{
-                  width: 400,
+                  width: "100%",
+                  maxWidth: 400,
                 }}
                 sx={{
                   transform: "none",
@@ -110,6 +129,7 @@ export default function Account() {
           <h1 className="pageHeader">Account</h1>
           <div className={styles.content}>
             <h2>Profile</h2>
+            <h3>You know, the basics</h3>
             <div>
               <div>
                 <TextField
@@ -285,7 +305,85 @@ export default function Account() {
                 <Button variant="contained">View Pricing</Button>
               </div>
             </div> */}
-            <h2>Extension</h2>
+            <h2>Google Integration</h2>
+            <h3>For smooth interaction with third-party tools</h3>
+            <div>
+              {googleEmail ? (
+                <Alert
+                  severity="success"
+                  action={
+                    user.providerData.length == 1 &&
+                    user.providerData[0].providerId === "google.com" ? null : (
+                      <LoadingButton
+                        loading={unlinkLoading}
+                        color="inherit"
+                        size="medium"
+                        onClick={async () => {
+                          setUnlinkLoading(true);
+                          try {
+                            const result = await unlink(user, "google.com");
+                            console.log(result);
+                            setSnackbarMessage(
+                              `Unlinked Google account: ${googleEmail}`
+                            );
+                            setSnackbarSeverity("success");
+                            setSnackbarIsOpen(true);
+                          } catch (e) {
+                            setSnackbarMessage(formatErrorCode(e.code));
+                            setSnackbarSeverity("error");
+                            setSnackbarIsOpen(true);
+                          }
+                          setUnlinkLoading(false);
+                        }}
+                      >
+                        Unlink Account
+                      </LoadingButton>
+                    )
+                  }
+                >
+                  {`Linked to ${googleEmail}`}
+                </Alert>
+              ) : (
+                <Alert
+                  severity="warning"
+                  action={
+                    <LoadingButton
+                      loading={googleLoading}
+                      color="inherit"
+                      size="medium"
+                      onClick={async () => {
+                        setGoogleLoading(true);
+                        try {
+                          const result = await linkWithPopup(
+                            user,
+                            new GoogleAuthProvider()
+                          );
+                          console.log(result);
+                          setSnackbarMessage(
+                            `Linked Google account: ${googleIsConnected(
+                              result.user
+                            )}`
+                          );
+                          setSnackbarSeverity("success");
+                          setSnackbarIsOpen(true);
+                        } catch (e) {
+                          setSnackbarMessage(formatErrorCode(e.code));
+                          setSnackbarSeverity("error");
+                          setSnackbarIsOpen(true);
+                        }
+                        setGoogleLoading(false);
+                      }}
+                    >
+                      Link Account
+                    </LoadingButton>
+                  }
+                >
+                  Not linked to a Google account
+                </Alert>
+              )}
+            </div>
+            <h2>Chrome Extension</h2>
+            <h3>Activate your assistant</h3>
             <div>
               <div>
                 {!extStatus ? (
@@ -360,6 +458,7 @@ export default function Account() {
               </div>
             </div>
             <h2>Danger Zone</h2>
+            <h3>Be very, very careful</h3>
             <div>
               <div>
                 <Button variant="outlined" color="error">

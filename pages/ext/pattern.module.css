@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.container > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 3px;
+}
+
+.container h4 {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+.container p {
+  font-size: 14px;
+  margin-top: 6px;
+  text-align: center;
+  padding: 6px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.noneDetected {
+  opacity: 0.5;
+  background-color: #ccc;
+}
+
+:global(.dark-mode) .noneDetected {
+  background-color: #333;
+}

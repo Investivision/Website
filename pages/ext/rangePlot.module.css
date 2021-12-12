@@ -1,0 +1,61 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  /* overflow: hidden; */
+}
+
+.axisScale {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+}
+
+/* .axisScale p {
+  font-size: 14px;
+  margin: 0 5px;
+} */
+
+.axisScale :global(.MuiToggleButtonGroup-root) button {
+  padding: 1px 10px;
+  border-radius: 6px;
+}
+
+.plot {
+  width: 100%;
+  height: 200px;
+}
+
+.toolTip {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+:global(.dark-mode) .toolTip {
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+}
+
+.toolTip > * {
+  text-align: center;
+  padding: 4px 0;
+}
+
+.toolTipHeader {
+  font-size: 14px;
+}
+
+.toolTipExpected {
+  font-size: 16px;
+}
+
+.toolTipRange {
+  font-size: 12px;
+  opacity: 0.5;
+}

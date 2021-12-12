@@ -9,11 +9,14 @@ import Snackbar from "@mui/material/Snackbar";
 import styles from "./index.module.css";
 import { useState, useEffect } from "react";
 import Wave from "react-wavify";
+import { useTheme } from "@mui/material/styles";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from "firebase/auth";
 import { auth, formatErrorCode } from "../../firebase";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -27,6 +30,8 @@ export default function Login() {
   const [snackbarIsOpen, setSnackbarIsOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  const theme = useTheme();
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -62,7 +67,7 @@ export default function Login() {
 
   return (
     <HeaderAndFooter bodyClassName={styles.body} hideFooterWave>
-      {[1, 2].map((i) => {
+      {[0, 1].map((i) => {
         return (
           <Wave
             key={i}
@@ -71,15 +76,25 @@ export default function Login() {
             paused={false}
             options={{
               height: 50,
-              amplitude: 170,
-              speed: 0.07,
+              amplitude: 120,
+              speed: 0.08 - i * 0.02,
               points: 4,
             }}
           >
             <defs>
               <linearGradient id="gradient" gradientTransform="rotate(90)">
-                <stop offset="0%" stopColor="#81A3FFc0" />
-                <stop offset="100%" stopColor="#81A3F124" />
+                <stop
+                  offset="0%"
+                  stopColor={
+                    theme.palette.mode == "dark" ? "#45ADEB" : "#7BC1FFa0"
+                  }
+                />
+                <stop
+                  offset="100%"
+                  stopColor={
+                    theme.palette.mode == "dark" ? "#456BEBa0" : "#638CDE50"
+                  }
+                />
               </linearGradient>
             </defs>
           </Wave>
@@ -87,17 +102,25 @@ export default function Login() {
       })}
       {/* <h1 className={styles.title}>Account</h1> */}
       <ToggleButtonGroup
-        color="primary"
+        color={theme.palette.mode == "dark" ? "secondary" : "primary"}
         exclusive
         onChange={(event, nextView) => {
           setIsLogin(nextView == "login");
         }}
         className={styles.toggle}
       >
-        <ToggleButton value="login" selected={isLogin}>
+        <ToggleButton
+          value="login"
+          selected={isLogin}
+          // color={!isLogin ? "primary" : "secondary"}
+        >
           Login
         </ToggleButton>
-        <ToggleButton value="signup" selected={!isLogin} color="primary">
+        <ToggleButton
+          value="signup"
+          selected={!isLogin}
+          // color={isLogin ? "primary" : "secondary"}
+        >
           Sign Up
         </ToggleButton>
       </ToggleButtonGroup>
@@ -111,7 +134,7 @@ export default function Login() {
             setEmail(e.target.value);
           }}
           className={styles.textInput}
-          color="primary"
+          color={theme.palette.mode == "dark" ? "secondary" : "primary"}
         />
         <TextField
           autoComplete={`${isLogin ? "current" : "new"}-password`}
@@ -122,9 +145,10 @@ export default function Login() {
             setPassword(e.target.value);
           }}
           className={styles.textInput}
-          color="primary"
+          color={theme.palette.mode == "dark" ? "secondary" : "primary"}
           type="password"
         />
+
         {isLogin ? (
           <div className={styles.checkboxContainer}>
             <p
@@ -143,7 +167,7 @@ export default function Login() {
                 cursor: "pointer",
               }}
             >
-              Forgot login? Reset password
+              Reset or generate password
             </p>
           </div>
         ) : (
@@ -172,6 +196,36 @@ export default function Login() {
         >
           {isLogin ? "Login" : "Sign Up"}
         </LoadingButton>
+        <div
+          onClick={async () => {
+            // sign in with google firebase
+            setSubmitLoading(true);
+            var provider = new GoogleAuthProvider();
+            provider.addScope("profile");
+            provider.addScope("email");
+            // get password scope
+
+            try {
+              const res = await signInWithPopup(auth, provider);
+              console.log(res);
+            } catch (e) {
+              setSnackbarMessage(formatErrorCode(e.code));
+              setSnackbarSeverity("error");
+              setSnackbarIsOpen(true);
+              setSubmitLoading(false);
+            }
+          }}
+          className={styles.google}
+        >
+          <img src="https://cdn.icon-icons.com/icons2/836/PNG/512/Google_icon-icons.com_66793.png" />
+          <p
+          // style={{
+          //   color: theme.palette.primary.main,
+          // }}
+          >
+            Continue with Google
+          </p>
+        </div>
       </div>
       <Snackbar
         open={snackbarIsOpen}
