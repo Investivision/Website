@@ -7,6 +7,22 @@
   position: relative;
 }
 
+body {
+  background-color: white;
+}
+
+body.dark-mode {
+  background-color: #0e1723;
+}
+
+/* body.transparent {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+body.transparent.dark-mode {
+  background-color: #0e1723c0;
+} */
+
 .dark-mode * {
   color: white;
 }

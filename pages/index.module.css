@@ -2,7 +2,7 @@
   height: 100vh;
   min-height: 650px;
   width: 100vw;
-  background: linear-gradient(to bottom right, #a1e3ff, #a4a8ff);
+  background: linear-gradient(to bottom right, #7dd8ff, #8f95ff);
   display: flex;
   flex-wrap: nowrap;
   flex-direction: row;
@@ -50,7 +50,7 @@
 }
 
 :global(.dark-mode) .cover {
-  background: linear-gradient(to bottom right, #008496, #29359e);
+  background: linear-gradient(to bottom right, #006370, #242e81);
 }
 
 .flipY {
@@ -65,7 +65,7 @@
   font-size: 40px;
   /* max-width: 400px; */
   text-align: center;
-  color: #618bff;
+  color: #4b73e0;
   font-weight: 400;
   line-height: 150%;
   font-size: 34px;

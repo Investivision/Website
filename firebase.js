@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
 import firebase from "firebase/compat/app";
 import {
   getFunctions,
@@ -26,7 +26,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export default app;
-module.exports.auth = getAuth();
 
 const formatErrorCode = (code) => {
   return code
@@ -38,11 +37,12 @@ const formatErrorCode = (code) => {
     .join(" ");
 };
 
-// connectFunctionsEmulator(getFunctions(), "localhost", 5001);
-
 const getFunction = (func) => {
   return httpsCallable(getFunctions(), func);
 };
+
+// connectAuthEmulator(getAuth(), "http://localhost:9099");
+// connectFunctionsEmulator(getFunctions(), "localhost", 5001);
 
 module.exports = {
   firebase,

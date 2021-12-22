@@ -107,6 +107,8 @@ export default function Ext(props) {
   const [name, setName] = useState(undefined);
   const [args, setArgs] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const [forbidden, setForbidden] = useState(false);
+  const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
   const [timeFrames, setTimeFrames] = useState(undefined);
   const [currentTimeFrame, setCurrentTimeFrame] = useState(undefined);
@@ -121,25 +123,43 @@ export default function Ext(props) {
       setArgs(props.args);
       setLoading(false);
       return;
+    } else {
+      // alert("make transparent", props);
+      // document.body.style.backgroundColor = "red !important";
+      document.body.classList.add("transparent");
     }
     if (!port) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
         console.log("got data", data);
+        setForbidden(data.status == "forbidden");
+        setRateLimited(data.status == "rateLimited");
+        if (["forbidden", "rateLimited"].includes(data.status)) {
+          setLoading(false);
+        }
+        setForbidden(data.status == "forbidden");
         if (data.status == "loading") {
           setLoading(true);
         } else if (data.status == "done") {
           setLoading(false);
         } else {
           // do we need to test data.status == 'done'
+          if (data.name) {
+            console.log("got new name", data);
+            setName(data.name);
+          }
+          if (data.removeName) {
+            console.log("removing name", data);
+            setName(undefined);
+          }
           if (
             data.insights &&
             Object.keys(data.insights).length > 0 &&
             data.args.length == 1
           ) {
+            // if insights exist for this symbol
             const formatted = processSymbolData(data.insights[data.args[0]]);
             setArgs(data.args);
-            setName(data.name);
             const frames = orderTimeFrames(formatted);
             console.log("formatted", formatted);
             setCurrentTimeFrame(frames[0]);
@@ -175,6 +195,12 @@ export default function Ext(props) {
     "args",
     args
   );
+  // useEffect(() => {
+  //   if (!props.data) {
+  //     document.body.style.backgroundColor = "transparent";
+  //   }
+  //   postMessage("iframe loaded", "*");
+  // });
   return (
     <div
       className={props.className}
@@ -184,7 +210,6 @@ export default function Ext(props) {
           overflowX: "hidden",
           overflowY: "scroll",
           padding: "20px 10px",
-          opacity: loading ? 0.3 : 1,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -192,76 +217,195 @@ export default function Ext(props) {
         props.style
       )}
     >
-      {loading || !timeFrames ? null : (
-        <>
-          {props.data ? null : (
-            <ThemeToggle
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-              }}
+      <>
+        {loading ? (
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              top: 0,
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 99999,
+            }}
+          >
+            <img
+              className={styles.loadingLogo + " " + styles.logoAnimated}
+              src="/images/logo.svg"
             />
-          )}
-          {/* <img
-            src="https://investivision.com/newLogo.svg"
-            className={styles.icon}
-          /> */}
-          <div className={styles.header}>
-            <h2>{name ? "Welcome, Blake" : "Investivision"}</h2>
-            <p
-              onClick={() => {
-                if (name) {
-                  port.postMessage({ message: "sign out" });
-                  alert("will sign out");
-                } else {
-                  alert("will redirect");
-                }
-              }}
-            >
-              {name ? "Sign out" : "Sign in"}
-            </p>
           </div>
-          <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
-          <FormControl>
-            <InputLabel>Time Frame</InputLabel>
-            <Select
-              value={currentTimeFrame}
+        ) : null}
+      </>
+      <>
+        {forbidden ? (
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              top: 0,
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 99999,
+              padding: 20,
+              opacity: loading ? 0 : 1,
+            }}
+          >
+            <img className={styles.loadingLogo} src="/images/logo.svg" />
+            <p
               style={{
-                width: 190,
-              }}
-              label="Time Frame"
-              onChange={(event) => {
-                setCurrentTimeFrame(event.target.value);
+                fontSize: 18,
+                textAlign: "center",
+                margin: "20px 0",
               }}
             >
-              {timeFrames.map((key) => {
-                return (
-                  <MenuItem value={key} key={key}>
-                    {termMap[key]}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
-          <Report global={data.global} data={data[currentTimeFrame]} />
-          {props.data ? null : (
+              This symbol falls outside your 50 symbol coverage
+            </p>
             <Button
               variant="contained"
-              size="large"
-              style={{
-                marginTop: 50,
-                marginBottom: 20,
-                fontWeight: 400,
+              onClick={() => {
+                port.postMessage({
+                  message: "see pricing",
+                });
               }}
-              disableElevation
             >
-              More on Investivision.com
+              Upgrade for Unlimited Coverage
             </Button>
-          )}
-        </>
-      )}
+          </div>
+        ) : rateLimited ? (
+          <div
+            style={{
+              position: "fixed",
+              width: "100%",
+              top: 0,
+              height: "100vh",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 99999,
+              padding: 20,
+              opacity: loading ? 0 : 1,
+            }}
+          >
+            <img className={styles.loadingLogo} src="/images/logo.svg" />
+            <p
+              style={{
+                fontSize: 18,
+                textAlign: "center",
+                margin: "20px 0",
+              }}
+            >
+              You've already accessed 10 insights in the past 24 hours.
+            </p>
+            <Button
+              variant="contained"
+              onClick={() => {
+                port.postMessage({
+                  message: "see pricing",
+                });
+              }}
+            >
+              Upgrade for Unlimited Insights
+            </Button>
+          </div>
+        ) : timeFrames ? (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
+              opacity: loading ? 0.2 : 1,
+            }}
+          >
+            {props.data ? null : (
+              <ThemeToggle
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                }}
+              />
+            )}
+            <div className={styles.header}>
+              <h2>
+                {name ? "Welcome, " + name.split(" ")[0] : "Investivision"}
+              </h2>
+              <Button
+                onClick={() => {
+                  if (name) {
+                    port.postMessage({ message: "sign out from extension" });
+                  } else {
+                    port.postMessage({ message: "sign in from extension" });
+                  }
+                }}
+                sx={{
+                  minWidth: 100,
+                  padding: "2px 10px",
+                }}
+                // style={{
+                //   marginTop: 0,
+                // }}
+              >
+                {name ? "Sign out" : "Sign in"}
+              </Button>
+            </div>
+            <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
+            <FormControl>
+              <InputLabel>Time Frame</InputLabel>
+              <Select
+                value={currentTimeFrame}
+                style={{
+                  width: 190,
+                }}
+                label="Time Frame"
+                onChange={(event) => {
+                  setCurrentTimeFrame(event.target.value);
+                }}
+              >
+                {timeFrames.map((key) => {
+                  return (
+                    <MenuItem value={key} key={key}>
+                      {termMap[key]}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+
+            <Report
+              global={data.global}
+              data={data[currentTimeFrame]}
+              port={port}
+            />
+            {props.data ? null : (
+              <Button
+                variant="outlined"
+                size="large"
+                style={{
+                  marginTop: 50,
+                  marginBottom: 20,
+                  fontWeight: 400,
+                }}
+                disableElevation
+                onClick={() => {
+                  port.postMessage({
+                    message: "redirect to investivision",
+                  });
+                }}
+              >
+                More on Investivision.com
+              </Button>
+            )}
+          </div>
+        ) : null}
+      </>
     </div>
   );
 }

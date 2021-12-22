@@ -89,10 +89,10 @@ export default function Theme(props) {
 
   useEffect(() => {
     if (prefersDarkMode) {
-      document.body.style.backgroundColor = "#0E1723";
+      // document.body.style.backgroundColor = "#0E1723";
       document.body.classList.add("dark-mode");
     } else {
-      document.body.style.backgroundColor = "#fff";
+      // document.body.style.backgroundColor = "#fff";
       document.body.classList.remove("dark-mode");
     }
   }, [prefersDarkMode]);

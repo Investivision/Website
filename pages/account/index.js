@@ -56,6 +56,8 @@ export default function Account() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [unlinkLoading, setUnlinkLoading] = useState(false);
 
+  const [role, setRole] = useState(undefined);
+
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -142,7 +144,7 @@ export default function Account() {
                   className={styles.textInput}
                   color="primary"
                   onBlur={async () => {
-                    const trimmed = name.trim();
+                    const trimmed = name ? name.trim() : "";
                     if (trimmed) {
                       if (trimmed != user.displayName) {
                         try {
@@ -265,7 +267,13 @@ export default function Account() {
                   loading={signOutLoading}
                   onClick={() => {
                     setSignOutLoading(true);
-                    signOut(auth);
+                    chrome.runtime.sendMessage(
+                      extId,
+                      { message: "signOut" },
+                      function (res) {
+                        signOut(auth);
+                      }
+                    );
                   }}
                 >
                   Sign Out

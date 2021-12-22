@@ -2,9 +2,11 @@ import { useState, useEffect } from "react";
 import { alterHsl } from "tsparticles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Button from "@mui/material/Button";
 import Numeric from "./Numeric";
 import Pattern from "./Pattern";
 import RangePlot from "./RangePlot";
+import styles from "./report.module.css";
 
 function zToPercentile(z) {
   // z == number of standard deviations from the mean
@@ -43,28 +45,26 @@ function zToPercentile(z) {
   return sum;
 }
 
-export default function Report(props) {
+function UpgradeButton(props) {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
+    <Button
+      variant="contained"
+      // color="secondary"
+      onClick={() => {
+        props.port.postMessage({
+          message: "see pricing",
+        });
       }}
     >
-      <h3
-        style={{
-          width: "100%",
-          textAlign: "center",
-          marginTop: 40,
-          marginBottom: 30,
-        }}
-      >
-        Growth
-      </h3>
+      Upgrade to Unlock
+    </Button>
+  );
+}
+
+export default function Report(props) {
+  return (
+    <div className={styles.report}>
+      <h3>Growth</h3>
       {props.data.alpha ? (
         <Numeric
           percentile={zToPercentile(props.data.alpha_z)}
@@ -95,16 +95,7 @@ export default function Report(props) {
           }}
         />
       ) : null}
-      <h3
-        style={{
-          width: "100%",
-          textAlign: "center",
-          marginTop: 40,
-          marginBottom: 30,
-        }}
-      >
-        Risk Management
-      </h3>
+      <h3>Risk Management</h3>
       {props.data.natr ? (
         <Numeric
           percentile={1 - zToPercentile(props.data.natr_z)}
@@ -135,16 +126,7 @@ export default function Report(props) {
           }}
         />
       ) : null}
-      <h3
-        style={{
-          width: "100%",
-          textAlign: "center",
-          marginTop: 40,
-          marginBottom: 30,
-        }}
-      >
-        Candle Patterns
-      </h3>
+      <h3>Candle Patterns</h3>
       {props.global.pattern ? (
         <Pattern
           pattern={props.global.pattern}
@@ -152,43 +134,42 @@ export default function Report(props) {
             width: "100%",
           }}
         />
-      ) : null}
-      <h3
-        style={{
-          width: "100%",
-          textAlign: "center",
-          marginTop: 40,
-          marginBottom: 30,
-        }}
-      >
-        AI Forecast
-      </h3>
-      {props.data.p ? (
-        <Numeric
-          percentile={zToPercentile(props.data.p_z)}
-          value={`${Math.round(props.data.p * 10) / 10}%`}
-          desc={"Predicted Gain"}
-          style={{
-            margin: 10,
-          }}
-        />
-      ) : null}
-      {props.data.pr ? (
-        <Numeric
-          percentile={zToPercentile(props.data.pr_z)}
-          value={`${Math.round(props.data.pr * 10) / 10}%`}
-          desc={"Prediction Range"}
-          style={{
-            margin: 10,
-          }}
-        />
-      ) : null}
-      {props.data.prophet ? (
-        <RangePlot
-          points={props.data.prophet}
-          lastClose={props.global.lastclose}
-        />
-      ) : null}
+      ) : (
+        <UpgradeButton port={props.port} />
+      )}
+      <h3>AI Forecast</h3>
+      {props.data.p && props.data.pr && props.data.prophet ? (
+        <>
+          <Numeric
+            percentile={zToPercentile(props.data.p_z)}
+            value={`${Math.round(props.data.p * 10) / 10}%`}
+            desc={"Predicted Gain"}
+            style={{
+              margin: 10,
+            }}
+          />
+          <Numeric
+            percentile={zToPercentile(props.data.pr_z)}
+            value={`${Math.round(props.data.pr * 10) / 10}%`}
+            desc={"Prediction Range"}
+            style={{
+              margin: 10,
+            }}
+          />
+          <RangePlot
+            points={props.data.prophet}
+            lastClose={props.global.lastclose}
+          />
+        </>
+      ) : (
+        <UpgradeButton port={props.port} />
+      )}
+      <h3>Notes</h3>
+      {props.data.notes || true ? (
+        <textarea></textarea>
+      ) : (
+        <UpgradeButton port={props.port} />
+      )}
     </div>
   );
 }

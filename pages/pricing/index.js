@@ -1,11 +1,14 @@
 import HeaderAndFooter from "../../components/HeaderAndFooter";
 import styles from "./index.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CheckCircleRoundedIcon from "@material-ui/icons/CheckCircleRounded";
 import { useTheme } from "@mui/material/styles";
-import Button from "@mui/material/Button";
+import LoadingButton from "@mui/lab/LoadingButton";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { getFunction, auth } from "../../firebase";
+import { onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/router";
 
 const plans = [
   {
@@ -18,7 +21,7 @@ const plans = [
     ],
   },
   {
-    title: "Trader",
+    title: "Bullish",
     monthlyCost: 9,
     annualCost: 90,
     features: [
@@ -29,6 +32,8 @@ const plans = [
       "Pattern Recognition",
       "AI Forecasting",
     ],
+    monthlyPriceId: "price_1K6j11ACbhl0jE7ZuLJoDW54",
+    yearlyPriceId: "price_1K6jPbACbhl0jE7ZoGLvulow",
   },
   {
     title: "Buffet",
@@ -43,13 +48,49 @@ const plans = [
       "AI Forecasting",
       "Integrated Notes",
       "Ranking & Filtering",
-      "Mass xlsx Downloads",
+      "Batch Excel Export",
     ],
   },
 ];
 
 export default function Pricing(props) {
-  const [isMonthly, setIsMonthly] = useState(false);
+  const [isMonthly, setIsMonthly] = useState(true);
+  const [planLoading, setPlanLoading] = useState(undefined);
+  const [user, setUser] = useState(undefined);
+  const [userLoading, setUserLoading] = useState(true);
+  const [role, setRole] = useState(undefined);
+
+  const router = useRouter();
+
+  const updateRole = async () => {
+    if (user) {
+      await user.getIdToken(true);
+      const token = await user.getIdTokenResult(true);
+      console.log("found token", token);
+      if (token.claims.role) {
+        setRole(token.claims.role);
+      } else {
+        setRole(undefined);
+        console.log("query", router.query);
+        if (router.query.success) {
+          setTimeout(updateRole, 1000);
+        }
+      }
+    } else {
+      setRole(undefined);
+    }
+  };
+
+  console.log(user);
+
+  onAuthStateChanged(auth, async (user) => {
+    setUser(user);
+    setUserLoading(false);
+  });
+
+  useEffect(async () => {
+    updateRole();
+  }, [user]);
 
   const theme = useTheme();
 
@@ -99,17 +140,13 @@ export default function Pricing(props) {
                       ? `${plan.monthlyCost} / mo`
                       : `${plan.annualCost} / yr`)}
               </h4>
-              {isMonthly ? null : (
-                <p className={styles.discount}>
-                  {plan.monthlyCost
-                    ? `Save ${Math.round(
-                        ((plan.monthlyCost - plan.annualCost / 12) /
-                          plan.monthlyCost) *
-                          100
-                      )}%`
-                    : "Still Free!"}
-                </p>
-              )}
+              {!isMonthly && plan.monthlyCost ? (
+                <p className={styles.discount}>{`Save ${Math.round(
+                  ((plan.monthlyCost - plan.annualCost / 12) /
+                    plan.monthlyCost) *
+                    100
+                )}%`}</p>
+              ) : null}
               <div className={styles.featureContainer}>
                 {plan.features.map((feature) => {
                   return (
@@ -120,9 +157,41 @@ export default function Pricing(props) {
                   );
                 })}
               </div>
-              <Button variant="contained" size="large" color="primary">
-                Get Started
-              </Button>
+              {plan.monthlyCost ? (
+                <LoadingButton
+                  variant="contained"
+                  size="large"
+                  color="primary"
+                  loading={planLoading === plan.title || userLoading}
+                  onClick={async () => {
+                    setPlanLoading(plan.title);
+                    if (!user) {
+                      window.location.href = "/login";
+                      return;
+                    }
+                    await user.getIdToken(true);
+                    let res;
+                    if ((await user.getIdTokenResult()).claims.role) {
+                      res = await getFunction("createPortalLink")({
+                        returnUrl: window.location.href,
+                      });
+                    } else {
+                      res = await getFunction("createCheckoutSession")({
+                        successUrl: window.location.href + "?success=true",
+                        cancelUrl: window.location.href,
+                        priceId: isMonthly
+                          ? plan.monthlyPriceId
+                          : plan.yearlyPriceId,
+                      });
+                    }
+                    window.location.href = res.data;
+                  }}
+                >
+                  {role == plan.title.toLowerCase()
+                    ? "Manage Plan"
+                    : `Get Started`}
+                </LoadingButton>
+              ) : null}
             </div>
           );
         })}

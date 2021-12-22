@@ -1,0 +1,40 @@
+.report h3 {
+  width: 100%;
+  text-align: center;
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+
+.report {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.report textarea {
+  width: 100%;
+  resize: vertical;
+  background-color: transparent;
+  border: 2px solid #00000014;
+  border-radius: 8px;
+  font-size: 14px;
+  padding: 10px;
+  min-height: 100px;
+  transition: border-color 0.1s ease;
+}
+
+.report textarea:focus {
+  outline: none;
+  border-color: #00000030;
+}
+
+:global(.dark-mode) .report textarea:focus {
+  border-color: #ffffff40;
+}
+
+:global(.dark-mode) .report textarea {
+  border-color: #ffffff14;
+}
