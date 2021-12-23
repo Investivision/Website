@@ -22,6 +22,7 @@ export default function Home() {
   const theme = useTheme();
 
   const [browser, setBrowser] = useState(undefined);
+  const [browserLoaded, setBrowserLoaded] = useState(false);
 
   useEffect(async () => {
     if (navigator.brave && (await navigator.brave.isBrave())) {
@@ -31,6 +32,7 @@ export default function Home() {
     } else if (isEdge) {
       setBrowser("Edge");
     }
+    setBrowserLoaded(true);
   }, []);
 
   const tech = [
@@ -115,10 +117,10 @@ export default function Home() {
         </Wave>
         <div
           className={`${styles.flexCenter} ${
-            browser ? styles.browserFound : ""
+            browserLoaded ? styles.browserFound : ""
           }`}
           style={{
-            opacity: browser ? 1 : 0,
+            opacity: browserLoaded ? 1 : 0,
           }}
         >
           <h2>
