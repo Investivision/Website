@@ -233,3 +233,16 @@
     width: 28px;
   }
 }
+
+.browserFound {
+  animation: fadein 2s ease-in;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

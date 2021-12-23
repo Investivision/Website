@@ -113,7 +113,14 @@ export default function Home() {
             </linearGradient>
           </defs>
         </Wave>
-        <div className={styles.flexCenter}>
+        <div
+          className={`${styles.flexCenter} ${
+            browser ? styles.browserFound : ""
+          }`}
+          style={{
+            opacity: browser ? 1 : 0,
+          }}
+        >
           <h2>
             {`It's ${new Date().getFullYear()}. Meet your new `}
             <br />
