@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { alterHsl } from "tsparticles";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import Report from "./Report";
+import Report from "../../components/ext/Report";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Button from "@mui/material/Button";
@@ -181,20 +181,6 @@ export default function Ext(props) {
     }
     // }
   }, [port]);
-  console.log(
-    "data",
-    JSON.stringify(data),
-    "name",
-    name,
-    "currentTimeFrame",
-    currentTimeFrame,
-    "timeFrames",
-    timeFrames,
-    "loading",
-    loading,
-    "args",
-    args
-  );
   // useEffect(() => {
   //   if (!props.data) {
   //     document.body.style.backgroundColor = "transparent";

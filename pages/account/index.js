@@ -7,8 +7,10 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { useState, useEffect } from "react";
 import Skeleton from "@mui/material/Skeleton";
+import SnackbarContent from "@mui/material/SnackbarContent";
 import MuiPhoneNumber from "material-ui-phone-number";
 import { auth, formatErrorCode, getFunction } from "../../firebase";
+import { useTheme } from "@mui/styles";
 import {
   onAuthStateChanged,
   updateProfile,
@@ -16,21 +18,14 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
-  GoogleAuthProvider,
-  linkWithPopup,
-  unlink,
 } from "firebase/auth";
+import { useRouter } from "next/router";
+import { setPriority } from "os";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
-const googleIsConnected = (currentUser) => {
-  if (!currentUser) return false;
-  for (const provider of currentUser.providerData) {
-    if (provider.providerId === "google.com") {
-      return provider.email;
-    }
-  }
-  return false;
+const capitalize = (s) => {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
 export default function Account() {
@@ -53,19 +48,52 @@ export default function Account() {
   const [resetLoading, setResetLoading] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [unlinkLoading, setUnlinkLoading] = useState(false);
 
   const [role, setRole] = useState(undefined);
 
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const theme = useTheme();
+
+  const router = useRouter();
+
+  const updateRole = async (user, remaining) => {
+    remaining = remaining || 0;
+    if (user) {
+      await user.getIdToken(true);
+      const token = await user.getIdTokenResult(true);
+      console.log("found token", token);
+      if (token.claims.role) {
+        setRole(token.claims.role);
+      } else {
+        setRole(undefined);
+        if (remaining == 0) {
+          router.push(`/account`, undefined, {
+            shallow: true,
+          });
+        }
+        console.log("query", router.query);
+        if (remaining > 0 && router.query.success) {
+          setTimeout(function () {
+            updateRole(user, remaining - 1);
+          }, 1500);
+        }
+      }
+    } else {
+      setRole(undefined);
+    }
+  };
+
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
+        await updateRole(user, 3);
         setUser(user);
         setName(user.displayName || "");
         setEmail(user.email);
         // setPhoneNumber(user.phoneNumber || "");
         console.log(user);
+
         try {
           chrome.runtime.sendMessage(extId, { uid: user.uid }, function (res) {
             setExtStatus(res.synced ? "synced" : "not synced");
@@ -78,8 +106,6 @@ export default function Account() {
       }
     });
   }, []);
-
-  const googleEmail = googleIsConnected(auth.currentUser);
 
   return (
     <HeaderAndFooter bodyClassName={styles.body}>
@@ -171,6 +197,7 @@ export default function Account() {
                 <TextField
                   label="Email"
                   variant="outlined"
+                  type="email"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -313,82 +340,87 @@ export default function Account() {
                 <Button variant="contained">View Pricing</Button>
               </div>
             </div> */}
-            <h2>Google Integration</h2>
-            <h3>For smooth interaction with third-party tools</h3>
+            <h2>Subscription</h2>
+            <h3>We need to pay the bills too</h3>
             <div>
-              {googleEmail ? (
-                <Alert
-                  severity="success"
-                  action={
-                    user.providerData.length == 1 &&
-                    user.providerData[0].providerId === "google.com" ? null : (
-                      <LoadingButton
-                        loading={unlinkLoading}
-                        color="inherit"
-                        size="medium"
-                        onClick={async () => {
-                          setUnlinkLoading(true);
-                          try {
-                            const result = await unlink(user, "google.com");
-                            console.log(result);
-                            setSnackbarMessage(
-                              `Unlinked Google account: ${googleEmail}`
-                            );
-                            setSnackbarSeverity("success");
-                            setSnackbarIsOpen(true);
-                          } catch (e) {
-                            setSnackbarMessage(formatErrorCode(e.code));
-                            setSnackbarSeverity("error");
-                            setSnackbarIsOpen(true);
-                          }
-                          setUnlinkLoading(false);
-                        }}
-                      >
-                        Unlink Account
-                      </LoadingButton>
-                    )
-                  }
-                >
-                  {`Linked to ${googleEmail}`}
-                </Alert>
-              ) : (
-                <Alert
-                  severity="warning"
-                  action={
-                    <LoadingButton
-                      loading={googleLoading}
-                      color="inherit"
-                      size="medium"
-                      onClick={async () => {
-                        setGoogleLoading(true);
-                        try {
-                          const result = await linkWithPopup(
-                            user,
-                            new GoogleAuthProvider()
-                          );
-                          console.log(result);
-                          setSnackbarMessage(
-                            `Linked Google account: ${googleIsConnected(
-                              result.user
-                            )}`
-                          );
-                          setSnackbarSeverity("success");
-                          setSnackbarIsOpen(true);
-                        } catch (e) {
-                          setSnackbarMessage(formatErrorCode(e.code));
-                          setSnackbarSeverity("error");
-                          setSnackbarIsOpen(true);
-                        }
-                        setGoogleLoading(false);
+              <div>
+                {role ? (
+                  <Alert
+                    severity="success"
+                    action={
+                      <>
+                        <Button
+                          color="inherit"
+                          size="medium"
+                          onClick={() => (window.location.href = "/pricing")}
+                        >
+                          View Plans
+                        </Button>
+
+                        <LoadingButton
+                          color="inherit"
+                          size="medium"
+                          loading={portalLoading}
+                          onClick={async () => {
+                            setPortalLoading(true);
+                            const res = await getFunction("createPortalLink")({
+                              returnUrl:
+                                window.location.origin +
+                                "/account?success=true",
+                            });
+                            window.location.href = res.data;
+                          }}
+                        >
+                          Manage Subscription
+                        </LoadingButton>
+                      </>
+                    }
+                  >
+                    {`Current Plan: `}
+                    <span
+                      style={{
+                        backgroundColor:
+                          theme.palette.mode == "dark"
+                            ? "#00000040"
+                            : "#00990030",
+                        padding: "6px 10px",
+                        borderRadius: 6,
+                        fontSize: 16,
+                        // fontWeight: "bold",
                       }}
                     >
-                      Link Account
-                    </LoadingButton>
-                  }
-                >
-                  Not linked to a Google account
-                </Alert>
-              )}
+                      {capitalize(role)}
+                    </span>
+                  </Alert>
+                ) : router.query.success ? (
+                  <Skeleton
+                    variant="text"
+                    animation="wave"
+                    height={100}
+                    style={{
+                      width: 300,
+                    }}
+                    sx={{
+                      transform: "none",
+                    }}
+                  />
+                ) : (
+                  <Alert
+                    severity="warning"
+                    action={
+                      <Button
+                        color="inherit"
+                        size="medium"
+                        onClick={() => (window.location.href = "/pricing")}
+                      >
+                        View Plans
+                      </Button>
+                    }
+                  >
+                    Not Subscribed
+                  </Alert>
+                )}
+              </div>
             </div>
             <h2>Chrome Extension</h2>
             <h3>Activate your assistant</h3>
@@ -469,7 +501,17 @@ export default function Account() {
             <h3>Be very, very careful</h3>
             <div>
               <div>
-                <Button variant="outlined" color="error">
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={() => {
+                    setSnackbarMessage(
+                      "Are you sure you want to delete your account?"
+                    );
+                    setSnackbarSeverity("delete");
+                    setSnackbarIsOpen(true);
+                  }}
+                >
                   Delete Account
                 </Button>
               </div>
@@ -487,9 +529,32 @@ export default function Account() {
             }}
             autoHideDuration={3000}
           >
-            <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
-              {snackbarMessage}
-            </Alert>
+            {snackbarSeverity == "delete" ? (
+              <SnackbarContent
+                sx={{
+                  backgroundImage: "none",
+                  backgroundColor:
+                    theme.palette.mode == "dark" ? "#ffffff20" : "#00000008",
+                  backdropFilter: "blur(10px)",
+                  color: theme.palette.mode == "dark" ? "#ffffff" : "#000000",
+                }}
+                message="Are you sure you want to delete your account?"
+                action={
+                  <LoadingButton
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    onClick={() => {}}
+                  >
+                    Yes, Delete
+                  </LoadingButton>
+                }
+              />
+            ) : (
+              <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
+                {snackbarMessage}
+              </Alert>
+            )}
           </Snackbar>
         </>
       )}

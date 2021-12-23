@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { alterHsl } from "tsparticles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
@@ -7,6 +7,8 @@ import Numeric from "./Numeric";
 import Pattern from "./Pattern";
 import RangePlot from "./RangePlot";
 import styles from "./report.module.css";
+
+let autosaveInterval;
 
 function zToPercentile(z) {
   // z == number of standard deviations from the mean
@@ -61,7 +63,19 @@ function UpgradeButton(props) {
   );
 }
 
+let savedValue;
+
 export default function Report(props) {
+  savedValue = props.global.notes;
+  const notesRef = useRef(null);
+  const [saved, setSaved] = useState(true);
+
+  useEffect(() => {
+    if (notesRef.current) {
+      notesRef.current.value = savedValue;
+    }
+  }, [notesRef, props]);
+
   return (
     <div className={styles.report}>
       <h3>Growth</h3>
@@ -165,8 +179,59 @@ export default function Report(props) {
         <UpgradeButton port={props.port} />
       )}
       <h3>Notes</h3>
-      {props.data.notes || true ? (
-        <textarea></textarea>
+      {props.global.notes !== undefined ? (
+        <>
+          <p
+            style={{
+              marginTop: -16,
+              marginBottom: 16,
+              fontSize: 12,
+              opacity: 0.3,
+            }}
+          >
+            {saved ? "Saved" : "Syncing..."}
+          </p>
+          <textarea
+            placeholder="In January, set limit sell order."
+            ref={notesRef}
+            onChange={() => {
+              console.log(
+                "current",
+                notesRef.current.value,
+                "saved",
+                savedValue
+              );
+              setSaved(notesRef.current.value == savedValue);
+            }}
+            onFocus={() => {
+              autosaveInterval = setInterval(() => {
+                const curr = notesRef.current.value;
+                if (curr !== savedValue) {
+                  props.port.postMessage({
+                    symbol: props.global.symbol,
+                    notes: curr,
+                  });
+                  console.log("new saved value is", curr);
+                  savedValue = curr;
+                  console.log("reading from saved value", savedValue);
+                }
+                setSaved(true);
+              }, 10000);
+            }}
+            onBlur={() => {
+              clearInterval(autosaveInterval);
+              const curr = notesRef.current.value;
+              if (curr != savedValue) {
+                props.port.postMessage({
+                  symbol: props.global.symbol,
+                  notes: curr,
+                });
+                savedValue = curr;
+                setSaved(true);
+              }
+            }}
+          ></textarea>
+        </>
       ) : (
         <UpgradeButton port={props.port} />
       )}

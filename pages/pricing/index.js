@@ -50,6 +50,8 @@ const plans = [
       "Ranking & Filtering",
       "Batch Excel Export",
     ],
+    monthlyPriceId: "price_1K9LAWACbhl0jE7ZV4Q3JpB5",
+    yearlyPriceId: "price_1K9LBUACbhl0jE7ZEY8tTM2a",
   },
 ];
 
@@ -60,9 +62,7 @@ export default function Pricing(props) {
   const [userLoading, setUserLoading] = useState(true);
   const [role, setRole] = useState(undefined);
 
-  const router = useRouter();
-
-  const updateRole = async () => {
+  const updateRole = async (user) => {
     if (user) {
       await user.getIdToken(true);
       const token = await user.getIdTokenResult(true);
@@ -71,10 +71,6 @@ export default function Pricing(props) {
         setRole(token.claims.role);
       } else {
         setRole(undefined);
-        console.log("query", router.query);
-        if (router.query.success) {
-          setTimeout(updateRole, 1000);
-        }
       }
     } else {
       setRole(undefined);
@@ -85,12 +81,11 @@ export default function Pricing(props) {
 
   onAuthStateChanged(auth, async (user) => {
     setUser(user);
+    await updateRole(user);
     setUserLoading(false);
   });
 
-  useEffect(async () => {
-    updateRole();
-  }, [user]);
+  useEffect(async () => {}, [user]);
 
   const theme = useTheme();
 
@@ -173,11 +168,13 @@ export default function Pricing(props) {
                     let res;
                     if ((await user.getIdTokenResult()).claims.role) {
                       res = await getFunction("createPortalLink")({
-                        returnUrl: window.location.href,
+                        returnUrl:
+                          window.location.origin + "/account?success=true",
                       });
                     } else {
                       res = await getFunction("createCheckoutSession")({
-                        successUrl: window.location.href + "?success=true",
+                        successUrl:
+                          window.location.origin + "/account?success=true",
                         cancelUrl: window.location.href,
                         priceId: isMonthly
                           ? plan.monthlyPriceId

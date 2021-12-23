@@ -3,10 +3,16 @@ const admin = require("firebase-admin");
 const cors = require("cors")({ origin: true });
 const { logger } = functions;
 const Stripe = require("stripe");
+const fs = require("fs");
 
+const isLocal = false;
 try {
-  require("dotenv").config();
+  if (fs.existsSync("./.env")) {
+    require("dotenv").config();
+    isLocal = true;
+  }
 } catch {}
+logger.log("isLocal:", isLocal);
 
 admin.initializeApp();
 
@@ -46,8 +52,9 @@ exports.generateToken = functions.https.onCall(async (data, context) => {
 
 const apiVersion = "2020-08-27";
 // console.log(process.env);
-const stripeSecret =
-  process.env.stripe_secret || functions.config().stripe.stripe_secret;
+const stripeSecret = isLocal
+  ? process.env.stripe_secret
+  : functions.config().stripe.stripe_secret;
 logger.log(`stripe secret: ${stripeSecret}`);
 const stripe = new Stripe(stripeSecret, {
   apiVersion,
@@ -192,10 +199,14 @@ const handleUpdatedSubscriptionObject = async (subscription) => {
 exports.hooks = functions.https.onRequest(async (req, resp) => {
   let event;
   try {
+    const secret = isLocal
+      ? process.env.stripe_signing_secret
+      : functions.config().stripe.stripe_signing_secret;
+    logger.log("signing secret is", secret);
     event = stripe.webhooks.constructEvent(
       req.rawBody,
       req.headers["stripe-signature"],
-      process.env.stripe_signing_secret || config.stripe_signing_secret
+      secret
     );
   } catch (error) {
     logger.log(`bad webhood request: ${error}`);
@@ -216,10 +227,6 @@ exports.hooks = functions.https.onRequest(async (req, resp) => {
         await handleUpdatedSubscriptionObject(event.data.object);
         break;
       case "checkout.session.completed":
-        console.log(
-          "session complete",
-          JSON.stringify(event.data.object, null, " ")
-        );
         let { subscription, customer } = event.data.object;
         handleSubscriptionUpdate(subscription, "active", customer);
         break;
@@ -244,7 +251,12 @@ exports.hooks = functions.https.onRequest(async (req, resp) => {
 
 exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
   await stripe.customers.del(user.customClaims.stripeId);
+  await admin
+    .firestore()
+    .collection("notes")
+    .where("uid", "==", user.uid)
+    .delete();
   logger.log(
-    `deleted user ${user.uid} stripe information, stripeId: ${user.customClaims.stripeId}`
+    `deleted user ${user.uid} stripe information, stripeId: ${user.customClaims.stripeId}. Removed notes.`
   );
 });
