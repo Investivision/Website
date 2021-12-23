@@ -143,7 +143,7 @@ export default function Home() {
         <div
           style={{
             backgroundColor:
-              theme.palette.mode == "dark" ? "#000000a0" : "#ffffff70",
+              theme.palette.mode == "dark" ? "#000000a0" : "#ffffffa0",
           }}
           className={styles.demo}
         >

@@ -6,6 +6,11 @@
 
 .header h2 {
   font-size: 20px !important;
+  color: black;
+}
+
+:global(.dark-mode) .header h2 {
+  color: white;
 }
 
 .header p {

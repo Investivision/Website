@@ -96,6 +96,7 @@ export default function Account() {
 
         try {
           chrome.runtime.sendMessage(extId, { uid: user.uid }, function (res) {
+            console.log("ext response", res);
             setExtStatus(res.synced ? "synced" : "not synced");
           });
         } catch (e) {

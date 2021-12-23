@@ -47,10 +47,9 @@ const interpolateColor = (color1, color2, factor) => {
   return result;
 };
 
-
 export default function Numeric(props) {
   const hue = -10 + 130 * props.percentile;
-  const color = `hsl(${hue}, 100%, 40%)`;
+  const color = `hsl(${hue}, 100%, 38%)`;
   return (
     <div
       style={Object.assign(
