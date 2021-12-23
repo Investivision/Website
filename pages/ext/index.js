@@ -106,7 +106,7 @@ export default function Ext(props) {
   const [data, setData] = useState(undefined);
   const [name, setName] = useState(undefined);
   const [args, setArgs] = useState(undefined);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!props.data);
   const [forbidden, setForbidden] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
@@ -204,7 +204,7 @@ export default function Ext(props) {
       )}
     >
       <>
-        {loading ? (
+        {loading && !props.data ? (
           <div
             style={{
               position: "fixed",
