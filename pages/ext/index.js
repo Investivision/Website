@@ -103,31 +103,24 @@ const orderTimeFrames = (data) => {
 };
 
 export default function Ext(props) {
-  const [data, setData] = useState(undefined);
-  const [name, setName] = useState(undefined);
-  const [args, setArgs] = useState(undefined);
+  const [data, setData] = useState(props.data);
+  const [name, setName] = useState(props.name);
+  const [args, setArgs] = useState(props.args);
   const [loading, setLoading] = useState(!props.data);
   const [forbidden, setForbidden] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
-  const [timeFrames, setTimeFrames] = useState(undefined);
-  const [currentTimeFrame, setCurrentTimeFrame] = useState(undefined);
+  const [timeFrames, setTimeFrames] = useState(props.timeFrames);
+  const [currentTimeFrame, setCurrentTimeFrame] = useState(
+    props.currentTimeFrame
+  );
 
   useEffect(() => {
     console.log("props", props);
-    if (Object.keys(props).length > 0) {
-      setData(props.data);
-      setName(props.name);
-      setCurrentTimeFrame(props.currentTimeFrame);
-      setTimeFrames(props.timeFrames);
-      setArgs(props.args);
-      setLoading(false);
+    if (props.name) {
       return;
-    } else {
-      // alert("make transparent", props);
-      // document.body.style.backgroundColor = "red !important";
-      document.body.classList.add("transparent");
     }
+    document.body.classList.add("transparent");
     if (!port) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
