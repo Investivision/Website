@@ -125,16 +125,15 @@ export default function Ext(props) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
         console.log("got data", data);
-        setForbidden(data.status == "forbidden");
         setRateLimited(data.status == "rateLimited");
         if (["forbidden", "rateLimited"].includes(data.status)) {
           setLoading(false);
         }
-        setForbidden(data.status == "forbidden");
+        if (data.status == "forbidden") {
+          setForbidden(true);
+        }
         if (data.status == "loading") {
           setLoading(true);
-        } else if (data.status == "done") {
-          setLoading(false);
         } else {
           // do we need to test data.status == 'done'
           if (data.name) {
@@ -159,6 +158,7 @@ export default function Ext(props) {
             setData(formatted);
             setTimeFrames(frames);
             setLoading(false);
+            setForbidden(false);
           }
         }
       });
@@ -357,31 +357,34 @@ export default function Ext(props) {
                 })}
               </Select>
             </FormControl>
-
-            <Report
-              global={data.global}
-              data={data[currentTimeFrame]}
-              port={port}
-            />
-            {props.data ? null : (
-              <Button
-                variant="outlined"
-                size="large"
-                style={{
-                  marginTop: 50,
-                  marginBottom: 20,
-                  fontWeight: 400,
-                }}
-                disableElevation
-                onClick={() => {
-                  port.postMessage({
-                    message: "redirect to investivision",
-                  });
-                }}
-              >
-                More on Investivision.com
-              </Button>
-            )}
+            {data[currentTimeFrame] ? (
+              <>
+                <Report
+                  global={data.global}
+                  data={data[currentTimeFrame]}
+                  port={port}
+                />
+                {props.data ? null : (
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    style={{
+                      marginTop: 50,
+                      marginBottom: 20,
+                      fontWeight: 400,
+                    }}
+                    disableElevation
+                    onClick={() => {
+                      port.postMessage({
+                        message: "redirect to investivision",
+                      });
+                    }}
+                  >
+                    More on Investivision.com
+                  </Button>
+                )}
+              </>
+            ) : null}
           </div>
         ) : null}
       </>
