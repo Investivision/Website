@@ -9,6 +9,7 @@ import Button from "@mui/material/Button";
 import { StylesContext } from "@material-ui/styles";
 import styles from "./index.module.css";
 import ThemeToggle from "../../components/ThemeToggle";
+import InfoScreen from "../../components/ext/InfoScreen";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -134,6 +135,8 @@ export default function Ext(props) {
         }
         if (data.status == "loading") {
           setLoading(true);
+        } else if (data.status == "done") {
+          setLoading(false);
         } else {
           // do we need to test data.status == 'done'
           if (data.name) {
@@ -220,79 +223,17 @@ export default function Ext(props) {
       </>
       <>
         {forbidden ? (
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              top: 0,
-              height: "100vh",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 99999,
-              padding: 20,
-              opacity: loading ? 0 : 1,
-            }}
-          >
-            <img className={styles.loadingLogo} src="/images/logo.svg" />
-            <p
-              style={{
-                fontSize: 18,
-                textAlign: "center",
-                margin: "20px 0",
-              }}
-            >
-              This symbol falls outside your 50 symbol coverage
-            </p>
-            <Button
-              variant="contained"
-              onClick={() => {
-                port.postMessage({
-                  message: "see pricing",
-                });
-              }}
-            >
-              Upgrade for Unlimited Coverage
-            </Button>
-          </div>
+          <InfoScreen
+            message="see pricing"
+            text="This symbol falls outside your 50 symbol coverage."
+            styles={styles}
+          />
         ) : rateLimited ? (
-          <div
-            style={{
-              position: "fixed",
-              width: "100%",
-              top: 0,
-              height: "100vh",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 99999,
-              padding: 20,
-              opacity: loading ? 0 : 1,
-            }}
-          >
-            <img className={styles.loadingLogo} src="/images/logo.svg" />
-            <p
-              style={{
-                fontSize: 18,
-                textAlign: "center",
-                margin: "20px 0",
-              }}
-            >
-              You've already accessed 10 insights in the past 24 hours.
-            </p>
-            <Button
-              variant="contained"
-              onClick={() => {
-                port.postMessage({
-                  message: "see pricing",
-                });
-              }}
-            >
-              Upgrade for Unlimited Insights
-            </Button>
-          </div>
+          <InfoScreen
+            message="see pricing"
+            text="You've already accessed 10 insights in the past 24 hours."
+            styles={styles}
+          />
         ) : timeFrames ? (
           <div
             style={{
@@ -386,7 +327,9 @@ export default function Ext(props) {
               </>
             ) : null}
           </div>
-        ) : null}
+        ) : (
+          <InfoScreen text="not tracking this symbol" styles={styles} />
+        )}
       </>
     </div>
   );
