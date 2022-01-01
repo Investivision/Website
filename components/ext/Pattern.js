@@ -23,7 +23,7 @@ const candleMap = {
   CDLENGULFING: "Engulfing Pattern",
   CDLEVENINGDOJISTAR: "Evening Doji Star",
   CDLEVENINGSTAR: "Evening Star",
-  CDLGAPSIDESIDEWHITE: "Up/Down-gap side-by-side white lines",
+  CDLGAPSIDESIDEWHITE: "Up/Down-Gap Side-by-Side White Lines",
   CDLGRAVESTONEDOJI: "Gravestone Doji",
   CDLHAMMER: "Hammer",
   CDLHANGINGMAN: "Hanging Man",
@@ -92,9 +92,22 @@ export default function Pattern(props) {
               key={index}
               style={{
                 backgroundColor: "#00990040",
+                lineHeight: "150%",
               }}
             >
               {pattern}
+              <a
+                target="_blank"
+                href={`https://www.investopedia.com/search?q=${pattern
+                  .split(" ")
+                  .join("+")}`}
+                style={{
+                  backgroundColor:
+                    theme.palette.mode != "dark" ? "white" : "rgba(0,0,0,0.7)",
+                }}
+              >
+                ?
+              </a>
             </p>
           ))
         )}
@@ -112,6 +125,17 @@ export default function Pattern(props) {
               }}
             >
               {pattern}
+              <a
+                href={`https://www.investopedia.com/search?q=${pattern
+                  .split(" ")
+                  .join("+")}`}
+                style={{
+                  backgroundColor:
+                    theme.palette.mode != "dark" ? "white" : "rgba(0,0,0,0.6)",
+                }}
+              >
+                ?
+              </a>
             </p>
           ))
         )}

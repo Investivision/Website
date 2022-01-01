@@ -13,6 +13,8 @@ import GridOnRoundedIcon from "@material-ui/icons/GridOnRounded";
 import Particles from "react-tsparticles";
 import { useTheme } from "@mui/material/styles";
 import ExtView from "./ext";
+import Link from "next/link";
+import Button from "@mui/material/Button";
 
 const iconColor = "#7EA0FF !important";
 
@@ -75,7 +77,7 @@ export default function Home() {
       <div className={styles.cover}>
         <Wave
           style={{
-            height: 400,
+            height: "40%",
           }}
           className="absoluteBottom"
           fill="url(#gradient)"
@@ -96,14 +98,14 @@ export default function Home() {
         </Wave>
         <Wave
           style={{
-            height: 200,
+            height: "70%",
           }}
           className={`absoluteBottom ${styles.flipX}`}
           fill="url(#gradient)"
           paused={false}
           options={{
-            height: 40,
-            amplitude: 80,
+            height: 60,
+            amplitude: 120,
             speed: 0.1,
             points: 5,
           }}
@@ -291,36 +293,90 @@ export default function Home() {
         </div>
       </div>
       <div className={`${styles.about} ${styles.flexCenter}`}>
+        <h4>Who are we?</h4>
         <h3>
-          <span>Investivision</span> is a platform of modern consumer{" "}
-          <span>investing tools</span>.
+          {/* <img
+            src="/images/logo.svg"
+            style={{
+              width: 30,
+              backgroundColor: "rgb(255,255,255,1)",
+              padding: 3,
+              borderRadius: 8,
+              verticalAlign: "middle",
+              margin: "0 4px",
+              marginTop: -2,
+            }}
+          /> */}
+          <span>Investivision</span> is the world's sleekest platform of stock
+          investing research tools.
         </h3>
-        <h3
-          style={{
-            marginTop: 40,
-          }}
-        >
-          Our mission is to support your journey to{" "}
-          <span>well calculated trades</span> with the help of{" "}
-          <span>cutting-edge technologies</span>, <span>analysis methods</span>,
-          and <span>interfaces</span> such as
+        <h3>
+          We deliver insightful, unopinionated, data-driven{" "}
+          <span>stock evaluation metrics</span> at your fingertips. In other
+          words, your stock report-card.
         </h3>
-        <div className={styles.techContainer}>
-          {tech.map((element, i) => {
-            return (
-              <div className={styles.tech} key={i}>
-                {element.icon}
-                <p className={styles.techTitle}>{element.title}</p>
-                {/* <p className={styles.techFor}>{`for ${element.for}`}</p> */}
-              </div>
-            );
-          })}
+        <h3>
+          Backed by <span>multivariate statistics</span> and groundbreaking{" "}
+          <span>machine learning</span>
+          methods, Investivision's concrete insights stand out{" "}
+          <span>against today's speculative analysts and writers</span>.
+        </h3>
+        <h4>This is a brokerage, right?</h4>
+        <h3>
+          <span>We are not a brokerage</span>, nor do we aim to replace your
+          current trading workflow. Instead, we specialize in unique
+          quantitative market research you can{" "}
+          <span>utilize alongside your current setup</span>, including
+        </h3>
+        <div className={styles.brokers}>
+          <img src="/images/etrade.png" width={130} />
+          <img src="/images/finviz.png" width={90} />
+          <img src="/images/robinhood.png" width={140} />
+          <img src="/images/td.png" width={150} />
+          <img src="/images/tradingview.png" width={150} />
         </div>
-        <h3>While improving your existing experiences with</h3>
-        <div className={styles.brokerages}>
-          {otherServices.map((service, i) => {
-            return <img src={`/images/${service}.png`} key={i} />;
-          })}
+        <h4>Get Started</h4>
+        <h3>Explore our essential offerings</h3>
+        <div className={styles.offerings}>
+          <div>
+            <ExtensionRoundedIcon />
+            <p className={styles.offeringTitle}>Chrome Extension</p>
+            <p className={styles.offeringCaption}>
+              Our powerful by-your-side trading research copilot. Download Now.
+            </p>
+            <Link href="/extension">
+              <Button
+                color="white"
+                variant="contained"
+                sx={{
+                  color: theme.palette.primary.main + " !important",
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Get Started
+              </Button>
+            </Link>
+          </div>
+          <div>
+            <GridOnRoundedIcon />
+            <p className={styles.offeringTitle}>Insight Library</p>
+            <p className={styles.offeringCaption}>
+              The ultimate workbench for stock discovery, evaluation, and
+              comparison.
+            </p>
+            <Link href="/library">
+              <Button
+                variant="contained"
+                color="white"
+                sx={{
+                  color: theme.palette.primary.main + " !important",
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Get Started
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </HeaderAndFooter>

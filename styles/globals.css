@@ -5,6 +5,7 @@
   font-family: "Rubik", sans-serif;
   font-weight: 400;
   position: relative;
+  scrollbar-width: thin;
 }
 
 body {

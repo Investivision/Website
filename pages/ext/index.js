@@ -190,7 +190,7 @@ export default function Ext(props) {
         {
           width: "100%",
           overflowX: "hidden",
-          overflowY: "scroll",
+          // overflowY: "scroll",
           padding: "20px 10px",
           display: "flex",
           flexDirection: "column",
@@ -304,6 +304,8 @@ export default function Ext(props) {
                   global={data.global}
                   data={data[currentTimeFrame]}
                   port={port}
+                  currentTimeFrame={currentTimeFrame}
+                  symbol={args[0]}
                 />
                 {props.data ? null : (
                   <Button

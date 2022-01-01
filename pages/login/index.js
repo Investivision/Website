@@ -130,6 +130,7 @@ export default function Login() {
           label="Email"
           variant="outlined"
           value={email}
+          type="email"
           onChange={(e) => {
             setEmail(e.target.value);
           }}

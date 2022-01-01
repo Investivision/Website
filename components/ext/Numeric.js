@@ -3,6 +3,9 @@ import { alterHsl } from "tsparticles";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
+import Tooltip from "./ToolTip";
+import InfoIcon from "@material-ui/icons/Info";
+
 function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
   var angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
 
@@ -93,15 +96,27 @@ export default function Numeric(props) {
       >
         {props.value}
       </p>
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: 12,
-          marginTop: 0,
-        }}
-      >
-        {props.desc}
-      </p>
+
+      <Tooltip title={props.toolTip} arrow>
+        <p
+          style={{
+            textAlign: "center",
+            fontSize: 13,
+            marginBottom: -6,
+          }}
+        >
+          {props.desc}
+          <InfoIcon
+            style={{
+              width: 14,
+              marginLeft: 3,
+              marginTop: -2,
+              opacity: 0.3,
+              verticalAlign: "middle",
+            }}
+          />
+        </p>
+      </Tooltip>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 .cover {
   height: 100vh;
   min-height: 650px;
-  width: 100vw;
+  width: 100%;
   background: linear-gradient(to bottom right, #7dd8ff, #8f95ff);
   display: flex;
   flex-wrap: nowrap;
@@ -11,7 +11,7 @@
 }
 
 .demo {
-  width: 300px;
+  width: 292px;
   height: max(calc(100vh - 220px), 300px);
   overflow-y: scroll;
   border-radius: 14px;
@@ -109,19 +109,27 @@
 }
 
 .about {
-  padding: 100px 60px;
+  padding: 40px 40px;
   text-align: center;
+  padding-bottom: 100px;
+}
+
+.about h4 {
+  font-size: 30px;
+  margin: 40px 0 20px 0;
 }
 
 .about h3 {
-  font-size: 28px;
-  color: rgb(158, 158, 158);
+  font-size: 25px;
+  color: rgb(116, 116, 116);
   line-height: 160%;
-  margin: 40px 0;
+  margin: 10px 0;
+  font-weight: 100;
+  max-width: 1000px;
 }
 
 :global(.dark-mode) .about h3 {
-  color: rgb(105, 105, 105);
+  color: rgb(154, 164, 196);
 }
 
 .about h3 span {
@@ -132,79 +140,74 @@
   color: #779cff;
 }
 
-.techContainer {
+.brokers img {
+  filter: contrast(0) brightness(0);
+  opacity: 0.5;
+  margin: 15px;
+}
+
+:global(.dark-mode) .brokers img {
+  filter: contrast(0) brightness(10000%);
+}
+
+.brokers {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 30px;
-  margin-bottom: 50px;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  margin: 20px 0;
 }
 
-.tech {
-  padding: 16px 24px;
-  margin: 12px;
-  border-radius: 8px;
-  box-shadow: 0 0 100px 0 rgba(0, 0, 0, 0.06);
-  background-color: rgb(236, 238, 255);
+.offerings {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin: 30px 0;
 }
 
-.tech svg path {
-  color: rgb(54, 67, 180);
+@media screen and (max-width: 800px) {
+  .offerings {
+    flex-direction: column;
+  }
 }
 
-.tech svg {
-  height: 38px;
-  width: 38px;
+.offerings div {
+  flex: 1;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  padding: 30px;
+  background-color: rgb(60, 91, 182);
+  color: white;
 }
 
-:global(.dark-mode) .tech svg path {
-  color: #779cff;
+:global(.dark-mode) .offerings div {
+  /* background-color: rgb(34, 62, 144, 0.7); */
 }
 
-:global(.dark-mode) .tech {
-  background-color: #19233f;
+.offerings svg {
+  width: 30px;
+  height: 30px;
 }
 
-.techTitle {
-  font-size: 18px;
-  margin-top: 7px;
+.offeringTitle {
+  font-size: 24px;
+  margin: 10px;
 }
 
-.techFor {
-  font-size: 14px;
-  margin-top: 2px;
+.offeringCaption {
+  font-size: 16px;
   opacity: 0.5;
 }
 
-.tsparticles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-}
-
-.brokerages {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  margin-top: 22px;
-}
-
-.brokerages img {
-  height: 30px;
-  margin: 12px;
-  background-color: #ffefd1;
-  padding: 20px 30px;
-  border-radius: 8px;
-  box-sizing: content-box;
-}
-
-:global(.dark-mode) .brokerages img {
-  background-color: #a5906a;
+.offerings button {
+  margin-top: 24px;
 }
 
 @media screen and (max-width: 600px) {
@@ -215,22 +218,13 @@
     margin-bottom: -100px;
   }
   .about {
-    padding: 70px 24px;
+    padding: 30px 20px 70px 20px;
+  }
+  .about h4 {
+    font-size: 26px;
   }
   .about h3 {
     font-size: 20px;
-    margin: 20px 0;
-  }
-  .tech {
-    min-width: 180px;
-    flex: 1;
-  }
-  .techTitle {
-    font-size: 14px;
-  }
-  .tech svg {
-    height: 28px;
-    width: 28px;
   }
 }
 

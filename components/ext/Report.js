@@ -83,30 +83,37 @@ export default function Report(props) {
         <Numeric
           percentile={zToPercentile(props.data.alpha_z)}
           value={`${Math.round(props.data.alpha * 100 * 10) / 10}%`}
-          desc={"Annualized Gain"}
+          desc={"Alpha"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip="Annualized share price growth per year, exponentially"
         />
       ) : null}
       {props.data.beta ? (
         <Numeric
           percentile={1 - zToPercentile(props.data.beta_z)}
           value={`${Math.round(props.data.beta * 100 * 10) / 10}%`}
-          desc={"Movement vs. S&P"}
+          desc={"Beta"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip={`Degree of correlation between ${props.symbol} and the S&P 500`}
         />
       ) : null}
       {props.data.drawup ? (
         <Numeric
           percentile={zToPercentile(props.data.drawup_z)}
           value={`${Math.round(props.data.drawup * 100)}%`}
-          desc={"Max Bull Run"}
+          desc={"Max Profit"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip={`Maximum gain achieved between any two points over the past ${
+            props.currentTimeFrame == "3mo"
+              ? "3 months"
+              : `${props.currentTimeFrame} years`
+          }`}
         />
       ) : null}
       <h3>Risk Management</h3>
@@ -114,20 +121,22 @@ export default function Report(props) {
         <Numeric
           percentile={1 - zToPercentile(props.data.natr_z)}
           value={`${Math.round(props.data.natr * 100) / 100}`}
-          desc={"Volatility Index"}
+          desc={"True Range"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip={`Normalized distance between price highs and lows over time`}
         />
       ) : null}
       {props.data.sharpe ? (
         <Numeric
           percentile={zToPercentile(props.data.sharpe_z)}
           value={`${Math.round(props.data.sharpe * 100) / 100}`}
-          desc={"Reward / Risk"}
+          desc={"Sharpe Ratio"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip={`Reward-to-Risk coefficient. Higher values indicate more stable returns`}
         />
       ) : null}
       {props.data.drawdown ? (
@@ -136,8 +145,13 @@ export default function Report(props) {
           value={`${Math.round(props.data.drawdown * 100 * 10) / 10}%`}
           desc={"Max Loss"}
           style={{
-            margin: 10,
+            margin: 4,
           }}
+          toolTip={`Greatest loss sufferred between any two points over the past ${
+            props.currentTimeFrame == "3mo"
+              ? "3 months"
+              : `${props.currentTimeFrame} years`
+          }`}
         />
       ) : null}
       <h3>Candle Patterns</h3>
@@ -159,16 +173,22 @@ export default function Report(props) {
             value={`${Math.round(props.data.p * 10) / 10}%`}
             desc={"Predicted Gain"}
             style={{
-              margin: 10,
+              margin: 4,
             }}
+            toolTip={`Predicted total price growth ${
+              props.currentTimeFrame == "3mo"
+                ? "3 months"
+                : `${props.currentTimeFrame} years`
+            } into the future`}
           />
           <Numeric
             percentile={zToPercentile(props.data.pr_z)}
             value={`${Math.round(props.data.pr * 10) / 10}%`}
-            desc={"Prediction Range"}
+            desc={"Forecast Range"}
             style={{
-              margin: 10,
+              margin: 4,
             }}
+            toolTip={`The relative width of the predicted price gain interval`}
           />
           <RangePlot
             points={props.data.prophet}

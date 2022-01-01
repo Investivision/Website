@@ -23,6 +23,25 @@
   padding: 6px;
   border-radius: 8px;
   width: 100%;
+  line-height: 150%;
+}
+
+.container p a {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 170%;
+  vertical-align: middle;
+  opacity: 0.4;
+  font-size: 13px;
+  border-radius: 5px;
+  margin-left: 6px;
+  margin-top: -2px;
+  transition: opacity 0.16s ease;
+}
+
+.container p a:hover {
+  opacity: 1;
 }
 
 .noneDetected {
