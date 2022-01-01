@@ -3,22 +3,12 @@ import styles from "./index.module.css";
 import Wave from "react-wavify";
 import { isChrome, isEdge } from "react-device-detect";
 import { useState, useEffect } from "react";
-import MemoryRoundedIcon from "@material-ui/icons/MemoryRounded";
-import StorageRoundedIcon from "@material-ui/icons/StorageRounded";
-import AssessmentRoundedIcon from "@material-ui/icons/AssessmentRounded";
 import ExtensionRoundedIcon from "@material-ui/icons/ExtensionRounded";
-import SpeedRoundedIcon from "@material-ui/icons/SpeedRounded";
-import CompareArrowsRoundedIcon from "@material-ui/icons/CompareArrowsRounded";
 import GridOnRoundedIcon from "@material-ui/icons/GridOnRounded";
-import Particles from "react-tsparticles";
 import { useTheme } from "@mui/material/styles";
 import ExtView from "./ext";
 import Link from "next/link";
 import Button from "@mui/material/Button";
-
-const iconColor = "#7EA0FF !important";
-
-const otherServices = ["robinhood", "etrade", "td", "tradingview", "finviz"];
 
 export default function Home() {
   const theme = useTheme();
@@ -36,41 +26,6 @@ export default function Home() {
     }
     setBrowserLoaded(true);
   }, []);
-
-  const tech = [
-    {
-      title: "Machine Learning",
-      for: "extracting trends from noisy data",
-      icon: <MemoryRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Multivariate Statistics",
-      for: "drawing inference from observation",
-      icon: <AssessmentRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Distributed Data Streams",
-      for: "up-to-date metrics, avaliable 24/7",
-      icon: <StorageRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Chromium Compatability",
-      for: "by-your-side assistance",
-      icon: <ExtensionRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Technical Analysis",
-      icon: <SpeedRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Comparative Studies",
-      icon: <CompareArrowsRoundedIcon style={{ color: iconColor }} />,
-    },
-    {
-      title: "Organized Downloads",
-      icon: <GridOnRoundedIcon style={{ color: iconColor }} />,
-    },
-  ];
 
   return (
     <HeaderAndFooter overlayHeader={true}>
@@ -317,15 +272,15 @@ export default function Home() {
         </h3>
         <h3>
           Backed by <span>multivariate statistics</span> and groundbreaking{" "}
-          <span>machine learning</span>
-          methods, Investivision's concrete insights stand out{" "}
-          <span>against today's speculative analysts and writers</span>.
+          <span>machine learning</span> methods, Investivision's concrete
+          insights stand out{" "}
+          <span>against today's speculative writers and analysts</span>.
         </h3>
         <h4>This is a brokerage, right?</h4>
         <h3>
           <span>We are not a brokerage</span>, nor do we aim to replace your
           current trading workflow. Instead, we specialize in unique
-          quantitative market research you can{" "}
+          quantitative market research designed for you to{" "}
           <span>utilize alongside your current setup</span>, including
         </h3>
         <div className={styles.brokers}>
