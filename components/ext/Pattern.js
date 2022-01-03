@@ -65,6 +65,48 @@ const candleMap = {
   CDLXSIDEGAP3METHODS: "Upside/Downside Gap Three Methods",
 };
 
+const Item = function (props) {
+  return (
+    <div
+      className={`${styles.patternContainer} ${props.className || ""}`}
+      style={{
+        backgroundColor: props.background,
+        ...props.style,
+      }}
+    >
+      <p>{props.pattern}</p>
+      {!props.isNull ? (
+        <a
+          href={`https://www.investopedia.com/search?q=${props.pattern
+            .split(" ")
+            .join("+")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            backgroundColor:
+              props.theme.palette.mode != "dark"
+                ? "white"
+                : `rgba(0,0,0,${props.nullOpacity})`,
+          }}
+        >
+          ?
+        </a>
+      ) : null}
+    </div>
+  );
+};
+
+const NullItem = function (props) {
+  return (
+    <Item
+      className={styles.noneDetected}
+      pattern="None detected"
+      isNull
+      theme={props.theme}
+    />
+  );
+};
+
 export default function Pattern(props) {
   const bullish = [];
   const bearish = [];
@@ -85,58 +127,32 @@ export default function Pattern(props) {
       <div>
         <h4>Bullish</h4>
         {bullish.length == 0 ? (
-          <p className={styles.noneDetected}>None detected</p>
+          <NullItem theme={theme} />
         ) : (
           bullish.map((pattern, index) => (
-            <p
+            <Item
+              background="#00990040"
+              pattern={pattern}
               key={index}
-              style={{
-                backgroundColor: "#00990040",
-                lineHeight: "150%",
-              }}
-            >
-              {pattern}
-              <a
-                target="_blank"
-                href={`https://www.investopedia.com/search?q=${pattern
-                  .split(" ")
-                  .join("+")}`}
-                style={{
-                  backgroundColor:
-                    theme.palette.mode != "dark" ? "white" : "rgba(0,0,0,0.7)",
-                }}
-              >
-                ?
-              </a>
-            </p>
+              theme={theme}
+              nullOpacity={0.7}
+            />
           ))
         )}
       </div>
       <div>
         <h4>Bearish</h4>
         {bearish.length == 0 ? (
-          <p className={styles.noneDetected}>None detected</p>
+          <NullItem theme={theme} />
         ) : (
           bearish.map((pattern, index) => (
-            <p
+            <Item
+              background="#ff000030"
+              pattern={pattern}
               key={index}
-              style={{
-                backgroundColor: "#ff000030",
-              }}
-            >
-              {pattern}
-              <a
-                href={`https://www.investopedia.com/search?q=${pattern
-                  .split(" ")
-                  .join("+")}`}
-                style={{
-                  backgroundColor:
-                    theme.palette.mode != "dark" ? "white" : "rgba(0,0,0,0.6)",
-                }}
-              >
-                ?
-              </a>
-            </p>
+              theme={theme}
+              nullOpacity={0.6}
+            />
           ))
         )}
       </div>

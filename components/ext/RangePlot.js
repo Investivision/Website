@@ -22,8 +22,6 @@ const monthNames = [
 ];
 
 export default function RangePlot(props) {
-  const [checked, setChecked] = useState(false);
-
   const theme = useTheme();
 
   const totalLength = props.points[props.points.length - 1].days;
@@ -95,26 +93,11 @@ export default function RangePlot(props) {
 
   return (
     <div className={styles.container} style={props.style}>
-      {min / props.lastClose > 0.95 ? (
-        <div className={styles.axisScale}>
-          <ToggleButtonGroup
-            value={checked}
-            exclusive
-            onChange={(e, val) => {
-              if (val !== null) {
-                setChecked(val);
-              }
-            }}
-          >
-            <ToggleButton value={false}>Linear</ToggleButton>
-            <ToggleButton value={true}>Log</ToggleButton>
-          </ToggleButtonGroup>
-        </div>
-      ) : null}
       <p
         style={{
           fontSize: 12,
           margin: "15px 0",
+          opacity: 0.4,
         }}
       >
         80% Confidence Range
@@ -154,7 +137,7 @@ export default function RangePlot(props) {
           //   }}
 
           yScale={{
-            type: checked ? "log" : "linear",
+            type: "linear",
             base: 1.01,
             min: "auto",
             max: "auto",
@@ -218,17 +201,23 @@ export default function RangePlot(props) {
                 } '${points[0].data.x.getYear() % 100}`}</p>
                 <p className={styles.toolTipExpected}>{`$${
                   points[1].data.y
-                } or ${Math.round(
+                } or ${
+                  points[1].data.y > props.lastClose ? "+" : ""
+                }${Math.round(
                   ((points[1].data.y - props.lastClose) / props.lastClose) * 100
                 )}%`}</p>
                 <p className={styles.toolTipRange}>
                   {`$${points[2].data.y} to $${points[0].data.y}`}
                 </p>
                 <p className={styles.toolTipRange}>
-                  {`${Math.round(
+                  {`${
+                    points[2].data.y > props.lastClose ? "+" : ""
+                  }${Math.round(
                     ((points[2].data.y - props.lastClose) / props.lastClose) *
                       100
-                  )}% to ${Math.round(
+                  )}% to ${
+                    points[0].data.y > props.lastClose ? "+" : ""
+                  }${Math.round(
                     ((points[0].data.y - props.lastClose) / props.lastClose) *
                       100
                   )}%`}

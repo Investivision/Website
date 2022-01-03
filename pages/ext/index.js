@@ -103,6 +103,8 @@ const orderTimeFrames = (data) => {
   return out;
 };
 
+let curtimeframe = undefined;
+
 export default function Ext(props) {
   const [data, setData] = useState(props.data);
   const [name, setName] = useState(props.name);
@@ -157,7 +159,10 @@ export default function Ext(props) {
             setArgs(data.args);
             const frames = orderTimeFrames(formatted);
             console.log("formatted", formatted);
-            setCurrentTimeFrame(frames[0]);
+            if (curtimeframe === undefined || !frames.includes(curtimeframe)) {
+              setCurrentTimeFrame(frames[0]);
+              curtimeframe = frames[0];
+            }
             setData(formatted);
             setTimeFrames(frames);
             setLoading(false);
@@ -183,6 +188,7 @@ export default function Ext(props) {
   //   }
   //   postMessage("iframe loaded", "*");
   // });
+  console.log("currentTimeFrame", currentTimeFrame);
   return (
     <div
       className={props.className}
@@ -286,7 +292,16 @@ export default function Ext(props) {
                 }}
                 label="Time Frame"
                 onChange={(event) => {
-                  setCurrentTimeFrame(event.target.value);
+                  console.log("event", event);
+                  if (event.target.value) {
+                    setCurrentTimeFrame(event.target.value);
+                    curtimeframe = event.target.value;
+                  }
+                  console.log(
+                    "set current time frame to",
+                    event.target.value,
+                    typeof event.target.value
+                  );
                 }}
               >
                 {timeFrames.map((key) => {
@@ -329,9 +344,9 @@ export default function Ext(props) {
               </>
             ) : null}
           </div>
-        ) : (
+        ) : currentTimeFrame ? (
           <InfoScreen text="not tracking this symbol" styles={styles} />
-        )}
+        ) : null}
       </>
     </div>
   );

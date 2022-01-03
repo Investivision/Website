@@ -7,6 +7,9 @@ import Numeric from "./Numeric";
 import Pattern from "./Pattern";
 import RangePlot from "./RangePlot";
 import styles from "./report.module.css";
+import Pivots from "./Pivots";
+import ToolTip from "./ToolTip";
+import InfoIcon from "@material-ui/icons/Info";
 
 let autosaveInterval;
 
@@ -112,7 +115,9 @@ export default function Report(props) {
           toolTip={`Maximum gain achieved between any two points over the past ${
             props.currentTimeFrame == "3mo"
               ? "3 months"
-              : `${props.currentTimeFrame} years`
+              : `${props.currentTimeFrame} year${
+                  props.currentTimeFrame != "1" ? "s" : ""
+                }`
           }`}
         />
       ) : null}
@@ -150,14 +155,17 @@ export default function Report(props) {
           toolTip={`Greatest loss sufferred between any two points over the past ${
             props.currentTimeFrame == "3mo"
               ? "3 months"
-              : `${props.currentTimeFrame} years`
+              : `${props.currentTimeFrame} year${
+                  props.currentTimeFrame != "1" ? "s" : ""
+                }
+              `
           }`}
         />
       ) : null}
       <h3>Candle Patterns</h3>
-      {props.global.pattern ? (
+      {props.data.pattern ? (
         <Pattern
-          pattern={props.global.pattern}
+          pattern={props.data.pattern}
           style={{
             width: "100%",
           }}
@@ -165,7 +173,23 @@ export default function Report(props) {
       ) : (
         <UpgradeButton port={props.port} />
       )}
-      <h3>AI Forecast</h3>
+      <ToolTip
+        title={`Prediction computed from ${props.symbol}-specific AI model.`}
+        arrow
+      >
+        <h3>
+          AI Forecast
+          <InfoIcon
+            style={{
+              width: 14,
+              marginLeft: 3,
+              marginTop: -2,
+              opacity: 0.3,
+              verticalAlign: "middle",
+            }}
+          />
+        </h3>
+      </ToolTip>
       {props.data.p && props.data.pr && props.data.prophet ? (
         <>
           <Numeric
@@ -178,7 +202,10 @@ export default function Report(props) {
             toolTip={`Predicted total price growth ${
               props.currentTimeFrame == "3mo"
                 ? "3 months"
-                : `${props.currentTimeFrame} years`
+                : `${props.currentTimeFrame} year${
+                    props.currentTimeFrame != "1" ? "s" : ""
+                  }
+                `
             } into the future`}
           />
           <Numeric
@@ -195,6 +222,32 @@ export default function Report(props) {
             lastClose={props.global.lastclose}
           />
         </>
+      ) : (
+        <UpgradeButton port={props.port} />
+      )}
+      <ToolTip
+        title="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
+        arrow
+      >
+        <h3>
+          Pivot Points
+          <InfoIcon
+            style={{
+              width: 14,
+              marginLeft: 3,
+              marginTop: -2,
+              opacity: 0.3,
+              verticalAlign: "middle",
+            }}
+          />
+        </h3>
+      </ToolTip>
+      {props.data.sup !== undefined ? (
+        <Pivots
+          sup={props.data.sup}
+          res={props.data.res}
+          lastClose={props.global.lastclose}
+        />
       ) : (
         <UpgradeButton port={props.port} />
       )}
