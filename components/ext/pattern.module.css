@@ -20,37 +20,36 @@
 .patternContainer {
   font-size: 14px;
   margin-top: 6px;
-  padding: 6px;
+  padding: 8px;
   border-radius: 8px;
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 .patternContainer p {
   text-align: center;
-  margin: 0 5px;
   word-wrap: break-word;
-  max-width: calc(100% - 24px);
+  width: calc(100% - 20px);
 }
 
 .patternContainer a {
   text-align: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
-  padding-top: 2px;
+  width: 14px;
+  border-radius: 3px;
+  padding-bottom: 0px;
+  opacity: 0.4;
   transition: opacity 0.16s ease;
 }
-
-.container p a:hover {
+.patternContainer a:hover {
   opacity: 1;
 }
 
 .noneDetected {
   opacity: 0.5;
   background-color: #ccc;
+  justify-content: center;
 }
 
 :global(.dark-mode) .noneDetected {

@@ -87,7 +87,7 @@ export default function Pivots(props) {
               Close
             </span>
           </div>
-          <p>{"$ " + Math.round(props.lastClose * 100) / 100}</p>
+          <p>{"$" + Math.round(props.lastClose * 100) / 100}</p>
           <div className={styles.line} />
         </div>
       </div>

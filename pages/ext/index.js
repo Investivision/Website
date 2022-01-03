@@ -117,6 +117,7 @@ export default function Ext(props) {
   const [currentTimeFrame, setCurrentTimeFrame] = useState(
     props.currentTimeFrame
   );
+  const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
 
   useEffect(() => {
     console.log("props", props);
@@ -149,25 +150,28 @@ export default function Ext(props) {
             console.log("removing name", data);
             setName(undefined);
           }
-          if (
-            data.insights &&
-            Object.keys(data.insights).length > 0 &&
-            data.args.length == 1
-          ) {
-            // if insights exist for this symbol
-            const formatted = processSymbolData(data.insights[data.args[0]]);
-            setArgs(data.args);
-            const frames = orderTimeFrames(formatted);
-            console.log("formatted", formatted);
-            if (curtimeframe === undefined || !frames.includes(curtimeframe)) {
-              setCurrentTimeFrame(frames[0]);
-              curtimeframe = frames[0];
+          if (data.insights && data.args.length == 1) {
+            if (Object.keys(data.insights).length > 0) {
+              // if insights exist for this symbol
+              const formatted = processSymbolData(data.insights[data.args[0]]);
+              setArgs(data.args);
+              const frames = orderTimeFrames(formatted);
+              console.log("formatted", JSON.stringify(formatted));
+              if (
+                curtimeframe === undefined ||
+                !frames.includes(curtimeframe)
+              ) {
+                setCurrentTimeFrame(frames[0]);
+                curtimeframe = frames[0];
+              }
+              setData(formatted);
+              setTimeFrames(frames);
             }
-            setData(formatted);
-            setTimeFrames(frames);
+
             setLoading(false);
             setForbidden(false);
           }
+          setHaveMadeRequest(true);
         }
       });
       port.onDisconnect.addListener(function () {
@@ -254,8 +258,8 @@ export default function Ext(props) {
               <ThemeToggle
                 style={{
                   position: "absolute",
-                  top: 0,
-                  right: 0,
+                  top: -20,
+                  right: -10,
                 }}
               />
             )}
@@ -283,6 +287,7 @@ export default function Ext(props) {
               </Button>
             </div>
             <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
+            <h3 className={styles.company}>{data.global.name}</h3>
             <FormControl>
               <InputLabel>Time Frame</InputLabel>
               <Select
@@ -344,7 +349,7 @@ export default function Ext(props) {
               </>
             ) : null}
           </div>
-        ) : currentTimeFrame ? (
+        ) : haveMadeRequest ? (
           <InfoScreen text="not tracking this symbol" styles={styles} />
         ) : null}
       </>

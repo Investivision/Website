@@ -1,10 +1,11 @@
 .container {
   width: 100%;
   height: 160px;
-  --topColor: rgb(151, 35, 35);
-  --middleColor: rgba(0, 0, 0, 0.4);
-  --bottomColor: rgb(0, 128, 17);
+  --topColor: hsl(0, 100%, 75%);
+  --middleColor: rgba(255, 255, 255, 0.664);
+  --bottomColor: hsl(128, 84%, 65%);
   --gradientStart: #ff000060;
+  --gradientMiddle: rgb(233, 233, 233);
   --gradientEnd: #00ff0060;
   /* overflow: hidden; */
   padding: -40px 0;
@@ -12,18 +13,19 @@
   background: linear-gradient(
     to bottom,
     var(--gradientStart),
-    rgba(255, 255, 255, 0.1),
+    var(--gradientMiddle),
     var(--gradientEnd)
   );
   margin: 14px 0;
 }
 
 :global(.dark-mode) .container {
-  --topColor: hsl(0, 100%, 64%);
-  --middleColor: rgba(255, 255, 255, 0.3);
-  --bottomColor: hsl(128, 80%, 64%);
-  --gradientStart: #ff000050;
-  --gradientEnd: #00ff0050;
+  --topColor: hsl(0, 100%, 21%);
+  --middleColor: rgba(0, 0, 0, 0.582);
+  --bottomColor: hsl(128, 100%, 22%);
+  --gradientStart: #ff000040;
+  --gradientMiddle: rgb(36, 36, 36);
+  --gradientEnd: #15f81540;
 }
 
 .noRes {
@@ -34,6 +36,15 @@
 .noSup {
   --gradientEnd: transparent !important;
   --bottomColor: transparent !important;
+}
+
+.noRes,
+.noSup {
+  background: linear-gradient(
+    to bottom,
+    var(--gradientStart),
+    var(--gradientEnd)
+  ) !important;
 }
 
 .level {
@@ -56,24 +67,21 @@
   display: block;
   font-size: 12px;
   line-height: 100%;
-  opacity: 1;
-
+  opacity: 0.4;
   transform: translateY(-14px);
-  padding-left: 4px;
-  /* color: black; */
+  padding-left: 3px;
 }
 
 .level p {
   padding: 2px 6px;
   font-size: 16px;
   border-radius: 6px;
-  color: white;
+  /* color: white; */
 }
-
+/* 
 :global(.dark-mode) .level p {
-  /* background-color: rgba(0, 0, 0, 0.3); */
   color: black;
-}
+} */
 
 .level:nth-of-type(1) p {
   background-color: var(--topColor);
@@ -85,11 +93,10 @@
 
 .close .level p {
   background-color: var(--middleColor) !important;
-  backdrop-filter: blur(40px) saturate(500%);
+  backdrop-filter: blur(40px) saturate(200%);
 }
 
 :global(.dark-mode) .close .level p {
-  backdrop-filter: blur(40px) saturate(800%);
 }
 
 .baseLines {

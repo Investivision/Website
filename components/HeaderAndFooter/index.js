@@ -132,7 +132,14 @@ export default function HeaderAndFooter(props) {
         <p className={styles.disclaimer}>
           Disclaimer: All investment strategies and investments involve risk of
           loss. Nothing contained in this platform or its services should be
-          construed as investment advice.
+          construed as investment advice. The research reports and the
+          information derived from such reports that are included on this
+          website are provided for information purposes only. This content is
+          not a solicitation of any offer to buy or sell any security or other
+          financial instrument or to participate in any trading strategy. This
+          site does not make any representation or guarantee relating to the
+          accuracy, timeliness, or completeness of information presented or the
+          data on which they are based.
         </p>
       </footer>
     </div>

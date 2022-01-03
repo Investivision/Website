@@ -84,9 +84,7 @@ const Item = function (props) {
           rel="noopener noreferrer"
           style={{
             backgroundColor:
-              props.theme.palette.mode != "dark"
-                ? "white"
-                : `rgba(0,0,0,${props.nullOpacity})`,
+              props.theme.palette.mode != "dark" ? "white" : "black",
           }}
         >
           ?
@@ -135,7 +133,6 @@ export default function Pattern(props) {
               pattern={pattern}
               key={index}
               theme={theme}
-              nullOpacity={0.7}
             />
           ))
         )}
@@ -151,7 +148,6 @@ export default function Pattern(props) {
               pattern={pattern}
               key={index}
               theme={theme}
-              nullOpacity={0.6}
             />
           ))
         )}
