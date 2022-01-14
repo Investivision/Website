@@ -35,16 +35,15 @@ const processSymbolData = (data) => {
       }
       continue;
     }
-    if (timeframe == "z") {
-      out.global[feature + "_z"] = value;
-      continue;
-    }
+    // if (timeframe == "z") {
+    //   out.global[feature + "_z"] = value;
+    //   continue;
+    // }
     if (!(timeframe in out)) {
       out[timeframe] = {};
     }
-    const newKey = feature + (z ? "_z" : "");
 
-    out[timeframe][newKey] = value;
+    out[timeframe][feature] = value;
   }
   prophet.sort((a, b) => {
     return a.days - b.days;
@@ -167,7 +166,6 @@ export default function Ext(props) {
               setData(formatted);
               setTimeFrames(frames);
             }
-
             setLoading(false);
             setForbidden(false);
           }
@@ -199,7 +197,7 @@ export default function Ext(props) {
       style={Object.assign(
         {
           width: "100%",
-          overflowX: "hidden",
+          overflow: "hidden",
           // overflowY: "scroll",
           padding: "20px 10px",
           display: "flex",

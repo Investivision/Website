@@ -1,0 +1,11 @@
+.icon {
+  transition: opacity 0.1s ease;
+  display: inline-block;
+  cursor: pointer;
+  vertical-align: middle;
+  padding: 4px 0 4px 4px;
+}
+
+.icon:hover {
+  opacity: 0.3 !important;
+}

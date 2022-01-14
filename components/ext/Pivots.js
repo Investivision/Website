@@ -4,6 +4,14 @@ import { absoluteAngleDegrees } from "@nivo/core";
 
 export default function Pivots(props) {
   const theme = useTheme();
+  let res;
+  let sup;
+  if (props.res) {
+    res = (props.res + 1) * props.lastClose;
+  }
+  if (props.sup) {
+    sup = (props.sup + 1) * props.lastClose;
+  }
 
   return (
     <div
@@ -32,14 +40,9 @@ export default function Pivots(props) {
         {props.res ? (
           <p>
             {"$" +
-              (props.res >= 1000
-                ? Math.round(props.res)
-                : Math.round(props.res * 100) / 100) +
+              (res >= 1000 ? Math.round(res) : Math.round(res * 100) / 100) +
               " or +" +
-              Math.round(
-                ((props.res - props.lastClose) / props.lastClose) * 100 * 10
-              ) /
-                10 +
+              Math.round(props.res * 100 * 10) / 10 +
               "%"}
           </p>
         ) : null}
@@ -66,18 +69,14 @@ export default function Pivots(props) {
               ? 0
               : !props.sup
               ? "100%"
-              : `${
-                  ((props.res - props.lastClose) / (props.res - props.sup)) *
-                  100
-                }%`,
+              : `${((res - props.lastClose) / (res - sup)) * 100}%`,
             transform: "translateY(-50%)",
           }}
         >
           <div className={styles.line}>
             <span
               style={
-                !props.res ||
-                (props.res - props.lastClose) / (props.res - props.sup) < 0.1
+                !props.res || (res - props.lastClose) / (res - sup) < 0.1
                   ? {
                       transform: "translateY(5px)",
                     }
@@ -121,14 +120,9 @@ export default function Pivots(props) {
         {props.sup ? (
           <p>
             {"$" +
-              (props.sup >= 1000
-                ? Math.round(props.sup)
-                : Math.round(props.sup * 100) / 100) +
+              (sup >= 1000 ? Math.round(sup) : Math.round(sup * 100) / 100) +
               " or " +
-              Math.round(
-                ((props.sup - props.lastClose) / props.lastClose) * 100 * 10
-              ) /
-                10 +
+              Math.round(props.sup * 100 * 10) / 10 +
               "%"}
           </p>
         ) : null}

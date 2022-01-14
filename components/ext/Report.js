@@ -13,43 +13,6 @@ import InfoIcon from "@material-ui/icons/Info";
 
 let autosaveInterval;
 
-function zToPercentile(z) {
-  // z == number of standard deviations from the mean
-
-  // if z is greater than 6.5 standard deviations from the mean the
-  // number of significant digits will be outside of a reasonable range
-
-  if (z < -6.5) {
-    return 0.0;
-  }
-
-  if (z > 6.5) {
-    return 1.0;
-  }
-
-  var factK = 1;
-  var sum = 0;
-  var term = 1;
-  var k = 0;
-  var loopStop = Math.exp(-23);
-
-  while (Math.abs(term) > loopStop) {
-    term =
-      (((0.3989422804 * Math.pow(-1, k) * Math.pow(z, k)) /
-        (2 * k + 1) /
-        Math.pow(2, k)) *
-        Math.pow(z, k + 1)) /
-      factK;
-    sum += term;
-    k++;
-    factK *= k;
-  }
-
-  sum += 0.5;
-
-  return sum;
-}
-
 function UpgradeButton(props) {
   return (
     <Button
@@ -84,7 +47,7 @@ export default function Report(props) {
       <h3>Growth</h3>
       {props.data.alpha ? (
         <Numeric
-          percentile={zToPercentile(props.data.alpha_z)}
+          percentile={props.data["alpha%"]}
           value={`${Math.round(props.data.alpha * 100 * 10) / 10}%`}
           desc={"Alpha"}
           style={{
@@ -95,7 +58,7 @@ export default function Report(props) {
       ) : null}
       {props.data.beta ? (
         <Numeric
-          percentile={1 - zToPercentile(props.data.beta_z)}
+          percentile={1 - props.data["beta%"]}
           value={`${Math.round(props.data.beta * 100 * 10) / 10}%`}
           desc={"Beta"}
           style={{
@@ -106,7 +69,7 @@ export default function Report(props) {
       ) : null}
       {props.data.drawup ? (
         <Numeric
-          percentile={zToPercentile(props.data.drawup_z)}
+          percentile={props.data["drawup%"]}
           value={`${Math.round(props.data.drawup * 100)}%`}
           desc={"Max Profit"}
           style={{
@@ -124,7 +87,7 @@ export default function Report(props) {
       <h3>Risk Management</h3>
       {props.data.natr ? (
         <Numeric
-          percentile={1 - zToPercentile(props.data.natr_z)}
+          percentile={1 - props.data["natr%"]}
           value={`${Math.round(props.data.natr * 100) / 100}`}
           desc={"True Range"}
           style={{
@@ -135,7 +98,7 @@ export default function Report(props) {
       ) : null}
       {props.data.sharpe ? (
         <Numeric
-          percentile={zToPercentile(props.data.sharpe_z)}
+          percentile={props.data["sharpe%"]}
           value={`${Math.round(props.data.sharpe * 100) / 100}`}
           desc={"Sharpe Ratio"}
           style={{
@@ -146,7 +109,7 @@ export default function Report(props) {
       ) : null}
       {props.data.drawdown ? (
         <Numeric
-          percentile={zToPercentile(props.data.drawdown_z)}
+          percentile={props.data["drawdown%"]}
           value={`${Math.round(props.data.drawdown * 100 * 10) / 10}%`}
           desc={"Max Loss"}
           style={{
@@ -193,7 +156,7 @@ export default function Report(props) {
       {props.data.p && props.data.pr && props.data.prophet ? (
         <>
           <Numeric
-            percentile={zToPercentile(props.data.p_z)}
+            percentile={props.data["p%"]}
             value={`${Math.round(props.data.p * 10) / 10}%`}
             desc={"Predicted Gain"}
             style={{
@@ -209,7 +172,7 @@ export default function Report(props) {
             } into the future`}
           />
           <Numeric
-            percentile={zToPercentile(props.data.pr_z)}
+            percentile={props.data["pr%"]}
             value={`${Math.round(props.data.pr * 10) / 10}%`}
             desc={"Forecast Range"}
             style={{

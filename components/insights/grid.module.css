@@ -1,0 +1,60 @@
+.wrapper {
+  /* width: 100%;
+  overflow-x: scroll;
+  margin-left: 5em;
+  overflow-y: visible;
+  padding-bottom: 1px; */
+}
+
+.table {
+}
+
+.table tr {
+  /* height: 20px; */
+}
+
+.table td,
+.table th {
+  padding: 6px 6px;
+  white-space: nowrap !important;
+}
+
+.table td {
+  border: 0.5px solid rgba(0, 0, 0, 0.4);
+  /* opacity: 0.5; */
+}
+
+.table th {
+  padding-bottom: 3px;
+}
+
+.table thead tr {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.table td:first-child {
+  background-color: rgba(0, 0, 0, 1);
+}
+
+.table tbody {
+  border-collapse: separate;
+}
+
+.table tbody td:first-child,
+.table thead th:first-child {
+  /* width: 100px; */
+  /* display: block; */
+  position: absolute;
+  width: 5em;
+  left: 0;
+  top: auto;
+  border-right: 0px none black;
+  border-top-width: 3px;
+  /*only relevant for first row*/
+  margin-top: -3px;
+  /*compensate for top border*/
+}
+
+.table tr:nth-of-type(2n) {
+  /* background-color: rgba(0, 0, 0, 0.3); */
+}

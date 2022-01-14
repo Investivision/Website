@@ -1,0 +1,63 @@
+.row {
+  display: flex;
+  gap: 10px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.02);
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 10px;
+  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+:global(.dark-mode) .row {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.row * {
+  font-size: 13px !important;
+  text-align: center;
+}
+
+.row :global(.MuiInput-root) {
+  padding-right: 10px !important;
+}
+
+.row :global(.MuiSvgIcon-root) {
+  font-size: 17px !important;
+}
+
+/* .row :global(.MuiAutocomplete-root) {
+  width: auto !important;
+} */
+
+.row label {
+  opacity: 0.4 !important;
+}
+
+.row :global(.MuiInputLabel-shrink) {
+  font-size: 15px !important; /* this gets scaled down i think */
+}
+
+.row :global(.MuiAutocomplete-endAdornment) {
+  opacity: 0.4 !important;
+}
+
+.row :global(.MuiInput-underline):before {
+  opacity: 0.4 !important;
+}
+
+.row :global(.MuiInput-underline):after {
+  opacity: 0.4 !important;
+}
+
+.deleteIcon {
+  width: 20;
+  height: 30;
+  opacity: 0.5;
+  transition: opacity 0.17s ease !important;
+  cursor: pointer;
+}
+
+.deleteIcon:hover {
+  opacity: 1;
+}

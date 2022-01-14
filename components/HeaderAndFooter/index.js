@@ -62,8 +62,8 @@ export default function HeaderAndFooter(props) {
           <h1>Investivision</h1>
         </a>
         <div className={styles.nav}>
-          <Link href="/">Insights</Link>
-          <Link href="/">Extension</Link>
+          <Link href="/insights">Insights</Link>
+          <Link href="/extension">Extension</Link>
           <Link href="/pricing">Pricing</Link>
           <Link href="/account">Account</Link>
           <ThemeToggle />
