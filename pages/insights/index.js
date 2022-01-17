@@ -57,6 +57,20 @@ const commonConfigurations = [
 
 let selectedColsSet = new Set();
 
+const getColValuesForSort = (cols) => {
+  const out = {};
+  cols.forEach((col) => {
+    if (col.includes("patterns")) {
+      out[col] = (val) => {
+        return val.length;
+      };
+      return;
+    }
+    out[col] = (val) => val;
+  });
+  return out;
+};
+
 export default function Insights() {
   const [downloading, setDownloading] = useState(false);
 
@@ -247,6 +261,48 @@ export default function Insights() {
     });
   }
 
+  const valuesForSort = useMemo(() => {
+    if (!sortedCols) {
+      return {};
+    }
+    return getColValuesForSort(sortedCols);
+  }, [sortedCols]);
+
+  const rowsForGrid = useMemo(() => {
+    if (!rows) {
+      return undefined;
+    }
+    console.log(
+      "values for sort dict",
+      valuesForSort,
+      sortAttr,
+      valuesForSort[sortAttr]
+    );
+    return rows.sort((a, b) => {
+      a = a[sortAttr];
+      b = b[sortAttr];
+      if (valuesForSort[sortAttr]) {
+        a = valuesForSort[sortAttr](a);
+        b = valuesForSort[sortAttr](b);
+      }
+      // console.log("values for sort dict a b", a, b);
+      if (!a && !b) {
+        return 0;
+      }
+      if (!a) {
+        return 1;
+      }
+      if (!b) {
+        return -1;
+      }
+      let res = a > b ? 1 : a < b ? -1 : 0;
+      if (sortDir == "asc") {
+        res *= -1;
+      }
+      return res;
+    });
+  }, [rows, sortAttr, sortDir, valuesForSort]);
+
   return (
     <HeaderAndFooter
       bodyClassName={styles.body}
@@ -310,7 +366,7 @@ export default function Insights() {
               loading={downloading}
               onClick={async () => {
                 setDownloading(true);
-                const res = await fetch("/raw.xlsx");
+                const res = await fetch("/all.xlsx");
                 let start = new Date();
                 console.log("res", res);
                 var workbook = XLSX.read(
@@ -364,6 +420,9 @@ export default function Insights() {
                 setRows(myRows);
                 console.log("set rows timer", new Date() - start);
                 setDownloading(false);
+                window.onbeforeunload = function () {
+                  return "test";
+                };
               }}
               disabled={rows !== undefined}
             >
@@ -495,24 +554,8 @@ export default function Insights() {
                 </div>
                 <Grid
                   cols={selectedCols}
-                  rows={rows.sort((a, b) => {
-                    a = a[sortAttr];
-                    b = b[sortAttr];
-                    if (!a && !b) {
-                      return 0;
-                    }
-                    if (!a) {
-                      return 1;
-                    }
-                    if (!b) {
-                      return -1;
-                    }
-                    let res = a > b ? 1 : a < b ? -1 : 0;
-                    if (sortDir == "asc") {
-                      res *= -1;
-                    }
-                    return res;
-                  })}
+                  allCols={sortedCols}
+                  rows={rowsForGrid}
                   sortAttr={sortAttr}
                   sortDir={sortDir}
                   onChange={(params) => {
