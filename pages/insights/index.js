@@ -278,7 +278,7 @@ export default function Insights() {
       sortAttr,
       valuesForSort[sortAttr]
     );
-    return rows.sort((a, b) => {
+    const sorted = rows.sort((a, b) => {
       a = a[sortAttr];
       b = b[sortAttr];
       if (valuesForSort[sortAttr]) {
@@ -301,6 +301,7 @@ export default function Insights() {
       }
       return res;
     });
+    return sorted;
   }, [rows, sortAttr, sortDir, valuesForSort]);
 
   return (
@@ -517,8 +518,8 @@ export default function Insights() {
 
               <div
                 style={{
-                  height: "calc(100vh - 100px)",
-                  minHeight: 500,
+                  maxHeight: "calc(100vh - 100px)",
+                  // minHeight: 500,
                   width: "100%",
                   // overflow: "scroll",
                 }}

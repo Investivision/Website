@@ -3,7 +3,11 @@ import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
 
 const toPercentage = (value) => {
-  return Math.round(value * 100 * 10) / 10 + "%";
+  const val = Math.round(value * 100 * 10) / 10;
+  if (val >= 0) {
+    return "+" + val + "%";
+  }
+  return val + "%";
 };
 
 const roundTo2Decimals = (value) => {
@@ -96,7 +100,7 @@ export default function Grid(props) {
   console.log("colFormatters", colFormatters);
 
   const rowComponents = useMemo(() => {
-    return props.rows.slice(0, 100).map((row) => {
+    return props.rows.slice(0, 20).map((row) => {
       const cells = [];
       for (const col of props.cols) {
         const val = row[col];
