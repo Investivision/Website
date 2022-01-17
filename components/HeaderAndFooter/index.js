@@ -27,7 +27,7 @@ export default function HeaderAndFooter(props) {
   }`;
 
   return (
-    <div className={styles.page}>
+    <div {...props} className={styles.page}>
       <header
         className={styles.header}
         style={{

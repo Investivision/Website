@@ -14,6 +14,11 @@ const noop = (value) => {
   return value;
 };
 
+const controlMap = {
+  filter: "Custom Filters",
+  columns: "Show/Hide Columns",
+};
+
 // const formatCellValue = (value, col) => {
 //   col = col.toLowerCase();
 //   if (col.includes("%ile") || col.includes("")) {
@@ -52,8 +57,13 @@ export default function Grid(props) {
   }, [props.cols]);
   console.log("colFormatters", colFormatters);
   return (
-    <div className={styles.wrapper}>
-      <table className={styles.table} cellSpacing={0}>
+    <div
+      className={styles.div}
+      style={{
+        overflow: props.controlOpen ? "hidden" : "scroll",
+      }}
+    >
+      <table>
         <thead>
           <tr>
             {props.cols.map((col) => {
@@ -97,6 +107,21 @@ export default function Grid(props) {
           })}
         </tbody>
       </table>
+      <div
+        className={styles.overlay}
+        style={{
+          opacity: props.controlOpen ? 1 : 0,
+          pointerEvents: props.controlOpen ? "all" : "none",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        <div>
+          <p>{controlMap[props.controlOpen]}</p>
+          {props.children}
+        </div>
+      </div>
     </div>
   );
 }

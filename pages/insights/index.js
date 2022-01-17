@@ -1,6 +1,6 @@
 import HeaderAndFooter from "../../components/HeaderAndFooter";
 import styles from "./index.module.css";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
 import { useTheme } from "@mui/material/styles";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, formatErrorCode } from "../../firebase";
@@ -16,6 +16,8 @@ import Checkbox from "@mui/material/Checkbox";
 // import { WrapperVariantContext } from "@mui/lab/internal/pickers/wrappers/WrapperVariantContext";
 import { DataGrid } from "@mui/x-data-grid";
 import Grid from "../../components/insights/Grid";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 const sortByBearishCandles = (a, b) => {
   return 0;
@@ -53,7 +55,7 @@ const commonConfigurations = [
   },
 ];
 
-let outsideRows;
+let selectedColsSet = new Set();
 
 export default function Insights() {
   const [downloading, setDownloading] = useState(false);
@@ -74,6 +76,15 @@ export default function Insights() {
   const [rows, setRows] = useState(undefined);
   const [cols, setCols] = useState(undefined);
   const [sortedCols, setSortedCols] = useState(undefined);
+
+  const [controlOpen, setControlOpen] = useState(undefined);
+
+  const [toggledCols, setToggledCols] = useState(new Set(["All"]));
+  const [toggledFrames, setToggledFrames] = useState(new Set(["All"]));
+
+  const [showPercentiles, setShowPercentiles] = useState(false);
+
+  const [selectedCols, setSelectedCols] = useState([]);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -141,10 +152,108 @@ export default function Insights() {
     );
   }
 
+  const [colTypes, timeFrames] = useMemo(() => {
+    if (!sortedCols) {
+      return [undefined, undefined];
+    }
+    let types = [];
+    let frames = [];
+    const visitedColTypes = new Set();
+    const visitedTimeFrames = new Set();
+    for (const col of sortedCols) {
+      let split = col.split(" - ");
+      if (split.length == 1) {
+        split = col.split(" for ");
+      }
+      const type = split[0];
+      const frame = split[1];
+      if (
+        type != "Symbol" &&
+        !visitedColTypes.has(type) &&
+        !type.includes("%ile")
+      ) {
+        types.push(type);
+        visitedColTypes.add(type);
+      }
+      if (frame && !visitedTimeFrames.has(frame)) {
+        frames.push(frame);
+        visitedTimeFrames.add(frame);
+      }
+    }
+    console.log("timeFrames", frames);
+    frames = frames
+      .map((frame) => {
+        console.log("timeFrame", frame);
+        return frame.toLowerCase().replace("yr", "00yr");
+      })
+      .sort((a, b) => {
+        a = parseInt(a);
+        b = parseInt(b);
+        return Math.sign(b - a);
+      })
+      .map((frame) => {
+        return frame.replace("00yr", "yr");
+      });
+
+    if (toggledCols.has("All")) {
+      setToggledCols(new Set(types.filter((type) => !type.includes("%ile")))); //.filter((type) => !type.includes("(%ile)"))
+    }
+    if (toggledFrames.has("All")) {
+      setToggledFrames(new Set(frames));
+    }
+    return [types, frames];
+  }, [sortedCols]);
+
+  const handleButtonToggle = (e, original, set, setter) => {
+    if (e.target.value == "All") {
+      return setter(new Set(original));
+    }
+    if (e.target.value == "None") {
+      return setter(new Set());
+    }
+    if (set.has(e.target.value)) {
+      set.delete(e.target.value);
+    } else {
+      set.add(e.target.value);
+    }
+    console.log("new set", set, setter);
+    setter(new Set(set));
+  };
+
   console.log("sortedCols", sortedCols);
 
+  let selectableCols;
+  if (sortedCols) {
+    selectableCols = sortedCols.filter((col) => {
+      console.log("toggled items", toggledCols, toggledFrames);
+      let split = col.split(" - ");
+      if (split.length == 1) {
+        split = col.split(" for ");
+      }
+      if (split.length == 2 && !toggledFrames.has(split[1])) {
+        console.log(
+          "filtering col on first condition",
+          col,
+          split[1],
+          Array.from(toggledFrames)
+        );
+        return false;
+      }
+      console.log("toggledCols", toggledCols, col, split[0]);
+      if (showPercentiles) {
+        split[0] = split[0].replace(" (%ile)", "");
+      }
+      return toggledCols.has(split[0]);
+    });
+  }
+
   return (
-    <HeaderAndFooter bodyClassName={styles.body}>
+    <HeaderAndFooter
+      bodyClassName={styles.body}
+      onClick={() => {
+        setControlOpen(false);
+      }}
+    >
       {!userLoaded ? (
         <>
           <Skeleton
@@ -201,7 +310,7 @@ export default function Insights() {
               loading={downloading}
               onClick={async () => {
                 setDownloading(true);
-                const res = await fetch("/all.xlsx");
+                const res = await fetch("/raw.xlsx");
                 let start = new Date();
                 console.log("res", res);
                 var workbook = XLSX.read(
@@ -220,8 +329,16 @@ export default function Insights() {
                 console.log("workbook to json timer", new Date() - start);
                 start = new Date();
                 console.log("xslx data", data);
-                setCols(new Set(data[0]));
-                setSortedCols(data[0]); //remove sort for now .sort()
+                const set = new Set(data[0]);
+                setCols(set);
+                set.delete("Symbol");
+                const sorted = ["Symbol", ...Array.from(set).sort()];
+                const withoutPercentiles = sorted.filter(
+                  (col) => !col.includes("(%ile)")
+                );
+                selectedColsSet = new Set(withoutPercentiles);
+                setSelectedCols(withoutPercentiles);
+                setSortedCols(sorted);
                 console.log(
                   "set cols and sorted cols timer",
                   new Date() - start
@@ -235,9 +352,6 @@ export default function Insights() {
                   return obj;
                 });
                 console.log("transform rows timer", new Date() - start);
-                start = new Date();
-                outsideRows = myRows;
-                console.log("set outsideRows timer", new Date() - start);
                 start = new Date();
                 // let rows = [];
                 // for (const row of data.slice(1)) {
@@ -341,112 +455,7 @@ export default function Insights() {
                   );
                 })}
               </div>
-              <h3>Advanced</h3>
-              <div className={styles.advanced}>
-                <div className={styles.controlSection}>
-                  <h4>Columns</h4>
-                  <div className={styles.buttonGroup}>
-                    <div>
-                      <Button size="small">Select All</Button>
-                      <Button size="small">Uncheck All</Button>
-                    </div>
-                    <div>
-                      <Button size="small">Select All Percentiles</Button>
-                      <Button size="small">Uncheck All Percentiles</Button>
-                    </div>
-                    <div>
-                      <Button size="small">Select All 10yr</Button>
-                      <Button size="small">Select All 5yr</Button>
-                      <Button size="small">Select All 1yr</Button>
-                      <Button size="small">Select All 3mo</Button>
-                    </div>
-                  </div>
-                  <FormGroup className={styles.colsGroup}>
-                    {Array.from(cols)
-                      .sort()
-                      .map((col, i) => {
-                        return (
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                defaultChecked
-                                color="primary"
-                                sx={{
-                                  "& .MuiSvgIcon-root": {
-                                    fontSize: 18,
-                                  },
-                                }}
-                              />
-                            }
-                            label={col}
-                            key={i}
-                          />
-                        );
-                      })}
-                  </FormGroup>
-                </div>
-                <div className={styles.controlSection}>
-                  <h4>Filters</h4>
-                  {filters.map((filter, i) => {
-                    return (
-                      <Filter
-                        cols={cols}
-                        onDelete={() => {
-                          setFilters(
-                            filters.slice(0, i).concat(filters.slice(i + 1))
-                          );
-                        }}
-                        onChange={(changes) => {
-                          setFilters(
-                            filters.map((filter, j) =>
-                              j == i ? Object.assign(filter, changes) : filter
-                            )
-                          );
-                        }}
-                        {...filter}
-                      />
-                    );
-                  })}
-                  <Button
-                    color="primary"
-                    variant="outlined"
-                    size="small"
-                    sx={
-                      {
-                        // padding: 0,
-                      }
-                    }
-                    onClick={() => {
-                      setFilters([
-                        ...filters,
-                        {
-                          feature: "",
-                          relation: "",
-                          value: "",
-                        },
-                      ]);
-                    }}
-                  >
-                    + new
-                  </Button>
-                </div>
-                {/* <div className={styles.controlSection}>
-                  <h4>Sorting</h4>
-                  <Sort
-                    cols={sortedCols}
-                    dir={sortDir}
-                    attr={sortAttr}
-                    onChange={(changes) => {
-                      if (changes.attr) {
-                        setSortAttr(changes.attr);
-                      }
-                      if (changes.dir) {
-                        setSortDir(changes.dir);
-                      }
-                    }}
-                  />
-                </div> */}
-              </div>
+
               <div
                 style={{
                   height: "calc(100vh - 100px)",
@@ -455,8 +464,37 @@ export default function Insights() {
                   // overflow: "scroll",
                 }}
               >
+                <div className={styles.gridActions}>
+                  <Button
+                    size="small"
+                    onClick={(e) => {
+                      const name = "filter";
+                      setControlOpen(controlOpen == name ? false : name);
+                      e.stopPropagation();
+                    }}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Filter
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={(e) => {
+                      const name = "columns";
+                      setControlOpen(controlOpen == name ? false : name);
+                      e.stopPropagation();
+                    }}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Columns
+                  </Button>
+                  <Button size="small" variant="outlined" color="success">
+                    Export
+                  </Button>
+                </div>
                 <Grid
-                  cols={sortedCols}
+                  cols={selectedCols}
                   rows={rows.sort((a, b) => {
                     a = a[sortAttr];
                     b = b[sortAttr];
@@ -483,7 +521,256 @@ export default function Insights() {
                     setSortDir(dir);
                     setSortAttr(attr);
                   }}
-                />
+                  controlOpen={controlOpen}
+                >
+                  {controlOpen == "filter" ? (
+                    <>
+                      {filters.map((filter, i) => {
+                        return (
+                          <Filter
+                            cols={cols}
+                            showDelete={filters.length > 1}
+                            onDelete={() => {
+                              setFilters(
+                                filters.slice(0, i).concat(filters.slice(i + 1))
+                              );
+                            }}
+                            onChange={(changes) => {
+                              setFilters(
+                                filters.map((filter, j) =>
+                                  j == i
+                                    ? Object.assign(filter, changes)
+                                    : filter
+                                )
+                              );
+                            }}
+                            {...filter}
+                          />
+                        );
+                      })}
+                      <div className={styles.controlActions}>
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          size="small"
+                          sx={{
+                            padding: 0,
+                          }}
+                          onClick={() => {
+                            setFilters([
+                              ...filters,
+                              {
+                                feature: "",
+                                relation: "",
+                                value: "",
+                              },
+                            ]);
+                          }}
+                        >
+                          + New
+                        </Button>
+                        <Button
+                          color="warning"
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            setControlOpen(false);
+                          }}
+                        >
+                          Exit
+                        </Button>
+                      </div>
+                    </>
+                  ) : controlOpen == "columns" ? (
+                    <>
+                      <p>Features</p>
+                      <ToggleButtonGroup
+                        size="small"
+                        value={Array.from(toggledCols)}
+                        onChange={(e) => {
+                          handleButtonToggle(
+                            e,
+                            colTypes,
+                            toggledCols,
+                            setToggledCols
+                          );
+                        }}
+                      >
+                        <ToggleButton
+                          value="All"
+                          sx={{
+                            backgroundColor: theme.palette.primary.dark,
+                          }}
+                        >
+                          All
+                        </ToggleButton>
+                        {colTypes.map((colType, i) => {
+                          return (
+                            <ToggleButton key={i} value={colType}>
+                              {colType}
+                            </ToggleButton>
+                          );
+                        })}
+                        <ToggleButton
+                          value="None"
+                          sx={{
+                            backgroundColor: theme.palette.primary.dark,
+                          }}
+                        >
+                          None
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                      <FormGroup className={styles.percentileCheckbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={showPercentiles}
+                              onChange={(e) =>
+                                setShowPercentiles(e.target.checked)
+                              }
+                              color="secondary"
+                              sx={{
+                                "& .MuiSvgIcon-root": {
+                                  fontSize: 22,
+                                },
+                              }}
+                            />
+                          }
+                          label="Show Percentiles"
+                        />
+                      </FormGroup>
+                      <p>Time Frames</p>
+                      <ToggleButtonGroup
+                        size="small"
+                        value={Array.from(toggledFrames)}
+                        onChange={(e) => {
+                          handleButtonToggle(
+                            e,
+                            timeFrames,
+                            toggledFrames,
+                            setToggledFrames
+                          );
+                        }}
+                        id="timeFrameToggle"
+                      >
+                        <ToggleButton
+                          value="All"
+                          sx={{
+                            backgroundColor: theme.palette.primary.dark,
+                          }}
+                        >
+                          All
+                        </ToggleButton>
+                        {timeFrames.map((frame, i) => {
+                          return (
+                            <ToggleButton key={i} value={frame}>
+                              {frame}
+                            </ToggleButton>
+                          );
+                        })}
+                        <ToggleButton
+                          value="None"
+                          sx={{
+                            backgroundColor: theme.palette.primary.dark,
+                          }}
+                        >
+                          None
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                      <FormGroup className={styles.colsGroup}>
+                        {selectableCols.map((col, i) => {
+                          return (
+                            <FormControlLabel
+                              key={col}
+                              control={
+                                <Checkbox
+                                  checked={selectedColsSet.has(col)}
+                                  onChange={(e) => {
+                                    // todo, just use selectedColsSet.entries()
+                                    if (e.target.checked) {
+                                      selectedColsSet.add(col);
+                                      selectedCols.push(col);
+                                    } else {
+                                      selectedColsSet.delete(col);
+                                      const index = selectedCols.indexOf(col);
+                                      if (index > -1) {
+                                        selectedCols.splice(index, 1);
+                                      }
+                                    }
+                                    console.log(
+                                      "new selectedCols",
+                                      selectedCols,
+                                      selectedColsSet,
+                                      col,
+                                      selectedColsSet.has(col)
+                                    );
+                                    setSelectedCols([...selectedCols]);
+                                  }}
+                                  color="primary"
+                                  sx={{
+                                    "& .MuiSvgIcon-root": {
+                                      fontSize: 18,
+                                    },
+                                  }}
+                                />
+                              }
+                              label={col}
+                            />
+                          );
+                        })}
+                      </FormGroup>
+                      <div className={styles.controlActions}>
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          size="small"
+                          onClick={() => {
+                            for (const col of selectableCols) {
+                              if (!selectedColsSet.has(col)) {
+                                selectedColsSet.add(col);
+                                selectedCols.push(col);
+                              }
+                            }
+                            setSelectedCols([...selectedCols]);
+                          }}
+                        >
+                          Check All
+                        </Button>
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          size="small"
+                          onClick={() => {
+                            const toRemove = new Set(selectableCols);
+                            for (const col of selectableCols) {
+                              if (selectedColsSet.has(col)) {
+                                selectedColsSet.delete(col);
+                              }
+                            }
+
+                            setSelectedCols([
+                              ...selectedCols.filter(
+                                (col) => !toRemove.has(col)
+                              ),
+                            ]);
+                          }}
+                        >
+                          Check None
+                        </Button>
+                        <Button
+                          color="warning"
+                          variant="outlined"
+                          size="small"
+                          onClick={() => {
+                            setControlOpen(false);
+                          }}
+                        >
+                          Exit
+                        </Button>
+                      </div>
+                    </>
+                  ) : null}
+                </Grid>
                 {/* <DataGrid
                   disableColumnMenu
                   disableColumnFilter

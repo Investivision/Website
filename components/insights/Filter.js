@@ -140,9 +140,11 @@ export default function Filter(props) {
               .join(" "),
           });
         }}
-        sx={{ width: 200 }}
         disableClearable
         freeSolo
+        style={{
+          flex: 1,
+        }}
         renderInput={(params) => {
           delete params.inputProps.value;
           return (
@@ -161,15 +163,17 @@ export default function Filter(props) {
           );
         }}
       />
-      <DeleteIcon
-        className={styles.deleteIcon}
-        onClick={() => {
-          props.onDelete();
-        }}
-        style={{
-          color: theme.palette.error.main,
-        }}
-      />
+      {props.showDelete ? (
+        <DeleteIcon
+          className={styles.deleteIcon}
+          onClick={() => {
+            props.onDelete();
+          }}
+          style={{
+            color: theme.palette.error.main,
+          }}
+        />
+      ) : null}
     </div>
   );
 }
