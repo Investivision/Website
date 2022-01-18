@@ -25,7 +25,7 @@ body.transparent.dark-mode {
 } */
 
 .dark-mode
-  :is(h1, h2, h3, h4, h5, h6, p, input[type="text"], .MuiAlert-root, .MuiFormControlLabel-label, td, th, textarea) {
+  :is(h1, h2, h3, h4, h5, h6, p, input[type="text"], input[type="number"], .MuiAlert-root, .MuiFormControlLabel-label, td, th, textarea) {
   color: white;
 }
 .dark-mode svg text {

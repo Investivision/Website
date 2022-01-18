@@ -53,7 +53,8 @@ const getColFormatters = (cols) => {
   const out = {};
   cols.forEach((col) => {
     console.log("getting formatting for col", col);
-    col = col.replace(", ", "");
+    const originalCol = col;
+    col = col.replace(", ", " ");
     const words = new Set(col.split(" "));
     for (let target of percentages) {
       target = target.split(" ");
@@ -65,7 +66,7 @@ const getColFormatters = (cols) => {
         }
       }
       if (foundMatch) {
-        out[col] = toPercentage;
+        out[originalCol] = toPercentage;
         return;
       }
     }
@@ -79,15 +80,15 @@ const getColFormatters = (cols) => {
         }
       }
       if (foundMatch) {
-        out[col] = roundTo2Decimals;
+        out[originalCol] = roundTo2Decimals;
         return;
       }
     }
     if (words.has("Patterns")) {
-      out[col] = toList;
+      out[originalCol] = toList;
       return;
     }
-    out[col] = noop;
+    out[originalCol] = noop;
   });
   console.log("col formats", out);
   return out;
@@ -105,8 +106,8 @@ export default function Grid(props) {
       for (const col of props.cols) {
         const val = row[col];
         if (val) {
-          console.log("push cell", col, val);
-          //   console.log(val, colFormatters[col](val));
+          console.log("push cell", col, val, colFormatters);
+          console.log(val, colFormatters[col](val));
           cells.push(<td>{colFormatters[col](val)}</td>);
         } else {
           cells.push(<td></td>);
@@ -116,10 +117,16 @@ export default function Grid(props) {
       console.log("new rows to render", props.rows, props.cols);
       return <tr key={row["Symbol"]}>{cells}</tr>;
     });
-  }, [props.rows.map((row) => row.Symbol).join(" "), props.cols]);
+  }, [props.rows, props.cols]);
 
   return (
-    <div className={styles.div}>
+    <div
+      className={styles.div}
+      style={{
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
       <div
         className={styles.div}
         style={{

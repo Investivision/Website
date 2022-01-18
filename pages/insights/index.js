@@ -18,6 +18,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import Grid from "../../components/insights/Grid";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import TextField from "@mui/material/TextField";
+import ArrowIcon from "@material-ui/icons/ArrowForwardIosRounded";
 
 const sortByBearishCandles = (a, b) => {
   return 0;
@@ -100,6 +102,10 @@ export default function Insights() {
 
   const [selectedCols, setSelectedCols] = useState([]);
 
+  const [pageSize, setPageSize] = useState(20);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       setUser(user);
@@ -135,6 +141,8 @@ export default function Insights() {
   //   }
 
   const theme = useTheme();
+
+  console.log("theme", theme);
 
   const colors =
     theme.palette.mode == "dark"
@@ -175,9 +183,9 @@ export default function Insights() {
     const visitedColTypes = new Set();
     const visitedTimeFrames = new Set();
     for (const col of sortedCols) {
-      let split = col.split(" - ");
+      let split = col.split(", ");
       if (split.length == 1) {
-        split = col.split(" for ");
+        split = col.split(" in ");
       }
       const type = split[0];
       const frame = split[1];
@@ -240,9 +248,9 @@ export default function Insights() {
   if (sortedCols) {
     selectableCols = sortedCols.filter((col) => {
       console.log("toggled items", toggledCols, toggledFrames);
-      let split = col.split(" - ");
+      let split = col.split(", ");
       if (split.length == 1) {
-        split = col.split(" for ");
+        split = col.split(" in ");
       }
       if (split.length == 2 && !toggledFrames.has(split[1])) {
         console.log(
@@ -268,7 +276,7 @@ export default function Insights() {
     return getColValuesForSort(sortedCols);
   }, [sortedCols]);
 
-  const rowsForGrid = useMemo(() => {
+  const sortedRows = useMemo(() => {
     if (!rows) {
       return undefined;
     }
@@ -301,8 +309,22 @@ export default function Insights() {
       }
       return res;
     });
-    return sorted;
+    return [...sorted]; // spread to create new object
   }, [rows, sortAttr, sortDir, valuesForSort]);
+
+  const pageRows = useMemo(() => {
+    if (!sortedRows) {
+      return undefined;
+    }
+    return [
+      ...sortedRows.slice(
+        (currentPage - 1) * pageSize,
+        (currentPage - 1) * pageSize + pageSize
+      ),
+    ];
+  }, [sortedRows, currentPage, pageSize]);
+
+  const totalPages = rows ? Math.ceil(rows.length / pageSize) : 0;
 
   return (
     <HeaderAndFooter
@@ -556,7 +578,7 @@ export default function Insights() {
                 <Grid
                   cols={selectedCols}
                   allCols={sortedCols}
-                  rows={rowsForGrid}
+                  rows={pageRows}
                   sortAttr={sortAttr}
                   sortDir={sortDir}
                   onChange={(params) => {
@@ -778,7 +800,7 @@ export default function Insights() {
                             setSelectedCols([...selectedCols]);
                           }}
                         >
-                          Check All
+                          Check All Above
                         </Button>
                         <Button
                           color="primary"
@@ -799,7 +821,7 @@ export default function Insights() {
                             ]);
                           }}
                         >
-                          Check None
+                          Check None Above
                         </Button>
                         <Button
                           color="warning"
@@ -815,6 +837,50 @@ export default function Insights() {
                     </>
                   ) : null}
                 </Grid>
+                <div className={styles.pageControl}>
+                  {currentPage > 1 ? (
+                    <ArrowIcon
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      style={{
+                        color: theme.palette.text.primary,
+                        transform: "rotate(180deg)",
+                      }}
+                    />
+                  ) : null}
+                  <TextField
+                    variant="outlined"
+                    type="number"
+                    defaultValue={currentPage}
+                    label="Page"
+                    color="primary"
+                    size="small"
+                    style={{
+                      width: 100,
+                    }}
+                    onBlur={(e) => {
+                      const val = parseInt(e.target.value);
+                      const validated = Math.min(totalPages, Math.max(1, val));
+                      if (val != validated) {
+                        e.target.value = validated;
+                      }
+                      setCurrentPage(validated);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.keyCode == "13") {
+                        e.target.blur();
+                      }
+                    }}
+                  />
+                  <p>{`of ${totalPages}`}</p>
+                  {currentPage < totalPages ? (
+                    <ArrowIcon
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      style={{
+                        color: theme.palette.text.primary,
+                      }}
+                    />
+                  ) : null}
+                </div>
                 {/* <DataGrid
                   disableColumnMenu
                   disableColumnFilter
