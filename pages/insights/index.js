@@ -21,6 +21,13 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TextField from "@mui/material/TextField";
 import ArrowIcon from "@material-ui/icons/ArrowForwardIosRounded";
 
+let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
+let filterChanges = false;
+
+let tempSelectedCols = [];
+let selectedColsSet = new Set();
+let selectedColsChanges = false;
+
 const sortByBearishCandles = (a, b) => {
   return 0;
 };
@@ -57,7 +64,7 @@ const commonConfigurations = [
   },
 ];
 
-let selectedColsSet = new Set();
+let prevSortedRows = undefined;
 
 const getColValuesForSort = (cols) => {
   const out = {};
@@ -73,6 +80,9 @@ const getColValuesForSort = (cols) => {
   return out;
 };
 
+let prevSortAttr = undefined;
+let prevSortDir = undefined;
+
 export default function Insights() {
   const [downloading, setDownloading] = useState(false);
 
@@ -80,7 +90,7 @@ export default function Insights() {
   const [sortDir, setSortDir] = useState("desc");
 
   const [filters, setFilters] = useState([
-    { feature: "", relation: "", value: "" },
+    { feature: "", relation: "", value: "", valid: true },
   ]);
 
   const [firstConfigWidth, setFirstConfigWidth] = useState(0);
@@ -106,6 +116,10 @@ export default function Insights() {
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const pageTextFieldRef = useRef();
+
+  const [checkboxRerender, setCheckboxRerender] = useState(0);
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       setUser(user);
@@ -120,7 +134,16 @@ export default function Insights() {
     }
   }, [rows]);
 
-  console.log("filters", filters);
+  const handleControlChange = () => {
+    if (filterChanges) {
+      setFilters([...tempFilters]);
+      filterChanges = false;
+    }
+    if (selectedColsChanges) {
+      setSelectedCols([...tempSelectedCols]);
+      selectedColsChanges = false;
+    }
+  };
 
   //   if (!userLoaded) {
   //     return (
@@ -165,15 +188,6 @@ export default function Insights() {
           "hsl(200, 60%, 57%)",
         ];
 
-  if (rows) {
-    console.log(
-      "table rows",
-      rows.map((row) => {
-        return { id: row.Symbol, ...row };
-      })
-    );
-  }
-
   const [colTypes, timeFrames] = useMemo(() => {
     if (!sortedCols) {
       return [undefined, undefined];
@@ -192,7 +206,7 @@ export default function Insights() {
       if (
         type != "Symbol" &&
         !visitedColTypes.has(type) &&
-        !type.includes("%ile")
+        !type.includes("%ile") // this prevents P and Pr
       ) {
         types.push(type);
         visitedColTypes.add(type);
@@ -242,11 +256,12 @@ export default function Insights() {
     setter(new Set(set));
   };
 
-  console.log("sortedCols", sortedCols);
-
-  let selectableCols;
-  if (sortedCols) {
-    selectableCols = sortedCols.filter((col) => {
+  const selectableCols = useMemo(() => {
+    if (!sortedCols) {
+      return undefined;
+    }
+    return sortedCols.filter((col) => {
+      console.log("determining if", col, "is to be selectable");
       console.log("toggled items", toggledCols, toggledFrames);
       let split = col.split(", ");
       if (split.length == 1) {
@@ -259,15 +274,44 @@ export default function Insights() {
           split[1],
           Array.from(toggledFrames)
         );
+
+        console.log("determining if", col, "is to be selectable", false);
         return false;
       }
       console.log("toggledCols", toggledCols, col, split[0]);
       if (showPercentiles) {
-        split[0] = split[0].replace(" (%ile)", "");
+        split[0] = split[0].replace(" %ile", "");
       }
+
+      console.log("determining if", col, toggledCols.has(split[0]));
       return toggledCols.has(split[0]);
     });
-  }
+  }, [sortedCols, toggledCols, toggledFrames, showPercentiles]);
+
+  // let selectableCols;
+  // if (sortedCols) {
+  //   selectableCols = sortedCols.filter((col) => {
+  //     console.log("toggled items", toggledCols, toggledFrames);
+  //     let split = col.split(", ");
+  //     if (split.length == 1) {
+  //       split = col.split(" in ");
+  //     }
+  //     if (split.length == 2 && !toggledFrames.has(split[1])) {
+  //       console.log(
+  //         "filtering col on first condition",
+  //         col,
+  //         split[1],
+  //         Array.from(toggledFrames)
+  //       );
+  //       return false;
+  //     }
+  //     console.log("toggledCols", toggledCols, col, split[0]);
+  //     if (showPercentiles) {
+  //       split[0] = split[0].replace(" (%ile)", "");
+  //     }
+  //     return toggledCols.has(split[0]);
+  //   });
+  // }
 
   const valuesForSort = useMemo(() => {
     if (!sortedCols) {
@@ -286,7 +330,13 @@ export default function Insights() {
       sortAttr,
       valuesForSort[sortAttr]
     );
-    const sorted = rows.sort((a, b) => {
+    let out = [...rows];
+    if (sortAttr == prevSortAttr && sortDir != prevSortDir) {
+      // console.log("sortedRows", prevSortedRows);
+      // alert("naive");
+      return [...prevSortedRows].reverse();
+    }
+    out = out.sort((a, b) => {
       a = a[sortAttr];
       b = b[sortAttr];
       if (valuesForSort[sortAttr]) {
@@ -309,27 +359,63 @@ export default function Insights() {
       }
       return res;
     });
-    return [...sorted]; // spread to create new object
+    return out; // spread to create new object
   }, [rows, sortAttr, sortDir, valuesForSort]);
 
-  const pageRows = useMemo(() => {
+  prevSortedRows = sortedRows;
+
+  const filteredRows = useMemo(() => {
     if (!sortedRows) {
       return undefined;
     }
-    return [
-      ...sortedRows.slice(
-        (currentPage - 1) * pageSize,
-        (currentPage - 1) * pageSize + pageSize
-      ),
-    ];
-  }, [sortedRows, currentPage, pageSize]);
+    let filtered = [...sortedRows];
+    for (const filter of filters) {
+      const { feature, relation, value, valid } = filter;
+      if (feature && relation && value && valid) {
+        let filterString = `row['${feature}']`;
+        if (/[a-zA-Z]/.test(relation)) {
+          filterString += `.${relation}(VAL)`;
+        } else {
+          filterString += ` ${relation} VAL`;
+        }
+        let accessibleValue = value;
+        for (const col of sortedCols) {
+          accessibleValue = accessibleValue.replaceAll(col, `row['${col}']`);
+        }
+        filterString = filterString.replace("VAL", accessibleValue);
+        console.log("filterString", filterString);
+        filtered = filtered.filter((row) => {
+          const pass = eval(filterString);
+          console.log(pass, "row during filtering", row);
+          return pass;
+        });
+      } else {
+        console.log("ignoring filter", filter);
+      }
+    }
+    return filtered;
+  }, [filters, sortedRows]);
 
-  const totalPages = rows ? Math.ceil(rows.length / pageSize) : 0;
+  const [pageRows, totalPages] = useMemo(() => {
+    if (!filteredRows) {
+      return [undefined, 0];
+    }
+    return [
+      [
+        ...filteredRows.slice(
+          (currentPage - 1) * pageSize,
+          (currentPage - 1) * pageSize + pageSize
+        ),
+      ],
+      Math.ceil(filteredRows.length / pageSize),
+    ];
+  }, [filteredRows, currentPage, pageSize]);
 
   return (
     <HeaderAndFooter
       bodyClassName={styles.body}
       onClick={() => {
+        handleControlChange();
         setControlOpen(false);
       }}
     >
@@ -413,11 +499,13 @@ export default function Insights() {
                 set.delete("Symbol");
                 const sorted = ["Symbol", ...Array.from(set).sort()];
                 const withoutPercentiles = sorted.filter(
-                  (col) => !col.includes("(%ile)")
+                  (col) => !col.includes("%ile")
                 );
                 selectedColsSet = new Set(withoutPercentiles);
+                tempSelectedCols = [...withoutPercentiles];
                 setSelectedCols(withoutPercentiles);
                 setSortedCols(sorted);
+                console.log("sorted cols", sorted);
                 console.log(
                   "set cols and sorted cols timer",
                   new Date() - start
@@ -540,7 +628,6 @@ export default function Insights() {
 
               <div
                 style={{
-                  maxHeight: "calc(100vh - 100px)",
                   // minHeight: 500,
                   width: "100%",
                   // overflow: "scroll",
@@ -557,7 +644,7 @@ export default function Insights() {
                     variant="outlined"
                     color="secondary"
                   >
-                    Filter
+                    Filters
                   </Button>
                   <Button
                     size="small"
@@ -584,6 +671,8 @@ export default function Insights() {
                   onChange={(params) => {
                     const { dir, attr } = params;
                     console.log("change sort", params);
+                    prevSortDir = sortDir;
+                    prevSortAttr = sortAttr;
                     setSortDir(dir);
                     setSortAttr(attr);
                   }}
@@ -594,21 +683,20 @@ export default function Insights() {
                       {filters.map((filter, i) => {
                         return (
                           <Filter
+                            key={filter}
                             cols={cols}
                             showDelete={filters.length > 1}
                             onDelete={() => {
-                              setFilters(
-                                filters.slice(0, i).concat(filters.slice(i + 1))
-                              );
+                              tempFilters = filters
+                                .slice(0, i)
+                                .concat(filters.slice(i + 1));
+                              filterChanges = true;
                             }}
                             onChange={(changes) => {
-                              setFilters(
-                                filters.map((filter, j) =>
-                                  j == i
-                                    ? Object.assign(filter, changes)
-                                    : filter
-                                )
+                              tempFilters = filters.map((filter, j) =>
+                                j == i ? Object.assign(filter, changes) : filter
                               );
+                              filterChanges = true;
                             }}
                             {...filter}
                           />
@@ -629,6 +717,7 @@ export default function Insights() {
                                 feature: "",
                                 relation: "",
                                 value: "",
+                                valid: true,
                               },
                             ]);
                           }}
@@ -640,6 +729,7 @@ export default function Insights() {
                           variant="outlined"
                           size="small"
                           onClick={() => {
+                            handleControlChange();
                             setControlOpen(false);
                           }}
                         >
@@ -649,7 +739,7 @@ export default function Insights() {
                     </>
                   ) : controlOpen == "columns" ? (
                     <>
-                      <p>Features</p>
+                      <p>Potential Features</p>
                       <ToggleButtonGroup
                         size="small"
                         value={Array.from(toggledCols)}
@@ -705,7 +795,7 @@ export default function Insights() {
                           label="Show Percentiles"
                         />
                       </FormGroup>
-                      <p>Time Frames</p>
+                      <p>Potential Time Frames</p>
                       <ToggleButtonGroup
                         size="small"
                         value={Array.from(toggledFrames)}
@@ -747,30 +837,29 @@ export default function Insights() {
                         {selectableCols.map((col, i) => {
                           return (
                             <FormControlLabel
-                              key={col}
+                              key={col + selectedColsSet.has(col)}
                               control={
                                 <Checkbox
-                                  checked={selectedColsSet.has(col)}
+                                  defaultChecked={selectedColsSet.has(col)}
                                   onChange={(e) => {
                                     // todo, just use selectedColsSet.entries()
                                     if (e.target.checked) {
                                       selectedColsSet.add(col);
-                                      selectedCols.push(col);
+                                      tempSelectedCols.push(col);
                                     } else {
                                       selectedColsSet.delete(col);
-                                      const index = selectedCols.indexOf(col);
+                                      const index =
+                                        tempSelectedCols.indexOf(col);
                                       if (index > -1) {
-                                        selectedCols.splice(index, 1);
+                                        tempSelectedCols.splice(index, 1);
                                       }
                                     }
+                                    selectedColsChanges = true;
                                     console.log(
-                                      "new selectedCols",
-                                      selectedCols,
-                                      selectedColsSet,
-                                      col,
-                                      selectedColsSet.has(col)
+                                      "temp Selected Cols",
+                                      tempSelectedCols
                                     );
-                                    setSelectedCols([...selectedCols]);
+                                    // setSelectedCols([...selectedCols]);
                                   }}
                                   color="primary"
                                   sx={{
@@ -794,10 +883,13 @@ export default function Insights() {
                             for (const col of selectableCols) {
                               if (!selectedColsSet.has(col)) {
                                 selectedColsSet.add(col);
-                                selectedCols.push(col);
+                                tempSelectedCols.push(col);
                               }
                             }
-                            setSelectedCols([...selectedCols]);
+                            console.log("temp Selected Cols", tempSelectedCols);
+                            // setSelectedCols([...selectedCols]);
+                            selectedColsChanges = true;
+                            setCheckboxRerender(checkboxRerender + 1);
                           }}
                         >
                           Check All Above
@@ -814,20 +906,22 @@ export default function Insights() {
                               }
                             }
 
-                            setSelectedCols([
-                              ...selectedCols.filter(
-                                (col) => !toRemove.has(col)
-                              ),
-                            ]);
+                            tempSelectedCols = selectedCols.filter(
+                              (col) => !toRemove.has(col)
+                            );
+                            console.log("temp Selected Cols", tempSelectedCols);
+                            selectedColsChanges = true;
+                            setCheckboxRerender(checkboxRerender + 1);
                           }}
                         >
-                          Check None Above
+                          Clear All Above
                         </Button>
                         <Button
                           color="warning"
                           variant="outlined"
                           size="small"
                           onClick={() => {
+                            handleControlChange();
                             setControlOpen(false);
                           }}
                         >
@@ -840,7 +934,10 @@ export default function Insights() {
                 <div className={styles.pageControl}>
                   {currentPage > 1 ? (
                     <ArrowIcon
-                      onClick={() => setCurrentPage(currentPage - 1)}
+                      onClick={() => {
+                        pageTextFieldRef.current.value = currentPage - 1;
+                        setCurrentPage(currentPage - 1);
+                      }}
                       style={{
                         color: theme.palette.text.primary,
                         transform: "rotate(180deg)",
@@ -848,6 +945,7 @@ export default function Insights() {
                     />
                   ) : null}
                   <TextField
+                    inputRef={pageTextFieldRef}
                     variant="outlined"
                     type="number"
                     defaultValue={currentPage}
@@ -855,11 +953,13 @@ export default function Insights() {
                     color="primary"
                     size="small"
                     style={{
-                      width: 100,
+                      width: 90,
                     }}
                     onBlur={(e) => {
-                      const val = parseInt(e.target.value);
-                      const validated = Math.min(totalPages, Math.max(1, val));
+                      const val = parseFloat(e.target.value);
+                      const validated = Math.round(
+                        Math.min(totalPages, Math.max(1, val))
+                      );
                       if (val != validated) {
                         e.target.value = validated;
                       }
@@ -874,7 +974,10 @@ export default function Insights() {
                   <p>{`of ${totalPages}`}</p>
                   {currentPage < totalPages ? (
                     <ArrowIcon
-                      onClick={() => setCurrentPage(currentPage + 1)}
+                      onClick={() => {
+                        pageTextFieldRef.current.value = currentPage + 1;
+                        setCurrentPage(currentPage + 1);
+                      }}
                       style={{
                         color: theme.palette.text.primary,
                       }}

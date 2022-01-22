@@ -5,6 +5,32 @@ import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import DeleteIcon from "@material-ui/icons/DeleteForeverRounded";
 
+const errorMessage = (value, cols) => {
+  if (!value) {
+    return undefined;
+  }
+  for (const col of cols) {
+    value = value.split(col).join("123");
+  }
+  // const words = value.split(" ");
+  // return words.every(word => {
+  // const splitByOpenParen = value.split('(')
+  // for (const part of splitByOpenParen) {
+  //   if (part && (/[a-zA-Z]/).test(part.trim().charAt(part.length - 1)) ) {
+  //     return "Cannot use functions"
+  //   }
+  // }
+  if (/[a-zA-Z]/g.test(value)) {
+    return "Misspelled column";
+  }
+  try {
+    eval(value);
+  } catch (e) {
+    return "Expression error";
+  }
+  return undefined;
+};
+
 export default function Filter(props) {
   const theme = useTheme();
   const cols = Array.from(props.cols);
@@ -22,7 +48,20 @@ export default function Filter(props) {
   };
 
   const filterOptions = (options, { inputValue }) => {
-    const lastWord = inputValue.split(" ").pop();
+    inputValue = inputValue.replaceAll(", ", ",").replaceAll(" %", "%");
+    let start = 0;
+    for (let i = inputValue.length - 1; i >= 0; i--) {
+      const char = inputValue.charAt(i);
+      if (!(/[a-zA-Z]/.test(char) || char == "," || char == "%")) {
+        start = i + 1;
+        break;
+      }
+    }
+
+    const lastWord = inputValue
+      .substring(start)
+      .replaceAll(",", ", ")
+      .replaceAll("%", " %");
     return cols.filter((element) => {
       return (
         element.toLowerCase().startsWith(lastWord.toLowerCase()) &&
@@ -44,7 +83,7 @@ export default function Filter(props) {
         sx={{
           width: 220,
         }}
-        value={props.feature}
+        defaultValue={props.feature}
         onChange={(e) => {
           props.onChange({ feature: e.target.innerText });
         }}
@@ -54,7 +93,7 @@ export default function Filter(props) {
             {...params}
             label="Feature"
             variant="standard"
-            value={props.feature}
+            defaultValue={props.feature}
             onChange={(e) => {
               if (props.cols.has(e.target.value)) {
                 props.onChange({ feature: e.target.value });
@@ -87,7 +126,7 @@ export default function Filter(props) {
             relation: e.target.innerText,
           });
         }}
-        value={props.relation}
+        defaultValue={props.relation}
         sx={{ width: 70 }}
         disableClearable
         renderInput={(params) => (
@@ -95,7 +134,7 @@ export default function Filter(props) {
             {...params}
             label="Relation"
             variant="standard"
-            value={props.relation}
+            defaultValue={props.relation}
             onBlur={(e) => {
               console.log("filters blur", e.target.value);
               if (relationMap[e.target.value]) {
@@ -147,16 +186,20 @@ export default function Filter(props) {
         }}
         renderInput={(params) => {
           delete params.inputProps.value;
+          const message = errorMessage(props.value, cols);
           return (
             <TextField
               {...params}
-              label="Expression"
+              error={message ? true : false}
+              label={message || "Expression"}
               variant="standard"
-              value={props.value}
+              defaultValue={props.value}
+              color={theme.palette.mode == "dark" ? "secondary" : "primary"}
               onChange={(e) => {
                 console.log("text field change", e.target.value);
                 props.onChange({
                   value: e.target.value,
+                  valid: message ? false : true,
                 });
               }}
             />

@@ -40,7 +40,7 @@ const controlMap = {
 
 const getColFormatters = (cols) => {
   const percentages = [
-    "(%ile)",
+    "%ile",
     "Alpha",
     "Beta",
     "Forecast",
@@ -120,17 +120,14 @@ export default function Grid(props) {
   }, [props.rows, props.cols]);
 
   return (
-    <div
-      className={styles.div}
-      style={{
-        display: "flex",
-        justifyContent: "center",
-      }}
-    >
+    <div className={styles.div}>
       <div
-        className={styles.div}
         style={{
           overflow: props.controlOpen ? "hidden" : "scroll",
+          maxWidth: "100%",
+          height: "100%",
+
+          maxHeight: "calc(100vh - 100px)",
         }}
       >
         <table>

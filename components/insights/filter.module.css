@@ -7,9 +7,7 @@
   /* border-radius: 8px; */
   justify-content: center;
   align-items: center;
-  resize: horizontal;
   min-width: 550px;
-  overflow: auto;
   border-radius: 8px;
 }
 
