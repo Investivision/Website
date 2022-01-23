@@ -2,6 +2,8 @@ import { useMemo } from "react";
 import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
 
+let draggedPosition;
+
 const toPercentage = (value) => {
   const val = Math.round(value * 100 * 10) / 10;
   if (val >= 0) {
@@ -88,6 +90,10 @@ const getColFormatters = (cols) => {
       out[originalCol] = toList;
       return;
     }
+    if (originalCol == "Last Close") {
+      out[originalCol] = roundTo2Decimals;
+      return;
+    }
     out[originalCol] = noop;
   });
   console.log("col formats", out);
@@ -126,16 +132,75 @@ export default function Grid(props) {
           overflow: props.controlOpen ? "hidden" : "scroll",
           maxWidth: "100%",
           height: "100%",
-
+          minHeight: 400,
           maxHeight: "calc(100vh - 100px)",
         }}
       >
         <table>
           <thead>
             <tr>
-              {props.cols.map((col) => {
+              {props.cols.map((col, i) => {
                 return (
-                  <th key={col}>
+                  <th
+                    key={col}
+                    index={i}
+                    draggable={i > 0}
+                    onDragStart={(e) => {
+                      console.log("drag start", e);
+                      // document.body.style.cursor = "move";
+                      e.target.style.opacity = 0.3;
+                      draggedPosition = i;
+
+                      // e.dataTransfer.effectAllowed = "copyMove";
+                    }}
+                    onDragEnd={(e) => {
+                      console.log("drag end");
+                      e.target.style.opacity = 1;
+                    }}
+                    onDragOver={(e) => {
+                      if (i > 0 && e.target.tagName == "TH") {
+                        if (i > draggedPosition) {
+                          e.target.style.borderRight = "4px solid red";
+                        } else if (i < draggedPosition) {
+                          e.target.style.borderLeft = "4px solid red";
+                        }
+                      }
+                      console.log(
+                        "drag over",
+                        e.target.innerText,
+                        i > draggedPosition
+                      );
+                      e.stopPropagation();
+                      e.preventDefault();
+                    }}
+                    onDragLeave={(e) => {
+                      e.target.style.border = "0px solid transparent";
+                    }}
+                    onDrop={(e) => {
+                      if (i == 0) {
+                        return;
+                      }
+                      console.log("drop", e.target.innerText);
+                      e.target.style.border = "0px solid transparent";
+                      if (i > draggedPosition) {
+                        const newOrder = [
+                          ...props.cols.slice(0, draggedPosition),
+                          props.cols.slice(draggedPosition + 1, i + 1),
+                          props.cols[draggedPosition],
+                          ...props.cols.slice(i + 1),
+                        ];
+                        props.onOrderChange(newOrder);
+                      } else if (i < draggedPosition) {
+                        const newOrder = [
+                          ...props.cols.slice(0, i),
+                          props.cols[draggedPosition],
+                          ...props.cols.slice(i, draggedPosition),
+                          ...props.cols.slice(draggedPosition + 1),
+                        ];
+                        props.onOrderChange(newOrder);
+                      }
+                    }}
+                  >
                     {col}
                     <SortToggle
                       direction={

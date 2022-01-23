@@ -36,32 +36,48 @@ const sortByBullishCandles = (a, b) => {
   return 0;
 };
 
-const commonConfigurations = [
+let commonConfigurations = [
   {
     name: "Stable Long-Term Picks",
-    sort: ["Sharpe - 10yr", "desc"],
-    desc: "Best Sharpe - 10yr",
+    sort: ["Sharpe, 10yr", "asc"],
+    cols: ["Sharpe, 10yr", "Alpha, 10yr", "Last Close"],
+    desc: "Best Sharpe, 10yr",
+    filters: [
+      {
+        feature: "Sharpe, 10yr",
+        relation: "exists",
+        value: "",
+      },
+    ],
   },
   {
     name: "Past-Year Champions",
-    sort: ["Alpha - 1yr", "desc"],
-    desc: "Best Alpha - 1yr",
+    sort: ["Alpha, 1yr", "asc"],
+    cols: ["Alpha, 1yr", "Sharpe, 1yr", "Last Close"],
+    desc: "Best Alpha, 1yr",
+    filters: [
+      {
+        feature: "Alpha, 1yr",
+        relation: "exists",
+        value: "",
+      },
+    ],
   },
   {
     name: "Nearby Expected Rebounds",
     sort: ["Pivot Progress - 3mo", "asc"],
     desc: "Close to Support Line with weak Relative Strength",
   },
-  {
-    name: "Short-Term Bearish Candles",
-    sort: sortByBearishCandles,
-    desc: "High net number of bearish candle patterns",
-  },
-  {
-    name: "Short-Term Bullish Candles",
-    sort: sortByBullishCandles,
-    desc: "High net number of bullish candle patterns",
-  },
+  // {
+  //   name: "Short-Term Bearish Candles",
+  //   sort: sortByBearishCandles,
+  //   desc: "High net number of bearish candle patterns",
+  // },
+  // {
+  //   name: "Short-Term Bullish Candles",
+  //   sort: sortByBullishCandles,
+  //   desc: "High net number of bullish candle patterns",
+  // },
 ];
 
 let prevSortedRows = undefined;
@@ -187,6 +203,11 @@ export default function Insights() {
           "hsl(195, 60%, 56%)",
           "hsl(200, 60%, 57%)",
         ];
+
+  commonConfigurations = commonConfigurations.map((config) => {
+    config.color = colors[Math.floor(Math.random() * colors.length)];
+    return config;
+  });
 
   const [colTypes, timeFrames] = useMemo(() => {
     if (!sortedCols) {
@@ -370,21 +391,49 @@ export default function Insights() {
     }
     let filtered = [...sortedRows];
     for (const filter of filters) {
-      const { feature, relation, value, valid } = filter;
-      if (feature && relation && value && valid) {
+      let { feature, relation, value, valid } = filter;
+      console.log("filterString", filter);
+      if (
+        feature &&
+        relation &&
+        (value || relation == "exists") &&
+        valid != false
+      ) {
+        const negate = relation == "excludes";
+        relation = relation
+          .replace("≥", ">=")
+          .replace("≤", "<=")
+          .replace("≠", "!=")
+          .replace("starts with", "startsWith")
+          .replace("ends with", "endsWith")
+          .replace("contains", "includes")
+          .replace("excludes", "includes")
+          .replace("exists", "!== ''");
         let filterString = `row['${feature}']`;
-        if (/[a-zA-Z]/.test(relation)) {
+        if (/[a-zA-Z]/.test(relation.charAt(0))) {
           filterString += `.${relation}(VAL)`;
         } else {
           filterString += ` ${relation} VAL`;
         }
-        let accessibleValue = value;
-        for (const col of sortedCols) {
-          accessibleValue = accessibleValue.replaceAll(col, `row['${col}']`);
+        if (relation != "exists") {
+          let accessibleValue = value;
+          for (const col of sortedCols) {
+            accessibleValue = accessibleValue.replaceAll(col, `row['${col}']`);
+          }
+          // if all letters are alphabetic
+          if (/^[a-zA-Z]+$/.test(accessibleValue)) {
+            accessibleValue = `"${accessibleValue}"`;
+          }
+          filterString = filterString.replace("VAL", accessibleValue);
+        } else {
+          filterString = filterString.replace("VAL", "");
         }
-        filterString = filterString.replace("VAL", accessibleValue);
+        if (negate) {
+          filterString = `!(${filterString})`;
+        }
         console.log("filterString", filterString);
         filtered = filtered.filter((row) => {
+          console.log("sharpe 10", row["Sharpe, 10yr"]);
           const pass = eval(filterString);
           console.log(pass, "row during filtering", row);
           return pass;
@@ -495,9 +544,10 @@ export default function Insights() {
                 start = new Date();
                 console.log("xslx data", data);
                 const set = new Set(data[0]);
-                setCols(set);
                 set.delete("Symbol");
                 const sorted = ["Symbol", ...Array.from(set).sort()];
+                set.add("Symbol");
+                setCols(set);
                 const withoutPercentiles = sorted.filter(
                   (col) => !col.includes("%ile")
                 );
@@ -567,10 +617,15 @@ export default function Insights() {
                           setSortAttr(config.sort[0]);
                           setSortDir(config.sort[1]);
                         }
+                        if (config.cols) {
+                          setSelectedCols(["Symbol", ...config.cols]);
+                        }
+                        if (config.filters) {
+                          setFilters(config.filters);
+                        }
                       }}
                       style={{
-                        backgroundColor:
-                          colors[Math.floor(Math.random() * colors.length)],
+                        backgroundColor: config.color,
                       }}
                       className={styles.config}
                     >
@@ -638,6 +693,7 @@ export default function Insights() {
                     size="small"
                     onClick={(e) => {
                       const name = "filter";
+                      handleControlChange();
                       setControlOpen(controlOpen == name ? false : name);
                       e.stopPropagation();
                     }}
@@ -650,6 +706,7 @@ export default function Insights() {
                     size="small"
                     onClick={(e) => {
                       const name = "columns";
+                      handleControlChange();
                       setControlOpen(controlOpen == name ? false : name);
                       e.stopPropagation();
                     }}
@@ -676,11 +733,15 @@ export default function Insights() {
                     setSortDir(dir);
                     setSortAttr(attr);
                   }}
+                  onOrderChange={(newCols) => {
+                    setSelectedCols(newCols);
+                  }}
                   controlOpen={controlOpen}
                 >
                   {controlOpen == "filter" ? (
                     <>
                       {filters.map((filter, i) => {
+                        console.log("filter to render", filter);
                         return (
                           <Filter
                             key={filter}
@@ -693,9 +754,11 @@ export default function Insights() {
                               filterChanges = true;
                             }}
                             onChange={(changes) => {
+                              console.log("filter change", changes);
                               tempFilters = filters.map((filter, j) =>
                                 j == i ? Object.assign(filter, changes) : filter
                               );
+                              console.log("new temp filters", tempFilters);
                               filterChanges = true;
                             }}
                             {...filter}

@@ -24,6 +24,9 @@
   z-index: 2;
   top: 0;
   padding-left: 6px;
+  transition: border-width 0.1s ease;
+  border: 0px solid transparent;
+  /* border-left: 4px solid transparent; */
 }
 
 .div thead tr > :first-child {

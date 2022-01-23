@@ -2,10 +2,11 @@ import { useTheme } from "@mui/styles";
 import styles from "./filter.module.css";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteIcon from "@material-ui/icons/DeleteForeverRounded";
 
-const errorMessage = (value, cols) => {
+const errorMessage = (value, cols, relation) => {
+  console.log("errorMessage", value, cols);
   if (!value) {
     return undefined;
   }
@@ -20,10 +21,14 @@ const errorMessage = (value, cols) => {
   //     return "Cannot use functions"
   //   }
   // }
-  if (/[a-zA-Z]/g.test(value)) {
+  if (/[a-zA-Z]/g.test(value) && !/^[a-zA-Z]+$/.test(value)) {
     return "Misspelled column";
   }
   try {
+    // if all letters are alphabetic
+    if (/^[a-zA-Z]+$/.test(value)) {
+      value = `"${value}"`;
+    }
     eval(value);
   } catch (e) {
     return "Expression error";
@@ -31,11 +36,75 @@ const errorMessage = (value, cols) => {
   return undefined;
 };
 
+const splitValue = (value, cols) => {
+  value = value.replaceAll(", ", ",").replaceAll(" %", "%");
+  let start = 0;
+  for (let i = value.length - 1; i >= 0; i--) {
+    const char = value.charAt(i);
+    if (
+      !(
+        /[a-zA-Z]/.test(char) ||
+        char == "," ||
+        char == "%" ||
+        (!isNaN(char) &&
+          (value.charAt(i - 1) == "," ||
+            (value.charAt(i - 2) == "," && !isNaN(value.charAt(i - 1)))))
+      )
+    ) {
+      start = i + 1;
+      break;
+    }
+  }
+
+  const lastWord = value
+    .substring(start)
+    .replaceAll(",", ", ")
+    .replaceAll("%", " %");
+  const before = value
+    .substring(0, start)
+    .replaceAll(",", ", ")
+    .replaceAll("%", " %");
+  console.log("value split", before, "|", lastWord);
+  return [before, lastWord];
+};
+
 export default function Filter(props) {
   const theme = useTheme();
   const cols = Array.from(props.cols);
 
-  const relations = ["=", ">", "<", "≥", "≤", "≠"];
+  const [tempFeature, setTempFeature] = useState("");
+  const [tempRelation, setTempRelation] = useState("");
+  const [tempValue, setTempValue] = useState("");
+
+  useEffect(() => {
+    setTempFeature(props.feature);
+  }, [props.feature]);
+
+  useEffect(() => {
+    setTempRelation(props.relation);
+    // alert("new props.relation", props.relation);
+  }, [props.relation]);
+
+  useEffect(() => {
+    setTempValue(props.value);
+  }, [props.value]);
+
+  console.log("tempRelation is", tempRelation);
+
+  const relations = [
+    "=",
+    ">",
+    "<",
+    "≥",
+    "≤",
+    "≠",
+    "starts with",
+    "ends with",
+    "contains",
+    "excludes",
+    "exists",
+  ];
+  const relationsSet = new Set(relations);
   const relationMap = {
     "==": "=",
     ">=": "≥",
@@ -48,20 +117,7 @@ export default function Filter(props) {
   };
 
   const filterOptions = (options, { inputValue }) => {
-    inputValue = inputValue.replaceAll(", ", ",").replaceAll(" %", "%");
-    let start = 0;
-    for (let i = inputValue.length - 1; i >= 0; i--) {
-      const char = inputValue.charAt(i);
-      if (!(/[a-zA-Z]/.test(char) || char == "," || char == "%")) {
-        start = i + 1;
-        break;
-      }
-    }
-
-    const lastWord = inputValue
-      .substring(start)
-      .replaceAll(",", ", ")
-      .replaceAll("%", " %");
+    const [before, lastWord] = splitValue(inputValue, cols);
     return cols.filter((element) => {
       return (
         element.toLowerCase().startsWith(lastWord.toLowerCase()) &&
@@ -85,26 +141,30 @@ export default function Filter(props) {
         }}
         defaultValue={props.feature}
         onChange={(e) => {
+          setTempFeature(e.target.innerText);
           props.onChange({ feature: e.target.innerText });
         }}
         disableClearable
+        freeSolo
         renderInput={(params) => (
           <TextField
             {...params}
             label="Feature"
+            error={!props.cols.has(tempFeature)}
             variant="standard"
-            defaultValue={props.feature}
+            value={tempFeature}
             onChange={(e) => {
               if (props.cols.has(e.target.value)) {
                 props.onChange({ feature: e.target.value });
               }
+              setTempFeature(e.target.value);
             }}
           />
         )}
       />
       <Autocomplete
         // disablePortal
-        autoSelect
+        freeSolo
         filterOptions={(options, { inputValue }) => {
           const starters = Object.keys(relationMap)
             .filter((key) => {
@@ -112,9 +172,9 @@ export default function Filter(props) {
             })
             .map((key) => relationMap[key]);
           const exact = relations.filter((element) => {
-            return !inputValue || element == inputValue;
+            return !inputValue || element.includes(inputValue.toLowerCase());
           });
-          return Array.from(new Set(starters.concat(exact)));
+          return Array.from(new Set([...starters, ...exact]));
         }}
         options={relations.map((col) => {
           return {
@@ -125,39 +185,38 @@ export default function Filter(props) {
           props.onChange({
             relation: e.target.innerText,
           });
+          setTempRelation(e.target.innerText);
         }}
-        defaultValue={props.relation}
-        sx={{ width: 70 }}
+        value={tempRelation}
+        sx={{ width: 100 }}
         disableClearable
         renderInput={(params) => (
           <TextField
             {...params}
             label="Relation"
             variant="standard"
-            defaultValue={props.relation}
+            error={!relationsSet.has(tempRelation)}
+            value={tempRelation}
             onBlur={(e) => {
-              console.log("filters blur", e.target.value);
               if (relationMap[e.target.value]) {
-                console.log(
-                  "filters using rel map",
-                  relationMap[e.target.value]
-                );
                 props.onChange({
                   relation: relationMap[e.target.value],
                 });
-              } else if (relations.includes(e.target.value)) {
-                console.log("using exact targets");
-                props.onChange({
-                  relation: e.target.value,
-                });
+                setTempRelation(relationMap[e.target.value]);
               }
             }}
             onChange={(e) => {
-              if (relations.includes(e.target.value)) {
+              if (relationsSet.has(e.target.value)) {
                 props.onChange({
                   relation: e.target.value,
                 });
+                if (e.target.value == "exists") {
+                  props.onChange({
+                    valid: true,
+                  });
+                }
               }
+              setTempRelation(e.target.value);
             }}
           />
         )}
@@ -171,36 +230,37 @@ export default function Filter(props) {
           };
         })}
         onChange={(e) => {
+          const newValue = splitValue(tempValue, cols)[0] + e.target.innerText;
           props.onChange({
-            value: props.value
-              .split(" ")
-              .slice(0, -1)
-              .concat([e.target.innerText])
-              .join(" "),
+            value: newValue,
+            valid: errorMessage(newValue, cols, tempRelation) ? false : true,
           });
+          setTempValue(newValue);
         }}
         disableClearable
         freeSolo
         style={{
           flex: 1,
         }}
+        disabled={tempRelation == "exists"}
         renderInput={(params) => {
           delete params.inputProps.value;
-          const message = errorMessage(props.value, cols);
+          const message = errorMessage(tempValue, cols, tempRelation);
           return (
             <TextField
               {...params}
               error={message ? true : false}
               label={message || "Expression"}
               variant="standard"
-              defaultValue={props.value}
+              value={tempValue}
+              disabled={tempRelation == "exists"}
               color={theme.palette.mode == "dark" ? "secondary" : "primary"}
               onChange={(e) => {
-                console.log("text field change", e.target.value);
                 props.onChange({
                   value: e.target.value,
                   valid: message ? false : true,
                 });
+                setTempValue(e.target.value);
               }}
             />
           );
