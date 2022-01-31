@@ -3,6 +3,7 @@ import Link from "next/link";
 import Wave from "react-wavify";
 import { useTheme } from "@mui/styles";
 import ThemeToggle from "../ThemeToggle";
+import { useEffect } from "react";
 
 const bottomWaveHeight = 50;
 
@@ -25,6 +26,10 @@ export default function HeaderAndFooter(props) {
       ? "00"
       : "00"
   }`;
+
+  useEffect(() => {
+    window.onbeforeunload = undefined;
+  });
 
   return (
     <div {...props} className={styles.page}>

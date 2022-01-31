@@ -49,6 +49,9 @@
 
 .div td {
   padding: 3px 6px;
+  max-width: 200px;
+  text-overflow: ellipsis;
+  overflow: hidden; /* for IE */
 }
 
 .div tbody tr:hover td:not(:first-child) {

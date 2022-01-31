@@ -3,7 +3,17 @@ import styles from "./index.module.css";
 import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
 import { useTheme } from "@mui/material/styles";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, formatErrorCode } from "../../firebase";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDocs,
+  query,
+  collection,
+  where,
+  deleteDoc,
+} from "firebase/firestore";
+import firebase, { auth, formatErrorCode } from "../../firebase";
 import Skeleton from "@mui/material/Skeleton";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
@@ -20,6 +30,11 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TextField from "@mui/material/TextField";
 import ArrowIcon from "@material-ui/icons/ArrowForwardIosRounded";
+import DeleteForeverRoundedIcon from "@material-ui/icons/DeleteForeverRounded";
+import { v4 as uuidv4 } from "uuid";
+import { common } from "@mui/material/colors";
+import Alert from "@mui/material/Alert";
+import { Snackbar } from "@material-ui/core";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -65,8 +80,21 @@ let commonConfigurations = [
   },
   {
     name: "Nearby Expected Rebounds",
-    sort: ["Pivot Progress - 3mo", "asc"],
+    sort: ["Support, 3mo", "asc"],
     desc: "Close to Support Line with weak Relative Strength",
+    filters: [
+      {
+        feature: "Resistance, 3mo",
+        relation: "exists",
+        value: "",
+      },
+      {
+        feature: "Resistance, 3mo",
+        relation: ">",
+        value: "Support, 3mo + 0.07",
+      },
+    ],
+    cols: ["Support, 3mo", "Resistance, 3mo", "Last Close"],
   },
   // {
   //   name: "Short-Term Bearish Candles",
@@ -103,11 +131,9 @@ export default function Insights() {
   const [downloading, setDownloading] = useState(false);
 
   const [sortAttr, setSortAttr] = useState("Market Cap");
-  const [sortDir, setSortDir] = useState("desc");
+  const [sortDir, setSortDir] = useState("asc");
 
-  const [filters, setFilters] = useState([
-    { feature: "", relation: "", value: "", valid: true },
-  ]);
+  const [filters, setFilters] = useState([]);
 
   const [firstConfigWidth, setFirstConfigWidth] = useState(0);
   const firstConfigRef = useRef(null);
@@ -135,6 +161,14 @@ export default function Insights() {
   const pageTextFieldRef = useRef();
 
   const [checkboxRerender, setCheckboxRerender] = useState(0);
+
+  const [newConfigName, setNewConfigName] = useState("");
+  const [newConfigDesc, setNewConfigDesc] = useState("");
+
+  const [userConfigs, setUserConfigs] = useState([]);
+
+  const [configToDelete, setConfigToDelete] = useState(undefined);
+  const [deleteConfigLoading, setDeleteConfigLoading] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -204,10 +238,13 @@ export default function Insights() {
           "hsl(200, 60%, 57%)",
         ];
 
-  commonConfigurations = commonConfigurations.map((config) => {
-    config.color = colors[Math.floor(Math.random() * colors.length)];
-    return config;
-  });
+  // if (theme.palette.mode && !commonConfigurations[0].color) {
+  //   alert(theme.palette.mode);
+  //   commonConfigurations = commonConfigurations.map((config) => {
+  //     config.color = colors[Math.floor(Math.random() * colors.length)];
+  //     return config;
+  //   });
+  // }
 
   const [colTypes, timeFrames] = useMemo(() => {
     if (!sortedCols) {
@@ -282,6 +319,9 @@ export default function Insights() {
       return undefined;
     }
     return sortedCols.filter((col) => {
+      if (col == "Symbol") {
+        return false;
+      }
       console.log("determining if", col, "is to be selectable");
       console.log("toggled items", toggledCols, toggledFrames);
       let split = col.split(", ");
@@ -364,7 +404,6 @@ export default function Insights() {
         a = valuesForSort[sortAttr](a);
         b = valuesForSort[sortAttr](b);
       }
-      // console.log("values for sort dict a b", a, b);
       if (!a && !b) {
         return 0;
       }
@@ -404,6 +443,7 @@ export default function Insights() {
           .replace("≥", ">=")
           .replace("≤", "<=")
           .replace("≠", "!=")
+          .replace("=", "==")
           .replace("starts with", "startsWith")
           .replace("ends with", "endsWith")
           .replace("contains", "includes")
@@ -524,6 +564,15 @@ export default function Insights() {
               loading={downloading}
               onClick={async () => {
                 setDownloading(true);
+                if (!auth.currentUser) {
+                  window.location.href = "/pricing";
+                  return;
+                }
+                const token = await auth.currentUser.getIdTokenResult(true);
+                if (token.claims.role !== "buffet") {
+                  window.location.href = "/pricing";
+                  return;
+                }
                 const res = await fetch("/all.xlsx");
                 let start = new Date();
                 console.log("res", res);
@@ -578,6 +627,25 @@ export default function Insights() {
                 //   }
                 //   rows.push(obj);
                 // }
+                try {
+                  console.log("uid is", user.uid);
+                  const remoteConfigsRes = await getDocs(
+                    query(
+                      collection(getFirestore(), "configs"),
+                      where("uid", "==", user.uid)
+                    )
+                  );
+
+                  const freshRemoteConfigs = [];
+                  remoteConfigsRes.forEach((doc) => {
+                    freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
+                  });
+
+                  setUserConfigs(freshRemoteConfigs);
+                } catch (e) {
+                  console.error("error getting user configs", e);
+                }
+
                 setRows(myRows);
                 console.log("set rows timer", new Date() - start);
                 setDownloading(false);
@@ -618,14 +686,23 @@ export default function Insights() {
                           setSortDir(config.sort[1]);
                         }
                         if (config.cols) {
-                          setSelectedCols(["Symbol", ...config.cols]);
+                          const columns = ["Symbol", ...config.cols];
+                          setSelectedCols(columns);
+                          selectedColsSet = new Set(columns);
+                          tempSelectedCols = [...columns];
+                          setCheckboxRerender(checkboxRerender + 1);
+                          console.log(
+                            "loaded config",
+                            selectedColsSet,
+                            tempSelectedCols
+                          );
                         }
                         if (config.filters) {
                           setFilters(config.filters);
                         }
                       }}
                       style={{
-                        backgroundColor: config.color,
+                        backgroundColor: colors[i % colors.length],
                       }}
                       className={styles.config}
                     >
@@ -649,33 +726,86 @@ export default function Insights() {
                       : {}
                   }
                 ></div>
-                <div
-                  onClick={() => {
-                    alert("will save");
-                  }}
-                  className={`${styles.config} ${styles.configAdd}`}
-                >
-                  <p>Save Current Configuration</p>
+                <div className={`${styles.config} ${styles.configAdd}`}>
+                  <TextField
+                    // label="Name"
+                    placeholder="Name"
+                    size="small"
+                    variant="standard"
+                    value={newConfigName}
+                    onChange={(e) => setNewConfigName(e.target.value)}
+                  ></TextField>
+                  <TextField
+                    placeholder="Description"
+                    size="small"
+                    variant="standard"
+                    value={newConfigDesc}
+                    onChange={(e) => setNewConfigDesc(e.target.value)}
+                  ></TextField>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    disabled={!newConfigName || !newConfigDesc}
+                    onClick={async () => {
+                      const obj = {
+                        name: newConfigName,
+                        sort: [sortAttr, sortDir],
+                        cols: selectedCols.filter((col) => col !== "Symbol"),
+                        desc: newConfigDesc,
+                        uid: user.uid,
+                      };
+                      const filts = filters.filter((filt) => {
+                        return filt.feature && filt.relation && filt.valid;
+                      });
+                      if (filts.length) {
+                        obj.filters = filts;
+                      }
+                      const key = user.uid + "-" + uuidv4().replaceAll("-", "");
+                      await setDoc(doc(getFirestore(), "configs", key), obj);
+                      setUserConfigs([{ ...obj, id: key }, ...userConfigs]);
+                    }}
+                  >
+                    Add
+                  </Button>
                 </div>
-                {commonConfigurations.map((config, i) => {
+                {userConfigs.map((config, i) => {
                   return (
                     <div
                       key={i}
-                      ref={i == 0 ? firstConfigRef : null}
                       onClick={() => {
                         if (config.sort) {
                           setSortAttr(config.sort[0]);
                           setSortDir(config.sort[1]);
                         }
+                        if (config.cols) {
+                          const columns = ["Symbol", ...config.cols];
+                          setSelectedCols(columns);
+                          selectedColsSet = new Set(columns);
+                          tempSelectedCols = [...columns];
+                          setCheckboxRerender(checkboxRerender + 1);
+                          console.log(
+                            "loaded config",
+                            selectedColsSet,
+                            tempSelectedCols
+                          );
+                        }
+                        setFilters(config.filters || []);
                       }}
                       style={{
-                        backgroundColor:
-                          colors[Math.floor(Math.random() * colors.length)],
+                        backgroundColor: colors[i % colors.length],
                       }}
                       className={styles.config}
                     >
                       <h5>{config.name}</h5>
                       <p>{config.desc}</p>
+                      <DeleteForeverRoundedIcon
+                        className={styles.configDelete}
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setConfigToDelete(config);
+                        }}
+                      />
                     </div>
                   );
                 })}
@@ -1063,6 +1193,71 @@ export default function Insights() {
                   })}
                 /> */}
               </div>
+              <Snackbar
+                open={configToDelete}
+                autoHideDuration={5000}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                  zIndex: 9999,
+                }}
+                onClose={() => {
+                  setConfigToDelete(undefined);
+                }}
+              >
+                <Alert
+                  severity="warning"
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  action={
+                    <div>
+                      <LoadingButton
+                        color="warning"
+                        size="small"
+                        loading={deleteConfigLoading}
+                        style={{
+                          marginRight: 8,
+                        }}
+                        variant="outlined"
+                        onClick={async (e) => {
+                          setDeleteConfigLoading(true);
+                          await deleteDoc(
+                            doc(getFirestore(), "configs", configToDelete.id)
+                          );
+                          setUserConfigs(
+                            userConfigs.filter(
+                              (c) => c.id !== configToDelete.id
+                            )
+                          );
+                          setConfigToDelete(undefined);
+                          setTimeout(() => {
+                            setDeleteConfigLoading(false);
+                          }, 200);
+                        }}
+                      >
+                        Delete
+                      </LoadingButton>
+                      <Button
+                        size="small"
+                        color="inherit"
+                        onClick={async (e) => {
+                          setConfigToDelete(undefined);
+                        }}
+                        style={{
+                          opacity: 0.5,
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  }
+                >
+                  {`Delete config ${configToDelete?.name}?`}
+                </Alert>
+              </Snackbar>
             </>
           )}
         </>
