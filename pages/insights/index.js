@@ -43,13 +43,82 @@ let tempSelectedCols = [];
 let selectedColsSet = new Set();
 let selectedColsChanges = false;
 
-const sortByBearishCandles = (a, b) => {
-  return 0;
+function getLastInsightUpdateTime() {
+  const date = new Date();
+  const initialOffset = date.getTimezoneOffset();
+  date.setTime(date.getTime() + initialOffset * 60 * 1000); // utc
+  let estOffset = -300;
+  if (date.isDstObserved()) {
+    estOffset += 60;
+  }
+  date.setTime(date.getTime() + estOffset * 60 * 1000); // est
+  if (date.getHours() < 17) {
+    date.setTime(date.getTime() - 1000 * 60 * 60 * 24);
+  }
+  date.setHours(17, 0, 0, 0);
+  const dayOffsets = {
+    0: -2,
+    6: -1,
+  };
+  console.log("date before offset", date);
+  const offset = dayOffsets[date.getDay()];
+  console.log("offset is", offset);
+  if (offset) {
+    date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * offset);
+  }
+  console.log("date in eastern time", date);
+  date.setTime(date.getTime() - estOffset * 60 * 1000);
+  date.setTime(date.getTime() - initialOffset * 60 * 1000);
+  return date;
+}
+
+Date.prototype.stdTimezoneOffset = function () {
+  var jan = new Date(this.getFullYear(), 0, 1);
+  var jul = new Date(this.getFullYear(), 6, 1);
+  return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
 };
 
-const sortByBullishCandles = (a, b) => {
-  return 0;
+Date.prototype.isDstObserved = function () {
+  return this.getTimezoneOffset() < this.stdTimezoneOffset();
 };
+
+function blobToBase64(blob) {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = (result) => resolve(result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function downloadBlob(blob, name = "file.txt") {
+  // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
+  const blobUrl = URL.createObjectURL(blob);
+
+  // Create a link element
+  const link = document.createElement("a");
+
+  // Set link's href to point to the Blob URL
+  link.href = blobUrl;
+  link.download = name;
+
+  // Append link to the body
+  document.body.appendChild(link);
+
+  // Dispatch click event on the link
+  // This is necessary as link.click() does not work on the latest firefox
+  link.dispatchEvent(
+    new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    })
+  );
+
+  // Remove link from body
+  document.body.removeChild(link);
+}
+
+var workbook;
 
 let commonConfigurations = [
   {
@@ -169,6 +238,8 @@ export default function Insights() {
 
   const [configToDelete, setConfigToDelete] = useState(undefined);
   const [deleteConfigLoading, setDeleteConfigLoading] = useState(false);
+
+  const [exportLoading, setExportLoading] = useState(false);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -573,25 +644,42 @@ export default function Insights() {
                   window.location.href = "/pricing";
                   return;
                 }
-                const res = await fetch("/all.xlsx");
-                let start = new Date();
-                console.log("res", res);
-                var workbook = XLSX.read(
-                  new Uint8Array(await res.arrayBuffer()),
-                  {
+                const stored = window.localStorage.getItem("insightsTimestamp");
+                console.log("stored insights", stored);
+                if (
+                  !stored ||
+                  Date.parse(stored) < getLastInsightUpdateTime()
+                ) {
+                  console.log("found invalid old timestamp for insights");
+                  const res = await fetch("/all.xlsx");
+                  const blob = await res.clone().blob();
+                  const base64 = await blobToBase64(blob);
+                  const buffer = await res.arrayBuffer();
+                  window.localStorage.setItem(
+                    "insights",
+                    JSON.stringify(base64)
+                  );
+                  window.localStorage.setItem("insightsTimestamp", new Date());
+                  workbook = XLSX.read(new Uint8Array(buffer), {
                     type: "array",
-                  }
-                );
-                console.log("read workbook timer", new Date() - start);
-                start = new Date();
-                console.log(workbook);
+                  });
+                } else {
+                  // const res = await fetch(localStorage.getItem("insights"));
+                  // const buffer = await res.arrayBuffer();
+                  // workbook = XLSX.read(new Uint8Array(buffer), {
+                  //   type: "array",
+                  // });
+                  workbook = XLSX.read(
+                    localStorage.getItem("insights").split(",")[1],
+                    {
+                      type: "base64",
+                    }
+                  );
+                }
                 var first_worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                var data = XLSX.utils.sheet_to_json(first_worksheet, {
+                const data = XLSX.utils.sheet_to_json(first_worksheet, {
                   header: 1,
                 });
-                console.log("workbook to json timer", new Date() - start);
-                start = new Date();
-                console.log("xslx data", data);
                 const set = new Set(data[0]);
                 set.delete("Symbol");
                 const sorted = ["Symbol", ...Array.from(set).sort()];
@@ -604,12 +692,6 @@ export default function Insights() {
                 tempSelectedCols = [...withoutPercentiles];
                 setSelectedCols(withoutPercentiles);
                 setSortedCols(sorted);
-                console.log("sorted cols", sorted);
-                console.log(
-                  "set cols and sorted cols timer",
-                  new Date() - start
-                );
-                start = new Date();
                 const myRows = data.slice(1).map((row) => {
                   const obj = {};
                   for (let i = 0; i < data[0].length; i++) {
@@ -617,8 +699,6 @@ export default function Insights() {
                   }
                   return obj;
                 });
-                console.log("transform rows timer", new Date() - start);
-                start = new Date();
                 // let rows = [];
                 // for (const row of data.slice(1)) {
                 //   const obj = {};
@@ -647,7 +727,6 @@ export default function Insights() {
                 }
 
                 setRows(myRows);
-                console.log("set rows timer", new Date() - start);
                 setDownloading(false);
                 window.onbeforeunload = function () {
                   return "test";
@@ -845,9 +924,28 @@ export default function Insights() {
                   >
                     Columns
                   </Button>
-                  <Button size="small" variant="outlined" color="success">
+                  <LoadingButton
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                    loading={exportLoading}
+                    onClick={async (e) => {
+                      setExportLoading(true);
+                      const now = new Date();
+                      XLSX.writeFile(
+                        workbook,
+                        `Investivision Insights ${
+                          now.getMonth() + 1
+                        }-${now.getDate()}-${now.getFullYear()}.xlsx`,
+                        {
+                          compression: true,
+                        }
+                      );
+                      setExportLoading(false);
+                    }}
+                  >
                     Export
-                  </Button>
+                  </LoadingButton>
                 </div>
                 <Grid
                   cols={selectedCols}
