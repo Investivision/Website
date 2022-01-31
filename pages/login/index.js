@@ -167,6 +167,7 @@ export default function Login() {
               style={{
                 cursor: "pointer",
               }}
+              className={styles.reset}
             >
               Reset or generate password
             </p>
@@ -190,6 +191,7 @@ export default function Login() {
           variant="contained"
           className={styles.submit}
           color="primary"
+          size="large"
           type="submit"
           disabled={!(email && password && (isLogin || checked))}
           onClick={handleSubmit}
