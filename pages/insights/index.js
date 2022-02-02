@@ -13,6 +13,7 @@ import {
   where,
   deleteDoc,
 } from "firebase/firestore";
+import { getStorage, ref, getBlob } from "firebase/storage";
 import firebase, { auth, formatErrorCode } from "../../firebase";
 import Skeleton from "@mui/material/Skeleton";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -35,6 +36,7 @@ import { v4 as uuidv4 } from "uuid";
 import { common } from "@mui/material/colors";
 import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
+import ExtView from "../ext";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -83,9 +85,13 @@ Date.prototype.isDstObserved = function () {
 };
 
 function blobToBase64(blob) {
+  console.log("blob before base64", blob);
   return new Promise((resolve, _) => {
     const reader = new FileReader();
-    reader.onloadend = (result) => resolve(result);
+    reader.onloadend = (result) => {
+      console.log("blog to base64", result.currentTarget.result);
+      resolve(result.currentTarget.result);
+    };
     reader.readAsDataURL(blob);
   });
 }
@@ -165,6 +171,13 @@ let commonConfigurations = [
     ],
     cols: ["Support, 3mo", "Resistance, 3mo", "Last Close"],
   },
+  {
+    name: "High Volatility Movers",
+    desc: "Choppy prices with extreme movements",
+    sort: ["True Range, 1yr", "asc"],
+    filters: [],
+    cols: ["True Range, 1yr", "Beta, 1yr", "Resistance, 3mo", "Support, 3mo"],
+  },
   // {
   //   name: "Short-Term Bearish Candles",
   //   sort: sortByBearishCandles,
@@ -243,8 +256,29 @@ export default function Insights() {
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-      setUserLoaded(true);
+      if (user) {
+        const token = await auth.currentUser.getIdTokenResult(true);
+        if (token.claims.role !== "buffet") {
+          setUser(undefined);
+          setUserLoaded(true);
+        } else {
+          setUser(user);
+          setUserLoaded(true);
+          const stored = window.localStorage.getItem("insightsTimestamp");
+          console.log("stored insights", stored);
+          if (stored && Date.parse(stored) > getLastInsightUpdateTime()) {
+            setDownloading(true);
+            extractWorkbook(
+              XLSX.read(localStorage.getItem("insights").split(",")[1], {
+                type: "base64",
+              })
+            );
+          }
+        }
+      } else {
+        setUser(undefined);
+        setUserLoaded(true);
+      }
     });
   }, []);
 
@@ -254,6 +288,75 @@ export default function Insights() {
       setFirstConfigWidth(firstConfigRef.current.clientWidth);
     }
   }, [rows]);
+
+  const extractWorkbook = async (wb) => {
+    workbook = wb;
+    var first_worksheet = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(first_worksheet, {
+      header: 1,
+    });
+    const set = new Set(data[0]);
+    set.delete("Symbol");
+    const sorted = ["Symbol", ...Array.from(set).sort()];
+    set.add("Symbol");
+    setCols(set);
+    const withoutPercentiles = sorted.filter((col) => !col.includes("%ile"));
+    selectedColsSet = new Set(withoutPercentiles);
+    tempSelectedCols = [...withoutPercentiles];
+    setSelectedCols(withoutPercentiles);
+    setSortedCols(sorted);
+    const myRows = data.slice(1).map((row) => {
+      const obj = {};
+      for (let i = 0; i < data[0].length; i++) {
+        obj[data[0][i]] = row[i];
+      }
+      return obj;
+    });
+    try {
+      console.log("uid is", auth.currentUser.uid);
+      const remoteConfigsRes = await getDocs(
+        query(
+          collection(getFirestore(), "configs"),
+          where("uid", "==", auth.currentUser.uid)
+        )
+      );
+
+      const freshRemoteConfigs = [];
+      remoteConfigsRes.forEach((doc) => {
+        freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
+      });
+
+      setUserConfigs(freshRemoteConfigs);
+    } catch (e) {
+      console.error("error getting user configs", e);
+    }
+
+    setRows(myRows);
+
+    try {
+      console.log("uid is", user.uid);
+      const remoteConfigsRes = await getDocs(
+        query(
+          collection(getFirestore(), "configs"),
+          where("uid", "==", user.uid)
+        )
+      );
+
+      const freshRemoteConfigs = [];
+      remoteConfigsRes.forEach((doc) => {
+        freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
+      });
+
+      setUserConfigs(freshRemoteConfigs);
+    } catch (e) {
+      console.error("error getting user configs", e);
+    }
+
+    setDownloading(false);
+    window.onbeforeunload = function () {
+      return "test";
+    };
+  };
 
   const handleControlChange = () => {
     if (filterChanges) {
@@ -300,13 +403,13 @@ export default function Insights() {
           "hsl(200, 100%, 27%)",
         ]
       : [
-          "hsl(165, 60%, 55%)",
-          "hsl(170, 60%, 54%)",
-          "hsl(175, 60%, 52%)",
-          "hsl(180, 60%, 54%)",
-          "hsl(190, 60%, 55%)",
-          "hsl(195, 60%, 56%)",
-          "hsl(200, 60%, 57%)",
+          "hsl(165, 75%, 80%)",
+          "hsl(170, 75%, 79%)",
+          "hsl(175, 75%, 77%)",
+          "hsl(180, 75%, 79%)",
+          "hsl(190, 75%, 80%)",
+          "hsl(195, 75%, 81%)",
+          "hsl(200, 75%, 82%)",
         ];
 
   // if (theme.palette.mode && !commonConfigurations[0].color) {
@@ -635,102 +738,20 @@ export default function Insights() {
               loading={downloading}
               onClick={async () => {
                 setDownloading(true);
-                if (!auth.currentUser) {
+                if (!user) {
                   window.location.href = "/pricing";
                   return;
                 }
-                const token = await auth.currentUser.getIdTokenResult(true);
-                if (token.claims.role !== "buffet") {
-                  window.location.href = "/pricing";
-                  return;
-                }
-                const stored = window.localStorage.getItem("insightsTimestamp");
-                console.log("stored insights", stored);
-                if (
-                  !stored ||
-                  Date.parse(stored) < getLastInsightUpdateTime()
-                ) {
-                  console.log("found invalid old timestamp for insights");
-                  const res = await fetch("/all.xlsx");
-                  const blob = await res.clone().blob();
-                  const base64 = await blobToBase64(blob);
-                  const buffer = await res.arrayBuffer();
-                  window.localStorage.setItem(
-                    "insights",
-                    JSON.stringify(base64)
-                  );
-                  window.localStorage.setItem("insightsTimestamp", new Date());
-                  workbook = XLSX.read(new Uint8Array(buffer), {
-                    type: "array",
-                  });
-                } else {
-                  // const res = await fetch(localStorage.getItem("insights"));
-                  // const buffer = await res.arrayBuffer();
-                  // workbook = XLSX.read(new Uint8Array(buffer), {
-                  //   type: "array",
-                  // });
-                  workbook = XLSX.read(
-                    localStorage.getItem("insights").split(",")[1],
-                    {
-                      type: "base64",
-                    }
-                  );
-                }
-                var first_worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const data = XLSX.utils.sheet_to_json(first_worksheet, {
-                  header: 1,
-                });
-                const set = new Set(data[0]);
-                set.delete("Symbol");
-                const sorted = ["Symbol", ...Array.from(set).sort()];
-                set.add("Symbol");
-                setCols(set);
-                const withoutPercentiles = sorted.filter(
-                  (col) => !col.includes("%ile")
+                const blob = await getBlob(ref(getStorage(), "/all.xlsx"));
+                console.log("blob from firebase", blob);
+                const base64 = await blobToBase64(blob);
+                window.localStorage.setItem("insights", JSON.stringify(base64));
+                window.localStorage.setItem("insightsTimestamp", new Date());
+                extractWorkbook(
+                  XLSX.read(base64.split(",")[1], {
+                    type: "base64",
+                  })
                 );
-                selectedColsSet = new Set(withoutPercentiles);
-                tempSelectedCols = [...withoutPercentiles];
-                setSelectedCols(withoutPercentiles);
-                setSortedCols(sorted);
-                const myRows = data.slice(1).map((row) => {
-                  const obj = {};
-                  for (let i = 0; i < data[0].length; i++) {
-                    obj[data[0][i]] = row[i];
-                  }
-                  return obj;
-                });
-                // let rows = [];
-                // for (const row of data.slice(1)) {
-                //   const obj = {};
-                //   for (let i = 0; i < data[0].length; i++) {
-                //     obj[data[0][i]] = row[i];
-                //   }
-                //   rows.push(obj);
-                // }
-                try {
-                  console.log("uid is", user.uid);
-                  const remoteConfigsRes = await getDocs(
-                    query(
-                      collection(getFirestore(), "configs"),
-                      where("uid", "==", user.uid)
-                    )
-                  );
-
-                  const freshRemoteConfigs = [];
-                  remoteConfigsRes.forEach((doc) => {
-                    freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
-                  });
-
-                  setUserConfigs(freshRemoteConfigs);
-                } catch (e) {
-                  console.error("error getting user configs", e);
-                }
-
-                setRows(myRows);
-                setDownloading(false);
-                window.onbeforeunload = function () {
-                  return "test";
-                };
               }}
               disabled={rows !== undefined}
             >
@@ -742,152 +763,147 @@ export default function Insights() {
             <>
               <h3>Common Configurations</h3>
               <div className={styles.configContainer}>
-                <div
-                  className={styles.spacer}
-                  style={
-                    firstConfigRef.current
-                      ? {
-                          minWidth: `calc(50% - ${
-                            firstConfigWidth / 2 + 10
-                          }px)`,
-                        }
-                      : {}
-                  }
-                ></div>
-                {commonConfigurations.map((config, i) => {
-                  return (
-                    <div
-                      key={i}
-                      ref={i == 0 ? firstConfigRef : null}
-                      onClick={() => {
-                        if (config.sort) {
-                          setSortAttr(config.sort[0]);
-                          setSortDir(config.sort[1]);
-                        }
-                        if (config.cols) {
-                          const columns = ["Symbol", ...config.cols];
-                          setSelectedCols(columns);
-                          selectedColsSet = new Set(columns);
-                          tempSelectedCols = [...columns];
-                          setCheckboxRerender(checkboxRerender + 1);
-                          console.log(
-                            "loaded config",
-                            selectedColsSet,
-                            tempSelectedCols
-                          );
-                        }
-                        if (config.filters) {
-                          setFilters(config.filters);
-                        }
-                      }}
-                      style={{
-                        backgroundColor: colors[i % colors.length],
-                      }}
-                      className={styles.config}
-                    >
-                      <h5>{config.name}</h5>
-                      <p>{config.desc}</p>
-                    </div>
-                  );
-                })}
+                <div className={styles.configCenter}>
+                  {commonConfigurations.map((config, i) => {
+                    return (
+                      <div
+                        key={i}
+                        ref={i == 0 ? firstConfigRef : null}
+                        onClick={() => {
+                          if (config.sort) {
+                            setSortAttr(config.sort[0]);
+                            setSortDir(config.sort[1]);
+                          }
+                          if (config.cols) {
+                            const columns = ["Symbol", ...config.cols];
+                            setSelectedCols(columns);
+                            selectedColsSet = new Set(columns);
+                            tempSelectedCols = [...columns];
+                            setCheckboxRerender(checkboxRerender + 1);
+                            console.log(
+                              "loaded config",
+                              selectedColsSet,
+                              tempSelectedCols
+                            );
+                          }
+                          if (config.filters) {
+                            setFilters(config.filters);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: colors[i % colors.length],
+                        }}
+                        className={styles.config}
+                      >
+                        <h5>{config.name}</h5>
+                        <p>{config.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
               <h3>Your Configurations</h3>
               <div className={styles.configContainer}>
-                <div
-                  className={styles.spacer}
-                  style={
-                    firstConfigRef.current
-                      ? {
-                          minWidth: `calc(50% - ${
-                            firstConfigWidth / 2 + 10 + 160
-                          }px)`,
-                        }
-                      : {}
-                  }
-                ></div>
-                <div className={`${styles.config} ${styles.configAdd}`}>
-                  <TextField
-                    // label="Name"
-                    placeholder="Name"
-                    size="small"
-                    variant="standard"
-                    value={newConfigName}
-                    onChange={(e) => setNewConfigName(e.target.value)}
-                  ></TextField>
-                  <TextField
-                    placeholder="Description"
-                    size="small"
-                    variant="standard"
-                    value={newConfigDesc}
-                    onChange={(e) => setNewConfigDesc(e.target.value)}
-                  ></TextField>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    disabled={!newConfigName || !newConfigDesc}
-                    onClick={async () => {
-                      const obj = {
-                        name: newConfigName,
-                        sort: [sortAttr, sortDir],
-                        cols: selectedCols.filter((col) => col !== "Symbol"),
-                        desc: newConfigDesc,
-                        uid: user.uid,
-                      };
-                      const filts = filters.filter((filt) => {
-                        return filt.feature && filt.relation && filt.valid;
-                      });
-                      if (filts.length) {
-                        obj.filters = filts;
-                      }
-                      const key = user.uid + "-" + uuidv4().replaceAll("-", "");
-                      await setDoc(doc(getFirestore(), "configs", key), obj);
-                      setUserConfigs([{ ...obj, id: key }, ...userConfigs]);
-                    }}
-                  >
-                    Add
-                  </Button>
-                </div>
-                {userConfigs.map((config, i) => {
-                  return (
+                <div className={styles.configCenter}>
+                  <div className={`${styles.config} ${styles.configAdd}`}>
+                    <TextField
+                      // label="Name"
+                      placeholder="Name"
+                      size="small"
+                      variant="standard"
+                      value={newConfigName}
+                      onChange={(e) => setNewConfigName(e.target.value)}
+                    ></TextField>
+                    <TextField
+                      placeholder="Description"
+                      size="small"
+                      variant="standard"
+                      value={newConfigDesc}
+                      onChange={(e) => setNewConfigDesc(e.target.value)}
+                    ></TextField>
                     <div
-                      key={i}
-                      onClick={() => {
-                        if (config.sort) {
-                          setSortAttr(config.sort[0]);
-                          setSortDir(config.sort[1]);
-                        }
-                        if (config.cols) {
-                          const columns = ["Symbol", ...config.cols];
-                          setSelectedCols(columns);
-                          selectedColsSet = new Set(columns);
-                          tempSelectedCols = [...columns];
-                          setCheckboxRerender(checkboxRerender + 1);
-                          console.log(
-                            "loaded config",
-                            selectedColsSet,
-                            tempSelectedCols
-                          );
-                        }
-                        setFilters(config.filters || []);
-                      }}
                       style={{
-                        backgroundColor: colors[i % colors.length],
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "100%",
                       }}
-                      className={styles.config}
                     >
-                      <h5>{config.name}</h5>
-                      <p>{config.desc}</p>
-                      <DeleteForeverRoundedIcon
-                        className={styles.configDelete}
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setConfigToDelete(config);
+                      <Button
+                        size="small"
+                        variant="contained"
+                        disabled={!newConfigName || !newConfigDesc}
+                        onClick={async () => {
+                          const obj = {
+                            name: newConfigName,
+                            sort: [sortAttr, sortDir],
+                            cols: selectedCols.filter(
+                              (col) => col !== "Symbol"
+                            ),
+                            desc: newConfigDesc,
+                            uid: user.uid,
+                          };
+                          const filts = filters.filter((filt) => {
+                            return filt.feature && filt.relation && filt.valid;
+                          });
+                          if (filts.length) {
+                            obj.filters = filts;
+                          }
+                          const key =
+                            user.uid + "-" + uuidv4().replaceAll("-", "");
+                          await setDoc(
+                            doc(getFirestore(), "configs", key),
+                            obj
+                          );
+                          setUserConfigs([{ ...obj, id: key }, ...userConfigs]);
                         }}
-                      />
+                      >
+                        Add
+                      </Button>
                     </div>
-                  );
-                })}
+                  </div>
+                  {userConfigs.map((config, i) => {
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          if (config.sort) {
+                            setSortAttr(config.sort[0]);
+                            setSortDir(config.sort[1]);
+                          }
+                          if (config.cols) {
+                            const columns = ["Symbol", ...config.cols];
+                            setSelectedCols(columns);
+                            selectedColsSet = new Set(columns);
+                            tempSelectedCols = [...columns];
+                            setCheckboxRerender(checkboxRerender + 1);
+                            console.log(
+                              "loaded config",
+                              selectedColsSet,
+                              tempSelectedCols
+                            );
+                          }
+                          setFilters(config.filters || []);
+                        }}
+                        style={{
+                          backgroundColor: colors[i % colors.length],
+                        }}
+                        className={styles.config}
+                      >
+                        <h5>{config.name}</h5>
+                        <p>{config.desc}</p>
+                        <DeleteForeverRoundedIcon
+                          className={styles.configDelete}
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setConfigToDelete(config);
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
               <div
@@ -907,7 +923,9 @@ export default function Insights() {
                       e.stopPropagation();
                     }}
                     variant="outlined"
-                    color="secondary"
+                    color={
+                      theme.palette.mode == "dark" ? "secondary" : "primary"
+                    }
                   >
                     Filters
                   </Button>
@@ -920,7 +938,9 @@ export default function Insights() {
                       e.stopPropagation();
                     }}
                     variant="outlined"
-                    color="secondary"
+                    color={
+                      theme.palette.mode == "dark" ? "secondary" : "primary"
+                    }
                   >
                     Columns
                   </Button>
@@ -1046,7 +1066,10 @@ export default function Insights() {
                         <ToggleButton
                           value="All"
                           sx={{
-                            backgroundColor: theme.palette.primary.dark,
+                            backgroundColor:
+                              theme.palette.mode == "dark"
+                                ? theme.palette.primary.dark
+                                : theme.palette.primary.main,
                           }}
                         >
                           All
@@ -1061,7 +1084,10 @@ export default function Insights() {
                         <ToggleButton
                           value="None"
                           sx={{
-                            backgroundColor: theme.palette.primary.dark,
+                            backgroundColor:
+                              theme.palette.mode == "dark"
+                                ? theme.palette.primary.dark
+                                : theme.palette.primary.main,
                           }}
                         >
                           None
@@ -1075,7 +1101,11 @@ export default function Insights() {
                               onChange={(e) =>
                                 setShowPercentiles(e.target.checked)
                               }
-                              color="secondary"
+                              color={
+                                theme.palette.mode == "dark"
+                                  ? "secondary"
+                                  : "primary"
+                              }
                               sx={{
                                 "& .MuiSvgIcon-root": {
                                   fontSize: 22,
@@ -1103,7 +1133,10 @@ export default function Insights() {
                         <ToggleButton
                           value="All"
                           sx={{
-                            backgroundColor: theme.palette.primary.dark,
+                            backgroundColor:
+                              theme.palette.mode == "dark"
+                                ? theme.palette.primary.dark
+                                : theme.palette.primary.main,
                           }}
                         >
                           All
@@ -1118,7 +1151,10 @@ export default function Insights() {
                         <ToggleButton
                           value="None"
                           sx={{
-                            backgroundColor: theme.palette.primary.dark,
+                            backgroundColor:
+                              theme.palette.mode == "dark"
+                                ? theme.palette.primary.dark
+                                : theme.palette.primary.main,
                           }}
                         >
                           None

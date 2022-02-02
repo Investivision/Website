@@ -19,14 +19,18 @@
 }
 
 .div thead tr > th {
-  background: rgb(0, 6, 26);
+  background: rgb(232, 240, 255);
   position: sticky;
   z-index: 2;
   top: 0;
   padding-left: 6px;
   transition: border-width 0.1s ease;
-  border: 0px solid transparent;
+  /* border: 0px solid transparent; */
   /* border-left: 4px solid transparent; */
+}
+
+:global(.dark-mode) .div thead tr > th {
+  background: rgb(0, 6, 26);
 }
 
 .div thead tr > :first-child {
@@ -36,26 +40,53 @@
 }
 
 .div td,
-.div tr {
+.div th {
+  border: 0.5px solid rgb(205, 208, 221);
+}
+
+:global(.dark-mode) :is(.div td, .div th) {
   border: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 .div tbody tr > :first-child {
-  background: rgb(0, 6, 26);
+  background: rgb(232, 240, 255);
   position: sticky;
   z-index: 1;
   left: 0;
 }
 
+:global(.dark-mode) .div tbody tr > :first-child {
+  background: rgb(0, 6, 26);
+}
+
 .div td {
   padding: 3px 6px;
-  max-width: 200px;
+}
+
+.capWidth {
   text-overflow: ellipsis;
   overflow: hidden; /* for IE */
+  max-width: 250px;
 }
 
 .div tbody tr:hover td:not(:first-child) {
+  background-color: rgba(0, 0, 0, 0.07);
+}
+
+.div tbody td:not(:first-child) {
+  opacity: 0.6;
+}
+
+:global(.dark-mode) .div tbody tr:hover td:not(:first-child) {
   background-color: rgba(255, 255, 255, 0.09);
+}
+
+.div tr > :first-child {
+  padding-left: 10px;
+}
+
+.div tr > :last-child {
+  padding-right: 10px;
 }
 
 .overlay {
@@ -65,10 +96,14 @@
   width: 100%;
   height: 100%;
   z-index: 3;
-  background-color: rgb(6, 10, 22);
+  background-color: rgb(238, 245, 255);
   padding: 30px;
   transition: opacity 0.2s ease;
   overflow: scroll;
+}
+
+:global(.dark-mode) .overlay {
+  background-color: rgb(6, 10, 22);
 }
 
 .overlay > div {
@@ -104,13 +139,24 @@
   border: none;
   padding: 2px 6px;
   flex: 1;
-  opacity: 0.6;
+  opacity: 0.8;
   font-size: 13px;
+  transition: background-color 0.13s ease;
+}
+
+:global(.dark-mode) .overlay :global(.MuiToggleButtonGroup-root) > button {
+  opacity: 0.6;
 }
 
 .overlay
   :is(:global(button.Mui-selected), button:first-child, button:last-child) {
   opacity: 1 !important;
+}
+
+.overlay
+  :global(.MuiToggleButtonGroup-root)
+  :is(button:first-child, button:last-child) {
+  color: white;
 }
 
 .overlay :global(#timeFrameToggle) {

@@ -8,25 +8,35 @@
 
 .body h2 {
   font-size: 16px;
-  margin: -10px 0 10px 0;
+  margin: -20px 0 10px 0;
   opacity: 0.4;
+  padding: 0 20px;
+  line-height: 140%;
+  text-align: center;
 }
 
 .body h3 {
   font-size: 20px;
-  margin: 28px 0 22px 0;
+  margin: 20px 0 22px 0;
 }
 
 .configContainer {
   display: flex;
-  gap: 10px;
   width: 100%;
+  justify-content: center;
+}
+
+.configCenter {
+  display: flex;
+  gap: 10px;
   overflow-x: scroll;
   margin-top: -14px;
   padding: 14px 30px;
   /* padding-bottom: 14px;   */
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  /* background-color: red; */
+  max-width: 100%;
 }
 
 .configContainer::-webkit-scrollbar {
@@ -98,7 +108,7 @@
 }
 
 .configAdd {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: rgba(0, 0, 0, 0.05);
   min-width: 300px;
   transition: opacity 0.2s ease;
   opacity: 1;

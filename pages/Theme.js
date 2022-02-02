@@ -18,7 +18,9 @@ export default function Theme(props) {
     }
   }, []);
 
-  const manuallyToggleTheme = () => {
+  const manuallyToggleTheme = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     let newMode;
     if (storedPrefersDark === undefined) {
       newMode = !envPrefersDark;

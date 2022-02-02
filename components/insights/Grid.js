@@ -1,10 +1,16 @@
 import { useMemo } from "react";
 import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
+import { useTheme } from "@mui/material/styles";
 
 let draggedPosition;
 
 const toPercentage = (value) => {
+  const val = Math.round(value * 100 * 10) / 10;
+  return val + "%";
+};
+
+const toPercentageChange = (value) => {
   const val = Math.round(value * 100 * 10) / 10;
   if (val >= 0) {
     return "+" + val + "%";
@@ -41,16 +47,16 @@ const controlMap = {
 // };
 
 const getColFormatters = (cols) => {
-  const percentages = [
+  const percentageChanges = [
     "%ile",
     "Alpha",
-    "Beta",
     "Forecast",
     "Drawdown",
     "Max Gain",
     "Resistance",
     "Support",
   ];
+  const percentages = ["Beta"];
   const rounding = ["Sharpe", "True Range"];
   const out = {};
   cols.forEach((col) => {
@@ -58,6 +64,21 @@ const getColFormatters = (cols) => {
     const originalCol = col;
     col = col.replace(", ", " ");
     const words = new Set(col.split(" "));
+    for (let target of percentageChanges) {
+      // check that all words exist
+      target = target.split(" ");
+      let foundMatch = true;
+      for (const t of target) {
+        if (!words.has(t)) {
+          foundMatch = false;
+          break;
+        }
+      }
+      if (foundMatch) {
+        out[originalCol] = toPercentageChange;
+        return;
+      }
+    }
     for (let target of percentages) {
       target = target.split(" ");
       let foundMatch = true;
@@ -106,6 +127,8 @@ export default function Grid(props) {
   }, [props.allCols]);
   console.log("colFormatters", colFormatters);
 
+  const theme = useTheme();
+
   const rowComponents = useMemo(() => {
     return props.rows.slice(0, 20).map((row) => {
       const cells = [];
@@ -114,7 +137,11 @@ export default function Grid(props) {
         if (val) {
           console.log("push cell", col, val, colFormatters);
           console.log(val, colFormatters[col](val));
-          cells.push(<td>{colFormatters[col](val)}</td>);
+          cells.push(
+            <td className={col == "Name" ? styles.capWidth : ""}>
+              {colFormatters[col](val)}
+            </td>
+          );
         } else {
           cells.push(<td></td>);
         }
@@ -174,14 +201,16 @@ export default function Grid(props) {
                       e.preventDefault();
                     }}
                     onDragLeave={(e) => {
-                      e.target.style.border = "0px solid transparent";
+                      e.target.style.borderLeft = "0px solid transparent";
+                      e.target.style.borderRight = "0px solid transparent";
                     }}
                     onDrop={(e) => {
                       if (i == 0) {
                         return;
                       }
                       console.log("drop", e.target.innerText);
-                      e.target.style.border = "0px solid transparent";
+                      e.target.style.borderLeft = "0px solid transparent";
+                      e.target.style.borderRight = "0px solid transparent";
                       if (i > draggedPosition) {
                         const newOrder = [
                           ...props.cols.slice(0, draggedPosition),
