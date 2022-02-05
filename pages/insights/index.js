@@ -37,6 +37,7 @@ import { common } from "@mui/material/colors";
 import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
 import ExtView from "../ext";
+import candleMap from "../../components/insights/candleMap";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -73,6 +74,20 @@ function getLastInsightUpdateTime() {
   date.setTime(date.getTime() - initialOffset * 60 * 1000);
   return date;
 }
+
+// extend the string prototype to title case
+String.prototype.toTitleCase = function () {
+  return this.replace(/\w\S*/g, function (txt) {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+};
+
+// String.prototype.toTitleCase = () => {
+//   console.log("toTitleCase", this);
+//   return this.replace(/\w\S*/g, function (txt) {
+//     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+//   });
+// };
 
 Date.prototype.stdTimezoneOffset = function () {
   var jan = new Date(this.getFullYear(), 0, 1);
@@ -195,9 +210,9 @@ let prevSortedRows = undefined;
 const getColValuesForSort = (cols) => {
   const out = {};
   cols.forEach((col) => {
-    if (col.includes("patterns")) {
+    if (col.includes("Patterns")) {
       out[col] = (val) => {
-        return val.length;
+        return val?.length || 0;
       };
       return;
     }
@@ -292,11 +307,113 @@ export default function Insights() {
   const extractWorkbook = async (wb) => {
     workbook = wb;
     var first_worksheet = wb.Sheets[wb.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(first_worksheet, {
+    let data = XLSX.utils.sheet_to_json(first_worksheet, {
       header: 1,
     });
-    const set = new Set(data[0]);
+    // const rawCols = data[0];
+    console.log("raw data", data);
+
+    // data = [data[0]].concat(
+    //   data.slice(1).map((row) => {
+    //     row = { ...row };
+    //     for (const timeFrame of ["3mo", "1", "5", "10"]) {
+    //       const colName = `pattern_${timeFrame}`;
+    //       const rawStr = row[colName];
+    //       if (rawStr) {
+    //         const bullish = [];
+    //         const bearish = [];
+    //         const list = JSON.parse(rawStr);
+    //         for (const [key, value] of Object.entries(list)) {
+    //           if (value > 0) {
+    //             bullish.push(candleMap[key]);
+    //           } else {
+    //             bearish.push(candleMap[key]);
+    //           }
+    //         }
+    //         delete row[colName];
+    //         const split = colName.split("_");
+    //         row["Bullish Pattern" + split[1]] = bullish.join(", ");
+    //         row["Bearish Pattern" + split[1]] = bearish.join(", ");
+    //       }
+    //     }
+    //     return row;
+    //   })
+    // );
+    // console.log("data after formatting", data);
+    const formattedCols = data[0].map((col) => {
+      //   original = col
+      // #     col = col.title().replace('Res_', 'Resistance_').replace(
+      // #         'Sup_', 'Support_').replace('%_', ' %ile_').replace('Lastclose', 'Last Close').replace('Drawup', 'Max Gain').replace('P_', 'AI Forecast_').replace('Pr_', 'Forecast Range_').replace('P %', 'AI Forecast %').replace('Pr 5', 'Forecast Range %').replace('Natr', 'True Range').replace('3Mo', '3mo')
+      // #     if col.endswith('_10'):
+      // #         col = col.replace('_10', '_10yr')
+      // #     elif col.endswith('_1'):
+      // #         col = col.replace('_1', '_1yr')
+      // #     col = col.replace('_5', '_5yr').replace('_', ', ')
+      // #     if 'Forecast' in col:
+      // #         col = col.replace(', ', ' in ')
+      // #     nameChanges[original] = col
+      let out = col
+        .toTitleCase()
+        .replace("Res_", "Resistance_")
+        .replace("Sup_", "Support_")
+        .replace("%_", " %ile_")
+        .replace("Lastclose", "Last Close")
+        .replace("Drawup", "Max Gain")
+        .replace("P_", "AI Forecast_")
+        .replace("Pr_", "Forecast Range_")
+        .replace("P %", "AI Forecast %")
+        .replace("Pr 5", "Forecast Range %")
+        .replace("Natr", "True Range")
+        .replace("3Mo", "3mo");
+      if (out.endsWith("_10")) {
+        out = out.replace("_10", "_10yr");
+      } else if (out.endsWith("_1")) {
+        out = out.replace("_1", "_1yr");
+      } else if (out.endsWith("_5")) {
+        out = out.replace("_5", "_5yr");
+      }
+      out = out.replace("_", ", ");
+      if (out.includes("Forecast")) {
+        out = out.replace(", ", " in ");
+      }
+      return out;
+    });
+    const myRows = data.slice(1).map((row) => {
+      const obj = {};
+      for (let i = 0; i < formattedCols.length; i++) {
+        if (row[i]) {
+          if (formattedCols[i].includes("Pattern")) {
+            let rawStr = row[i];
+            if (rawStr) {
+              const bullish = [];
+              const bearish = [];
+              rawStr = rawStr.replaceAll("'", '"');
+              const list = JSON.parse(rawStr);
+              for (const [key, value] of Object.entries(list)) {
+                if (value > 0) {
+                  bullish.push(candleMap[key]);
+                } else {
+                  bearish.push(candleMap[key]);
+                }
+              }
+              const split = formattedCols[i].split("Pattern");
+              obj["Bullish Patterns" + split[1]] = bullish;
+              obj["Bearish Patterns" + split[1]] = bearish;
+            }
+          } else {
+            obj[formattedCols[i]] = row[i];
+          }
+        }
+      }
+      return obj;
+    });
+    const set = new Set(formattedCols);
     set.delete("Symbol");
+    for (const timeFrame of ["3mo", "1yr", "5yr", "10yr"]) {
+      set.delete("Pattern, " + timeFrame);
+      set.add("Bullish Patterns, " + timeFrame);
+      set.add("Bearish Patterns, " + timeFrame);
+    }
     const sorted = ["Symbol", ...Array.from(set).sort()];
     set.add("Symbol");
     setCols(set);
@@ -305,13 +422,8 @@ export default function Insights() {
     tempSelectedCols = [...withoutPercentiles];
     setSelectedCols(withoutPercentiles);
     setSortedCols(sorted);
-    const myRows = data.slice(1).map((row) => {
-      const obj = {};
-      for (let i = 0; i < data[0].length; i++) {
-        obj[data[0][i]] = row[i];
-      }
-      return obj;
-    });
+    console.log("sortedCols", sorted);
+    console.log("myRows", myRows);
     try {
       console.log("uid is", auth.currentUser.uid);
       const remoteConfigsRes = await getDocs(
@@ -656,6 +768,7 @@ export default function Insights() {
         console.log("ignoring filter", filter);
       }
     }
+    console.log("new filtered rows", filtered);
     return filtered;
   }, [filters, sortedRows]);
 
@@ -742,7 +855,7 @@ export default function Insights() {
                   window.location.href = "/pricing";
                   return;
                 }
-                const blob = await getBlob(ref(getStorage(), "/all.xlsx"));
+                const blob = await getBlob(ref(getStorage(), "/all_raw.xlsx"));
                 console.log("blob from firebase", blob);
                 const base64 = await blobToBase64(blob);
                 window.localStorage.setItem("insights", JSON.stringify(base64));
@@ -1316,7 +1429,7 @@ export default function Insights() {
                   disableColumnFilter
                   disableColumnSelector
                   rows={rows.map((row) => {
-                    return { id: row.Symbol, ...row };
+                    return { id: row.symbol, ...row };
                   })}
                   columns={sortedCols.map((col) => {
                     return {

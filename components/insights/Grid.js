@@ -27,10 +27,7 @@ const noop = (value) => {
 };
 
 const toList = (value) => {
-  return value
-    .substring(1, value.length - 1)
-    .replaceAll("'", "")
-    .replaceAll('"', "");
+  return value.join(", ");
 };
 
 const controlMap = {
