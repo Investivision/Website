@@ -331,6 +331,7 @@ export default function Insights() {
             : row[i];
         }
       }
+      obj.notes = "";
       console.log("rawObj", obj);
       rawData[obj.symbol] = obj;
     });

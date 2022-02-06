@@ -10,8 +10,7 @@ import styles from "./report.module.css";
 import Pivots from "./Pivots";
 import ToolTip from "./ToolTip";
 import InfoIcon from "@material-ui/icons/Info";
-
-let autosaveInterval;
+import TextArea from "./TextArea";
 
 function UpgradeButton(props) {
   return (
@@ -29,18 +28,7 @@ function UpgradeButton(props) {
   );
 }
 
-let savedValue;
-
 export default function Report(props) {
-  const [notesText, setNotesText] = useState(props.global.notes);
-  const [saved, setSaved] = useState(true);
-
-  useEffect(() => {
-    setNotesText(props.global.notes);
-  }, [props.global.notes]);
-
-  console.log("ReportData", props);
-
   return (
     <div className={styles.report}>
       <h3>Growth</h3>
@@ -215,53 +203,12 @@ export default function Report(props) {
       )}
       <h3>Notes</h3>
       {props.global.notes !== undefined ? (
-        <>
-          <p
-            style={{
-              marginTop: -16,
-              marginBottom: 16,
-              fontSize: 12,
-              opacity: 0.3,
-            }}
-          >
-            {saved ? "Saved" : "Syncing..."}
-          </p>
-          <textarea
-            placeholder="In January, set limit sell order."
-            value={notesText}
-            onChange={(e) => {
-              setNotesText(e.target.value);
-              setSaved(e.target.value == savedValue);
-            }}
-            onFocus={() => {
-              autosaveInterval = setInterval(() => {
-                const curr = notesText;
-                if (curr !== savedValue) {
-                  props.port.postMessage({
-                    symbol: props.global.symbol,
-                    notes: curr,
-                  });
-                  console.log("new saved value is", curr);
-                  savedValue = curr;
-                  console.log("reading from saved value", savedValue);
-                }
-                setSaved(true);
-              }, 10000);
-            }}
-            onBlur={() => {
-              clearInterval(autosaveInterval);
-              const curr = notesText;
-              if (curr != savedValue) {
-                props.port.postMessage({
-                  symbol: props.global.symbol,
-                  notes: curr,
-                });
-                savedValue = curr;
-                setSaved(true);
-              }
-            }}
-          ></textarea>
-        </>
+        <TextArea
+          symbol={props.global.symbol}
+          notes={props.global.notes}
+          port={props.port}
+          localFirebase={props.localFirebase}
+        />
       ) : (
         <UpgradeButton port={props.port} />
       )}

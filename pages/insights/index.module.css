@@ -263,4 +263,5 @@
   transform: translateY(-50%);
   z-index: 9999;
   transition: transform 0.3s ease;
+  padding-bottom: 60px;
 }
