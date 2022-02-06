@@ -126,10 +126,14 @@ export default function Ext(props) {
   const [currentTimeFrame, setCurrentTimeFrame] = useState(
     frames ? frames[0] : undefined
   );
-  if (frames) {
-    curtimeframe = frames[0];
-  }
+
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
+
+  useEffect(() => {
+    if (frames) {
+      curtimeframe = frames[0];
+    }
+  }, []);
 
   useEffect(() => {
     console.log("props.data", props.data);
@@ -141,7 +145,8 @@ export default function Ext(props) {
       "try to set new time frame",
       frames,
       curtimeframe,
-      frames.includes(curtimeframe)
+      !frames.includes(curtimeframe),
+      frames && (curtimeframe === undefined || !frames.includes(curtimeframe))
     );
     if (
       frames &&
@@ -162,7 +167,7 @@ export default function Ext(props) {
       return;
     }
     document.body.classList.add("transparent");
-    if (!port) {
+    if (!port && !props.localFirebase) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
         console.log("got data", data);
@@ -364,6 +369,7 @@ export default function Ext(props) {
                   port={port}
                   currentTimeFrame={currentTimeFrame}
                   symbol={args[0]}
+                  localFirebase={props.localFirebase}
                 />
                 {props.data ? null : (
                   <Button

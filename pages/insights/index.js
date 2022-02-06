@@ -315,7 +315,11 @@ export default function Insights() {
   const extractWorkbook = async (wb) => {
     workbook = wb;
     var first_worksheet = wb.Sheets[wb.SheetNames[0]];
+    var second_worksheet = wb.Sheets[wb.SheetNames[1]];
     let data = XLSX.utils.sheet_to_json(first_worksheet, {
+      header: 1,
+    });
+    let data2 = XLSX.utils.sheet_to_json(second_worksheet, {
       header: 1,
     });
     data.slice(1).forEach((row) => {
@@ -329,6 +333,17 @@ export default function Insights() {
       }
       console.log("rawObj", obj);
       rawData[obj.symbol] = obj;
+    });
+    data2.slice(1).forEach((row) => {
+      const obj = {};
+      for (let i = 0; i < data2[0].length; i++) {
+        if (row[i]) {
+          obj[data2[0][i]] = data2[0][i].startsWith("p")
+            ? JSON.parse(row[i])
+            : row[i];
+        }
+      }
+      rawData[obj.symbol] = { ...rawData[obj.symbol], ...obj };
     });
     console.log("rawData", rawData);
     // const rawCols = data[0];
@@ -807,6 +822,10 @@ export default function Insights() {
       Math.ceil(filteredRows.length / pageSize),
     ];
   }, [filteredRows, currentPage, pageSize]);
+
+  const extView = useMemo(() => {
+    return <ExtView hideHeader localFirebase data={dataForExt} />;
+  }, [dataForExt]);
 
   return (
     <HeaderAndFooter
@@ -1486,7 +1505,7 @@ export default function Insights() {
                     e.stopPropagation();
                   }}
                 >
-                  {dataForExt ? <ExtView hideHeader data={dataForExt} /> : null}
+                  {dataForExt ? extView : null}
                 </div>
                 {/* <DataGrid
                   disableColumnMenu
