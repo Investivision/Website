@@ -136,29 +136,31 @@ export default function Ext(props) {
   }, []);
 
   useEffect(() => {
-    console.log("props.data", props.data);
-    const formatted = processSymbolData(
-      props.data ? props.data.insights[props.data.args[0]] : undefined
-    );
-    const frames = orderTimeFrames(formatted);
-    console.log(
-      "try to set new time frame",
-      frames,
-      curtimeframe,
-      !frames.includes(curtimeframe),
-      frames && (curtimeframe === undefined || !frames.includes(curtimeframe))
-    );
-    if (
-      frames &&
-      (curtimeframe === undefined || !frames.includes(curtimeframe))
-    ) {
-      setCurrentTimeFrame(frames[0]);
-      curtimeframe = frames[0];
+    if (props.data) {
+      console.log("props.data", props.data);
+      const formatted = processSymbolData(
+        props.data ? props.data.insights[props.data.args[0]] : undefined
+      );
+      const frames = orderTimeFrames(formatted);
+      console.log(
+        "try to set new time frame",
+        frames,
+        curtimeframe,
+        !frames.includes(curtimeframe),
+        frames && (curtimeframe === undefined || !frames.includes(curtimeframe))
+      );
+      if (
+        frames &&
+        (curtimeframe === undefined || !frames.includes(curtimeframe))
+      ) {
+        setCurrentTimeFrame(frames[0]);
+        curtimeframe = frames[0];
+      }
+      setData(formatted);
+      setName(props.data?.name);
+      setArgs(props.data?.args);
+      setTimeFrames(frames);
     }
-    setData(formatted);
-    setName(props.data?.name);
-    setArgs(props.data?.args);
-    setTimeFrames(frames);
   }, [props.data]);
 
   useEffect(() => {

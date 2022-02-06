@@ -32,15 +32,12 @@ function UpgradeButton(props) {
 let savedValue;
 
 export default function Report(props) {
-  savedValue = props.global.notes;
-  const notesRef = useRef(null);
+  const [notesText, setNotesText] = useState(props.global.notes);
   const [saved, setSaved] = useState(true);
 
   useEffect(() => {
-    if (notesRef.current) {
-      notesRef.current.value = savedValue;
-    }
-  }, [notesRef, props]);
+    setNotesText(props.global.notes);
+  }, [props.global.notes]);
 
   console.log("ReportData", props);
 
@@ -231,19 +228,14 @@ export default function Report(props) {
           </p>
           <textarea
             placeholder="In January, set limit sell order."
-            ref={notesRef}
-            onChange={() => {
-              console.log(
-                "current",
-                notesRef.current.value,
-                "saved",
-                savedValue
-              );
-              setSaved(notesRef.current.value == savedValue);
+            value={notesText}
+            onChange={(e) => {
+              setNotesText(e.target.value);
+              setSaved(e.target.value == savedValue);
             }}
             onFocus={() => {
               autosaveInterval = setInterval(() => {
-                const curr = notesRef.current.value;
+                const curr = notesText;
                 if (curr !== savedValue) {
                   props.port.postMessage({
                     symbol: props.global.symbol,
@@ -258,7 +250,7 @@ export default function Report(props) {
             }}
             onBlur={() => {
               clearInterval(autosaveInterval);
-              const curr = notesRef.current.value;
+              const curr = notesText;
               if (curr != savedValue) {
                 props.port.postMessage({
                   symbol: props.global.symbol,
