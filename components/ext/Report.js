@@ -42,6 +42,8 @@ export default function Report(props) {
     }
   }, [notesRef, props]);
 
+  console.log("ReportData", props);
+
   return (
     <div className={styles.report}>
       <h3>Growth</h3>

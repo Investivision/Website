@@ -14,6 +14,9 @@ import InfoScreen from "../../components/ext/InfoScreen";
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
 const processSymbolData = (data) => {
+  if (!data) {
+    return undefined;
+  }
   let out = {
     global: {},
   };
@@ -81,6 +84,9 @@ const termMap = {
 };
 
 const orderTimeFrames = (data) => {
+  if (!data) {
+    return undefined;
+  }
   let keys = [];
   for (const key of Object.keys(data)) {
     if (key != "global") {
@@ -105,18 +111,50 @@ const orderTimeFrames = (data) => {
 let curtimeframe = undefined;
 
 export default function Ext(props) {
-  const [data, setData] = useState(props.data);
-  const [name, setName] = useState(props.name);
-  const [args, setArgs] = useState(props.args);
+  const formatted = processSymbolData(
+    props.data ? props.data.insights[props.data.args[0]] : undefined
+  );
+  const frames = orderTimeFrames(formatted);
+  const [data, setData] = useState(formatted);
+  const [name, setName] = useState(props.data?.name);
+  const [args, setArgs] = useState(props.data?.args);
   const [loading, setLoading] = useState(!props.data);
   const [forbidden, setForbidden] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
-  const [timeFrames, setTimeFrames] = useState(props.timeFrames);
+  const [timeFrames, setTimeFrames] = useState(frames);
   const [currentTimeFrame, setCurrentTimeFrame] = useState(
-    props.currentTimeFrame
+    frames ? frames[0] : undefined
   );
+  if (frames) {
+    curtimeframe = frames[0];
+  }
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
+
+  useEffect(() => {
+    console.log("props.data", props.data);
+    const formatted = processSymbolData(
+      props.data ? props.data.insights[props.data.args[0]] : undefined
+    );
+    const frames = orderTimeFrames(formatted);
+    console.log(
+      "try to set new time frame",
+      frames,
+      curtimeframe,
+      frames.includes(curtimeframe)
+    );
+    if (
+      frames &&
+      (curtimeframe === undefined || !frames.includes(curtimeframe))
+    ) {
+      setCurrentTimeFrame(frames[0]);
+      curtimeframe = frames[0];
+    }
+    setData(formatted);
+    setName(props.data?.name);
+    setArgs(props.data?.args);
+    setTimeFrames(frames);
+  }, [props.data]);
 
   useEffect(() => {
     console.log("props", props);
@@ -261,29 +299,31 @@ export default function Ext(props) {
                 }}
               />
             )}
-            <div className={styles.header}>
-              <h2>
-                {name ? "Welcome, " + name.split(" ")[0] : "Investivision"}
-              </h2>
-              <Button
-                onClick={() => {
-                  if (name) {
-                    port.postMessage({ message: "sign out from extension" });
-                  } else {
-                    port.postMessage({ message: "sign in from extension" });
-                  }
-                }}
-                sx={{
-                  minWidth: 100,
-                  padding: "2px 10px",
-                }}
-                // style={{
-                //   marginTop: 0,
-                // }}
-              >
-                {name ? "Sign out" : "Sign in"}
-              </Button>
-            </div>
+            {props.hideHeader ? null : (
+              <div className={styles.header}>
+                <h2>
+                  {name ? "Welcome, " + name.split(" ")[0] : "Investivision"}
+                </h2>
+                <Button
+                  onClick={() => {
+                    if (name) {
+                      port.postMessage({ message: "sign out from extension" });
+                    } else {
+                      port.postMessage({ message: "sign in from extension" });
+                    }
+                  }}
+                  sx={{
+                    minWidth: 100,
+                    padding: "2px 10px",
+                  }}
+                  // style={{
+                  //   marginTop: 0,
+                  // }}
+                >
+                  {name ? "Sign out" : "Sign in"}
+                </Button>
+              </div>
+            )}
             <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
             <h3 className={styles.company}>{data.global.name}</h3>
             <FormControl>

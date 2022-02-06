@@ -38,6 +38,7 @@ import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
 import ExtView from "../ext";
 import candleMap from "../../components/insights/candleMap";
+import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -45,6 +46,8 @@ let filterChanges = false;
 let tempSelectedCols = [];
 let selectedColsSet = new Set();
 let selectedColsChanges = false;
+
+const rawData = {};
 
 function getLastInsightUpdateTime() {
   const date = new Date();
@@ -224,6 +227,8 @@ const getColValuesForSort = (cols) => {
 let prevSortAttr = undefined;
 let prevSortDir = undefined;
 
+let symbolForExt = undefined;
+
 export default function Insights() {
   const [downloading, setDownloading] = useState(false);
 
@@ -269,6 +274,9 @@ export default function Insights() {
 
   const [exportLoading, setExportLoading] = useState(false);
 
+  const [dataForExt, setDataForExt] = useState(undefined);
+  const [extOpen, setExtOpen] = useState(false);
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -310,6 +318,19 @@ export default function Insights() {
     let data = XLSX.utils.sheet_to_json(first_worksheet, {
       header: 1,
     });
+    data.slice(1).forEach((row) => {
+      const obj = {};
+      for (let i = 0; i < data[0].length; i++) {
+        if (row[i]) {
+          obj[data[0][i]] = data[0][i].includes("pattern")
+            ? JSON.parse(row[i].replaceAll("'", '"'))
+            : row[i];
+        }
+      }
+      console.log("rawObj", obj);
+      rawData[obj.symbol] = obj;
+    });
+    console.log("rawData", rawData);
     // const rawCols = data[0];
     console.log("raw data", data);
 
@@ -793,6 +814,8 @@ export default function Insights() {
       onClick={() => {
         handleControlChange();
         setControlOpen(false);
+        setExtOpen(false);
+        symbolForExt = undefined;
       }}
     >
       {!userLoaded ? (
@@ -837,7 +860,7 @@ export default function Insights() {
       ) : (
         <>
           <h1 className="pageHeader">Insight Library</h1>
-          <h2>
+          <h2 className={styles.subHeader}>
             Explore our complete database according to your personalized
             criteria
           </h2>
@@ -874,7 +897,7 @@ export default function Insights() {
             </LoadingButton>
           ) : (
             <>
-              <h3>Common Configurations</h3>
+              <h3 className={styles.sectionTitle}>Common Configurations</h3>
               <div className={styles.configContainer}>
                 <div className={styles.configCenter}>
                   {commonConfigurations.map((config, i) => {
@@ -915,7 +938,7 @@ export default function Insights() {
                   })}
                 </div>
               </div>
-              <h3>Your Configurations</h3>
+              <h3 className={styles.sectionTitle}>Your Configurations</h3>
               <div className={styles.configContainer}>
                 <div className={styles.configCenter}>
                   <div className={`${styles.config} ${styles.configAdd}`}>
@@ -1040,7 +1063,7 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Filters
+                    Manage Filters
                   </Button>
                   <Button
                     size="small"
@@ -1055,7 +1078,7 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Columns
+                    Manage Columns
                   </Button>
                   <LoadingButton
                     size="small"
@@ -1077,7 +1100,7 @@ export default function Insights() {
                       setExportLoading(false);
                     }}
                   >
-                    Export
+                    Export to XLSX
                   </LoadingButton>
                 </div>
                 <Grid
@@ -1098,6 +1121,31 @@ export default function Insights() {
                     setSelectedCols(newCols);
                   }}
                   controlOpen={controlOpen}
+                  onRowClick={(symb) => {
+                    if (symb != symbolForExt) {
+                      console.log("rowClick new symbol", symbolForExt, "=>", {
+                        symb: symb,
+                      });
+                      symbolForExt = symb;
+
+                      setDataForExt({
+                        insights: {
+                          [symb]: rawData[symb],
+                        },
+                        args: [symb],
+                      });
+                      setExtOpen(true);
+                    } else {
+                      console.log(
+                        "rowClick same symbol",
+                        symbolForExt,
+                        "=>",
+                        symb
+                      );
+                      symbolForExt = undefined;
+                      setExtOpen(false);
+                    }
+                  }}
                 >
                   {controlOpen == "filter" ? (
                     <>
@@ -1423,6 +1471,22 @@ export default function Insights() {
                       }}
                     />
                   ) : null}
+                </div>
+                <div
+                  style={{
+                    backgroundColor:
+                      theme.palette.mode == "dark" ? "#00000090" : "#ffffffa0",
+                    transform: `translate(${
+                      extOpen ? 0 : "calc(100% + 30px)"
+                    }, -50%)`,
+                  }}
+                  className={styles.extView}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  {dataForExt ? <ExtView hideHeader data={dataForExt} /> : null}
                 </div>
                 {/* <DataGrid
                   disableColumnMenu

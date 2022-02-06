@@ -145,7 +145,18 @@ export default function Grid(props) {
       }
       //   alert("new rows to render");
       console.log("new rows to render", props.rows, props.cols);
-      return <tr key={row["Symbol"]}>{cells}</tr>;
+      return (
+        <tr
+          key={row["Symbol"]}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            props.onRowClick(row["Symbol"]);
+          }}
+        >
+          {cells}
+        </tr>
+      );
     });
   }, [props.rows, props.cols]);
 

@@ -84,3 +84,9 @@ a {
 .dark-mode .MuiAlert-root > * {
   filter: brightness(0.33334);
 }
+
+.MuiTooltip-popper,
+.MuiModal-root {
+  z-index: 999999;
+  /* background-color: red; */
+}
