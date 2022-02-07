@@ -100,7 +100,9 @@ export default function Account() {
             setExtStatus(res.synced ? "synced" : "not synced");
           });
         } catch (e) {
-          setExtStatus("not installed");
+          setExtStatus(
+            window.chrome ? "not installed" : "incompatible browser"
+          );
         }
       } else {
         window.location.href = "/login";
@@ -295,13 +297,17 @@ export default function Account() {
                   loading={signOutLoading}
                   onClick={() => {
                     setSignOutLoading(true);
-                    chrome.runtime.sendMessage(
-                      extId,
-                      { message: "signOut" },
-                      function (res) {
-                        signOut(auth);
-                      }
-                    );
+                    if (window.chrome) {
+                      chrome.runtime.sendMessage(
+                        extId,
+                        { message: "signOut" },
+                        function (res) {
+                          signOut(auth);
+                        }
+                      );
+                    } else {
+                      signOut(auth);
+                    }
                   }}
                 >
                   Sign Out
@@ -455,6 +461,8 @@ export default function Account() {
                   <Alert severity="success">
                     Browser Extension installed and synced
                   </Alert>
+                ) : extStatus == "incompatible browser" ? (
+                  <Alert severity="warning">Incompatible Browser</Alert>
                 ) : (
                   <Alert
                     severity="warning"

@@ -169,7 +169,7 @@ export default function Ext(props) {
       return;
     }
     document.body.classList.add("transparent");
-    if (!port && !props.localFirebase) {
+    if (window.chrome && !port && !props.localFirebase) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
         console.log("got data", data);

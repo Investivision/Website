@@ -13,7 +13,7 @@ import {
   where,
   deleteDoc,
 } from "firebase/firestore";
-import { getStorage, ref, getBlob } from "firebase/storage";
+import { getStorage, ref, getBlob, getBytes } from "firebase/storage";
 import firebase, { auth, formatErrorCode } from "../../firebase";
 import Skeleton from "@mui/material/Skeleton";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -38,7 +38,10 @@ import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
 import ExtView from "../ext";
 import candleMap from "../../components/insights/candleMap";
-import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
+import Base256 from "base256-encoding";
+import Base128 from "base128-encoding";
+import base91 from "node-base91";
+import Base64String from "../../components/insights/LZString";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -292,9 +295,14 @@ export default function Insights() {
           if (stored && Date.parse(stored) > getLastInsightUpdateTime()) {
             setDownloading(true);
             extractWorkbook(
-              XLSX.read(localStorage.getItem("insights").split(",")[1], {
-                type: "base64",
-              })
+              XLSX.read(
+                Base64String.decompressFromUTF16(
+                  localStorage.getItem("insights")
+                ),
+                {
+                  type: "base64",
+                }
+              )
             );
           }
         }
@@ -899,9 +907,25 @@ export default function Insights() {
                   return;
                 }
                 const blob = await getBlob(ref(getStorage(), "/all_raw.xlsx"));
-                console.log("blob from firebase", blob);
-                const base64 = await blobToBase64(blob);
-                window.localStorage.setItem("insights", JSON.stringify(base64));
+
+                // console.log("bytes from firebase", bytes);
+                // const base64 = base91.encode(bytes);
+                // console.log("encoded length", base64.length);
+                // console.log("encoded string", base64);
+                let base64 = (await blobToBase64(blob)).split(",")[1];
+                console.log("encoded LZ", Base64String.compressToUTF16);
+                const lz = Base64String.compressToUTF16(base64);
+                console.log("encoded length", base64.length, lz.length);
+                console.log("encoded string", base64, lz);
+                // console.log("LZString", LZString);
+                try {
+                  // window.localStorage.setItem("insights", base64);
+                  window.localStorage.insights = lz;
+                  console.log("successfully set localStorage insights");
+                } catch (e) {
+                  console.error(e);
+                  console.error("failed to set localStorage");
+                }
                 window.localStorage.setItem("insightsTimestamp", new Date());
                 extractWorkbook(
                   XLSX.read(base64.split(",")[1], {
