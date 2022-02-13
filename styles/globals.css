@@ -87,6 +87,6 @@ a {
 
 .MuiTooltip-popper,
 .MuiModal-root {
-  z-index: 999999;
+  z-index: 999999 !important;
   /* background-color: red; */
 }

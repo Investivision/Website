@@ -255,14 +255,15 @@
 
 .extView {
   width: 292px;
-  max-height: calc(100vh - 30px);
+  max-height: 100vh;
   /* max-height: 100%; */
   overflow-y: scroll;
-  border-radius: 14px;
-  backdrop-filter: blur(6px);
+  border-bottom-left-radius: 14px;
+  border-top-left-radius: 14px;
+  backdrop-filter: blur(16px);
   position: fixed;
   top: 50%;
-  right: 15px;
+  right: 0;
   transform: translateY(-50%);
   z-index: 9999;
   transition: transform 0.3s ease;
