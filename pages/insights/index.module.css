@@ -172,7 +172,7 @@
 
 .colsGroup {
   display: flex;
-  flex-direction: row;
+  flex-direction: row !important;
   flex-wrap: wrap;
   align-items: center;
   max-width: 920px;
