@@ -928,7 +928,7 @@ export default function Insights() {
                 }
                 window.localStorage.setItem("insightsTimestamp", new Date());
                 extractWorkbook(
-                  XLSX.read(base64.split(",")[1], {
+                  XLSX.read(base64, {
                     type: "base64",
                   })
                 );
