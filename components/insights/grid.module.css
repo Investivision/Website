@@ -162,3 +162,7 @@
 .overlay :global(#timeFrameToggle) {
   width: 400px;
 }
+
+.toolTip div[role="tooltip"] {
+  max-width: none !important;
+}

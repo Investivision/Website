@@ -31,6 +31,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import TextField from "@mui/material/TextField";
 import ArrowIcon from "@material-ui/icons/ArrowForwardIosRounded";
+import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import DeleteForeverRoundedIcon from "@material-ui/icons/DeleteForeverRounded";
 import { v4 as uuidv4 } from "uuid";
 import { common } from "@mui/material/colors";
@@ -833,6 +834,9 @@ export default function Insights() {
   }, [filteredRows, currentPage, pageSize]);
 
   const extView = useMemo(() => {
+    if (!dataForExt) {
+      return null;
+    }
     return <ExtView hideHeader localFirebase data={dataForExt} />;
   }, [dataForExt]);
 
@@ -1530,7 +1534,19 @@ export default function Insights() {
                     e.stopPropagation();
                   }}
                 >
-                  {dataForExt ? extView : null}
+                  <CloseRoundedIcon
+                    className={styles.extCloseIcon}
+                    style={{
+                      color: theme.palette.text.primary,
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setExtOpen(false);
+                      symbolForExt = undefined;
+                    }}
+                  />
+                  {extView}
                 </div>
                 {/* <DataGrid
                   disableColumnMenu

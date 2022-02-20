@@ -90,3 +90,7 @@ a {
   z-index: 999999 !important;
   /* background-color: red; */
 }
+
+#tableTooltip * {
+  max-width: none !important;
+}

@@ -269,3 +269,19 @@
   transition: transform 0.3s ease;
   padding-bottom: 60px;
 }
+
+.extCloseIcon {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  height: 28px !important;
+  width: 28px !important;
+  opacity: 0.4;
+  cursor: pointer;
+  z-index: 99999;
+  transition: opacity 0.2s ease !important;
+}
+
+.extCloseIcon:hover {
+  opacity: 1;
+}

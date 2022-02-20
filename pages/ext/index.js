@@ -137,10 +137,10 @@ export default function Ext(props) {
 
   useEffect(() => {
     if (props.data) {
-      console.log("props.data", props.data);
       const formatted = processSymbolData(
         props.data ? props.data.insights[props.data.args[0]] : undefined
       );
+      console.log("props.data", props.data, formatted);
       const frames = orderTimeFrames(formatted);
       console.log(
         "try to set new time frame",
