@@ -220,7 +220,7 @@ export default function Login() {
           }}
           className={styles.google}
         >
-          <img src="https://cdn.icon-icons.com/icons2/836/PNG/512/Google_icon-icons.com_66793.png" />
+          <img src="/images/google.png" />
           <p
           // style={{
           //   color: theme.palette.primary.main,

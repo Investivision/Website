@@ -73,31 +73,40 @@ export default function HeaderAndFooter(props) {
             height: props.overlayHeader === true ? 80 : 60,
           }}
         >
-          <a href="/">
+          <Link href="/">
             <div
-              className={styles.imgWrapper}
               style={{
-                backgroundColor:
-                  theme.palette.mode == "light" || props.overlayHeader === true
-                    ? "white"
-                    : "black",
-                boxShadow: `0 0 20px 0 ${
-                  theme.palette.mode == "light" || props.overlayHeader === true
-                    ? `rgba(0, 0, 0, 0.1)`
-                    : `rgba(255, 255, 255, 0.05)`
-                }`,
+                cursor: "pointer",
               }}
             >
-              <img
-                src={`/images/${
-                  theme.palette.mode == "light" || props.overlayHeader === true
-                    ? ""
-                    : "dark_"
-                }logo.svg`}
-              />
+              <div
+                className={styles.imgWrapper}
+                style={{
+                  backgroundColor:
+                    theme.palette.mode == "light" ||
+                    props.overlayHeader === true
+                      ? "white"
+                      : "black",
+                  boxShadow: `0 0 20px 0 ${
+                    theme.palette.mode == "light" ||
+                    props.overlayHeader === true
+                      ? `rgba(0, 0, 0, 0.1)`
+                      : `rgba(255, 255, 255, 0.05)`
+                  }`,
+                }}
+              >
+                <img
+                  src={`/images/${
+                    theme.palette.mode == "light" ||
+                    props.overlayHeader === true
+                      ? ""
+                      : "dark_"
+                  }logo.svg`}
+                />
+              </div>
+              <h1>Investivision</h1>
             </div>
-            <h1>Investivision</h1>
-          </a>
+          </Link>
           <div className={styles.nav}>
             <Link href="/insights">Insights</Link>
             <Link href="/extension">Extension</Link>
