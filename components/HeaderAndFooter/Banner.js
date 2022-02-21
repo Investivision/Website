@@ -17,7 +17,7 @@ export default function Banner() {
 
   useEffect(() => {
     const stored = window.localStorage.hideBanner;
-
+    console.log("stored banner status", stored);
     if (!stored) {
       setShowing(true);
     }

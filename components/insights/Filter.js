@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import DeleteIcon from "@material-ui/icons/DeleteForeverRounded";
 
 const errorMessage = (value, cols, relation) => {
+  console.log("errorMessage", value, cols);
   if (!value) {
     return undefined;
   }
@@ -63,7 +64,7 @@ const splitValue = (value, cols) => {
     .substring(0, start)
     .replaceAll(",", ", ")
     .replaceAll("%", " %");
-
+  console.log("value split", before, "|", lastWord);
   return [before, lastWord];
 };
 
@@ -87,6 +88,8 @@ export default function Filter(props) {
   useEffect(() => {
     setTempValue(props.value);
   }, [props.value]);
+
+  console.log("tempRelation is", tempRelation);
 
   const relations = [
     "=",
@@ -123,6 +126,7 @@ export default function Filter(props) {
     });
   };
 
+  console.log("row props", props);
   return (
     <div className={styles.row} style={props.style}>
       <Autocomplete

@@ -58,7 +58,7 @@ const getColFormatters = (cols) => {
   const rounding = ["Sharpe", "True Range", "Relative Strength"];
   const out = {};
   cols.forEach((col) => {
-    
+    console.log("getting formatting for col", col);
     const originalCol = col;
     col = col.replace(", ", " ");
     const words = new Set(col.split(" "));
@@ -115,7 +115,7 @@ const getColFormatters = (cols) => {
     }
     out[originalCol] = noop;
   });
-  
+  console.log("col formats", out);
   return out;
 };
 
@@ -125,7 +125,7 @@ export default function Grid(props) {
   const colFormatters = useMemo(() => {
     return getColFormatters(props.allCols);
   }, [props.allCols]);
-  
+  console.log("colFormatters", colFormatters);
 
   const [toolTipOpen, setToolTipOpen] = useState(false);
 
@@ -137,8 +137,8 @@ export default function Grid(props) {
       for (const col of props.cols) {
         const val = row[col];
         if (val) {
-          
-          
+          console.log("push cell", col, val, colFormatters);
+          console.log(val, colFormatters[col](val));
           cells.push(
             <td className={col == "Name" ? styles.capWidth : ""}>
               {colFormatters[col](val)}
@@ -149,7 +149,7 @@ export default function Grid(props) {
         }
       }
       //   alert("new rows to render");
-      
+      console.log("new rows to render", props.rows, props.cols);
       return (
         <tr
           key={row["Symbol"]}
@@ -216,7 +216,7 @@ export default function Grid(props) {
                       index={i}
                       draggable={i > 0}
                       onDragStart={(e) => {
-                        
+                        console.log("drag start", e);
                         // document.body.style.cursor = "move";
                         e.target.style.opacity = 0.3;
                         draggedPosition = i;
@@ -224,7 +224,7 @@ export default function Grid(props) {
                         // e.dataTransfer.effectAllowed = "copyMove";
                       }}
                       onDragEnd={(e) => {
-                        
+                        console.log("drag end");
                         e.target.style.opacity = 1;
                       }}
                       onDragOver={(e) => {
@@ -235,7 +235,7 @@ export default function Grid(props) {
                             e.target.style.borderLeft = "4px solid red";
                           }
                         }
-                        
+                        console.log(
                           "drag over",
                           e.target.innerText,
                           i > draggedPosition
@@ -251,7 +251,7 @@ export default function Grid(props) {
                         if (i == 0) {
                           return;
                         }
-                        
+                        console.log("drop", e.target.innerText);
                         e.target.style.borderLeft = "0px solid transparent";
                         e.target.style.borderRight = "0px solid transparent";
                         if (i > draggedPosition) {

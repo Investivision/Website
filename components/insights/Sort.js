@@ -11,6 +11,7 @@ export default function Filter(props) {
 
   const directions = ["Asc", "Desc"];
 
+  console.log("sort row props", props);
   return (
     <div className={styles.row} style={props.style}>
       <Autocomplete
