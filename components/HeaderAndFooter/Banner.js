@@ -23,11 +23,7 @@ export default function Banner() {
     }
   }, []);
 
-  if (signedIn === undefined) {
-    return null;
-  }
-
-  if (!showing || signedIn) {
+  if (!showing || signedIn !== false) {
     return null;
   }
 
@@ -36,7 +32,9 @@ export default function Banner() {
       <div className={styles.banner}>
         <p>50% off for a limited time!</p>
         <p
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             setShowing(false);
             window.localStorage.hideBanner = true;
           }}

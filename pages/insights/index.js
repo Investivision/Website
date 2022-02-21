@@ -413,7 +413,8 @@ export default function Insights() {
         .replace("P %", "AI Forecast %")
         .replace("Pr 5", "Forecast Range %")
         .replace("Natr", "True Range")
-        .replace("3Mo", "3mo");
+        .replace("3Mo", "3mo")
+        .replace("Rsi", "Relative Strength");
       if (out.endsWith("_10")) {
         out = out.replace("_10", "_10yr");
       } else if (out.endsWith("_1")) {
