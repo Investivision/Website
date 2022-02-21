@@ -20,6 +20,7 @@ import {
 } from "firebase/auth";
 import { auth, formatErrorCode } from "../../firebase";
 import LoadingButton from "@mui/lab/LoadingButton";
+import { useRouter } from "next/router";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -31,12 +32,14 @@ export default function Login() {
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
 
+  const router = useRouter();
+
   const theme = useTheme();
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.location.href = "/account";
+        router.push("/account");
       }
     });
     window.addEventListener("keydown", (event) => {

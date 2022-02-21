@@ -43,6 +43,7 @@ import Base256 from "base256-encoding";
 import Base128 from "base128-encoding";
 import base91 from "node-base91";
 import Base64String from "../../components/insights/LZString";
+import { useRouter } from "next/router";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -234,6 +235,8 @@ let prevSortDir = undefined;
 let symbolForExt = undefined;
 
 export default function Insights() {
+  const router = useRouter();
+
   const [downloading, setDownloading] = useState(false);
 
   const [sortAttr, setSortAttr] = useState("Market Cap");
@@ -907,7 +910,7 @@ export default function Insights() {
               onClick={async () => {
                 setDownloading(true);
                 if (!user) {
-                  window.location.href = "/pricing";
+                  router.push("/pricing");
                   return;
                 }
                 const blob = await getBlob(ref(getStorage(), "/all_raw.xlsx"));

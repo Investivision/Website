@@ -62,6 +62,8 @@ export default function Pricing(props) {
   const [userLoading, setUserLoading] = useState(true);
   const [role, setRole] = useState(undefined);
 
+  const router = useRouter();
+
   const updateRole = async (user) => {
     if (user) {
       await user.getIdToken(true);
@@ -161,7 +163,7 @@ export default function Pricing(props) {
                   onClick={async () => {
                     setPlanLoading(plan.title);
                     if (!user) {
-                      window.location.href = "/login";
+                      router.push("/login");
                       return;
                     }
                     await user.getIdToken(true);
@@ -181,7 +183,7 @@ export default function Pricing(props) {
                           : plan.yearlyPriceId,
                       });
                     }
-                    window.location.href = res.data;
+                    router.push(res.data);
                   }}
                 >
                   {role == plan.title.toLowerCase()

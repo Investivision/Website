@@ -105,7 +105,8 @@ export default function Account() {
           );
         }
       } else {
-        window.location.href = "/login";
+        router.push("/login");
+        // window.location.href = "/login";
       }
     });
   }, []);
@@ -359,7 +360,7 @@ export default function Account() {
                         <Button
                           color="inherit"
                           size="medium"
-                          onClick={() => (window.location.href = "/pricing")}
+                          onClick={() => router.push("/pricing")}
                         >
                           View Plans
                         </Button>
@@ -375,7 +376,7 @@ export default function Account() {
                                 window.location.origin +
                                 "/account?success=true",
                             });
-                            window.location.href = res.data;
+                            router.push(res.data);
                           }}
                         >
                           Manage Subscription
@@ -418,7 +419,7 @@ export default function Account() {
                       <Button
                         color="inherit"
                         size="medium"
-                        onClick={() => (window.location.href = "/pricing")}
+                        onClick={() => router.push("/pricing")}
                       >
                         View Plans
                       </Button>
