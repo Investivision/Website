@@ -29,7 +29,7 @@ const capitalize = (s) => {
 };
 
 export default function Account() {
-  // console.log(auth);
+  //
   // if (!auth.currentUser) {
   //   // window.location.hef = "/login";
   //   // return null;
@@ -62,7 +62,7 @@ export default function Account() {
     if (user) {
       await user.getIdToken(true);
       const token = await user.getIdTokenResult(true);
-      console.log("found token", token);
+
       if (token.claims.role) {
         setRole(token.claims.role);
       } else {
@@ -72,7 +72,7 @@ export default function Account() {
             shallow: true,
           });
         }
-        console.log("query", router.query);
+
         if (remaining > 0 && router.query.success) {
           setTimeout(function () {
             updateRole(user, remaining - 1);
@@ -92,11 +92,9 @@ export default function Account() {
         setName(user.displayName || "");
         setEmail(user.email);
         // setPhoneNumber(user.phoneNumber || "");
-        console.log(user);
 
         try {
           chrome.runtime.sendMessage(extId, { uid: user.uid }, function (res) {
-            console.log("ext response", res);
             setExtStatus(res.synced ? "synced" : "not synced");
           });
         } catch (e) {

@@ -180,7 +180,6 @@ export default function Login() {
             <Checkbox
               checked={checked}
               onChange={(e) => {
-                console.log(e.target.checked);
                 setChecked(e.target.checked);
               }}
             />
@@ -213,7 +212,6 @@ export default function Login() {
 
             try {
               const res = await signInWithPopup(auth, provider);
-              console.log(res);
             } catch (e) {
               setSnackbarMessage(formatErrorCode(e.code));
               setSnackbarSeverity("error");

@@ -71,13 +71,13 @@ function getLastInsightUpdateTime() {
     0: -2,
     6: -1,
   };
-  console.log("date before offset", date);
+  
   const offset = dayOffsets[date.getDay()];
-  console.log("offset is", offset);
+  
   if (offset) {
     date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * offset);
   }
-  console.log("date in eastern time", date);
+  
   date.setTime(date.getTime() - estOffset * 60 * 1000);
   date.setTime(date.getTime() - initialOffset * 60 * 1000);
   return date;
@@ -91,7 +91,7 @@ String.prototype.toTitleCase = function () {
 };
 
 // String.prototype.toTitleCase = () => {
-//   console.log("toTitleCase", this);
+//   
 //   return this.replace(/\w\S*/g, function (txt) {
 //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 //   });
@@ -108,11 +108,11 @@ Date.prototype.isDstObserved = function () {
 };
 
 function blobToBase64(blob) {
-  console.log("blob before base64", blob);
+  
   return new Promise((resolve, _) => {
     const reader = new FileReader();
     reader.onloadend = (result) => {
-      console.log("blog to base64", result.currentTarget.result);
+      
       resolve(result.currentTarget.result);
     };
     reader.readAsDataURL(blob);
@@ -295,7 +295,7 @@ export default function Insights() {
           setUser(user);
           setUserLoaded(true);
           const stored = window.localStorage.getItem("insightsTimestamp");
-          console.log("stored insights", stored);
+          
           if (stored && Date.parse(stored) > getLastInsightUpdateTime()) {
             setDownloading(true);
             extractWorkbook(
@@ -317,7 +317,7 @@ export default function Insights() {
     });
   }, []);
 
-  console.log(firstConfigRef);
+  
   useEffect(() => {
     if (firstConfigRef.current) {
       setFirstConfigWidth(firstConfigRef.current.clientWidth);
@@ -344,7 +344,7 @@ export default function Insights() {
         }
       }
       obj.notes = "";
-      console.log("rawObj", obj);
+      
       rawData[obj.symbol] = obj;
     });
     data2.slice(1).forEach((row) => {
@@ -358,9 +358,9 @@ export default function Insights() {
       }
       rawData[obj.symbol] = { ...rawData[obj.symbol], ...obj };
     });
-    console.log("rawData", rawData);
+    
     // const rawCols = data[0];
-    console.log("raw data", data);
+    
 
     // data = [data[0]].concat(
     //   data.slice(1).map((row) => {
@@ -388,7 +388,7 @@ export default function Insights() {
     //     return row;
     //   })
     // );
-    // console.log("data after formatting", data);
+    // 
     const formattedCols = data[0].map((col) => {
       //   original = col
       // #     col = col.title().replace('Res_', 'Resistance_').replace(
@@ -472,10 +472,10 @@ export default function Insights() {
     tempSelectedCols = [...withoutPercentiles];
     setSelectedCols(withoutPercentiles);
     setSortedCols(sorted);
-    console.log("sortedCols", sorted);
-    console.log("myRows", myRows);
+    
+    
     try {
-      console.log("uid is", auth.currentUser.uid);
+      
       const remoteConfigsRes = await getDocs(
         query(
           collection(getFirestore(), "configs"),
@@ -496,7 +496,7 @@ export default function Insights() {
     setRows(myRows);
 
     try {
-      console.log("uid is", user.uid);
+      
       const remoteConfigsRes = await getDocs(
         query(
           collection(getFirestore(), "configs"),
@@ -551,7 +551,7 @@ export default function Insights() {
 
   const theme = useTheme();
 
-  console.log("theme", theme);
+  
 
   const colors =
     theme.palette.mode == "dark"
@@ -610,10 +610,10 @@ export default function Insights() {
         visitedTimeFrames.add(frame);
       }
     }
-    console.log("timeFrames", frames);
+    
     frames = frames
       .map((frame) => {
-        console.log("timeFrame", frame);
+        
         return frame.toLowerCase().replace("yr", "00yr");
       })
       .sort((a, b) => {
@@ -646,7 +646,7 @@ export default function Insights() {
     } else {
       set.add(e.target.value);
     }
-    console.log("new set", set, setter);
+    
     setter(new Set(set));
   };
 
@@ -658,29 +658,29 @@ export default function Insights() {
       if (col == "Symbol") {
         return false;
       }
-      console.log("determining if", col, "is to be selectable");
-      console.log("toggled items", toggledCols, toggledFrames);
+      
+      
       let split = col.split(", ");
       if (split.length == 1) {
         split = col.split(" in ");
       }
       if (split.length == 2 && !toggledFrames.has(split[1])) {
-        console.log(
+        
           "filtering col on first condition",
           col,
           split[1],
           Array.from(toggledFrames)
         );
 
-        console.log("determining if", col, "is to be selectable", false);
+        
         return false;
       }
-      console.log("toggledCols", toggledCols, col, split[0]);
+      
       if (showPercentiles) {
         split[0] = split[0].replace(" %ile", "");
       }
 
-      console.log("determining if", col, toggledCols.has(split[0]));
+      
       return toggledCols.has(split[0]);
     });
   }, [sortedCols, toggledCols, toggledFrames, showPercentiles]);
@@ -688,13 +688,13 @@ export default function Insights() {
   // let selectableCols;
   // if (sortedCols) {
   //   selectableCols = sortedCols.filter((col) => {
-  //     console.log("toggled items", toggledCols, toggledFrames);
+  //     
   //     let split = col.split(", ");
   //     if (split.length == 1) {
   //       split = col.split(" in ");
   //     }
   //     if (split.length == 2 && !toggledFrames.has(split[1])) {
-  //       console.log(
+  //       
   //         "filtering col on first condition",
   //         col,
   //         split[1],
@@ -702,7 +702,7 @@ export default function Insights() {
   //       );
   //       return false;
   //     }
-  //     console.log("toggledCols", toggledCols, col, split[0]);
+  //     
   //     if (showPercentiles) {
   //       split[0] = split[0].replace(" (%ile)", "");
   //     }
@@ -721,7 +721,7 @@ export default function Insights() {
     if (!rows) {
       return undefined;
     }
-    console.log(
+    
       "values for sort dict",
       valuesForSort,
       sortAttr,
@@ -729,7 +729,7 @@ export default function Insights() {
     );
     let out = [...rows];
     if (sortAttr == prevSortAttr && sortDir != prevSortDir) {
-      // console.log("sortedRows", prevSortedRows);
+      // 
       // alert("naive");
       return [...prevSortedRows].reverse();
     }
@@ -767,7 +767,7 @@ export default function Insights() {
     let filtered = [...sortedRows];
     for (const filter of filters) {
       let { feature, relation, value, valid } = filter;
-      console.log("filterString", filter);
+      
       if (
         feature &&
         relation &&
@@ -807,18 +807,18 @@ export default function Insights() {
         if (negate) {
           filterString = `!(${filterString})`;
         }
-        console.log("filterString", filterString);
+        
         filtered = filtered.filter((row) => {
-          console.log("sharpe 10", row["Sharpe, 10yr"]);
+          
           const pass = eval(filterString);
-          console.log(pass, "row during filtering", row);
+          
           return pass;
         });
       } else {
-        console.log("ignoring filter", filter);
+        
       }
     }
-    console.log("new filtered rows", filtered);
+    
     return filtered;
   }, [filters, sortedRows]);
 
@@ -916,20 +916,20 @@ export default function Insights() {
                 }
                 const blob = await getBlob(ref(getStorage(), "/all_raw.xlsx"));
 
-                // console.log("bytes from firebase", bytes);
+                // 
                 // const base64 = base91.encode(bytes);
-                // console.log("encoded length", base64.length);
-                // console.log("encoded string", base64);
+                // 
+                // 
                 let base64 = (await blobToBase64(blob)).split(",")[1];
-                console.log("encoded LZ", Base64String.compressToUTF16);
+                
                 const lz = Base64String.compressToUTF16(base64);
-                console.log("encoded length", base64.length, lz.length);
-                console.log("encoded string", base64, lz);
-                // console.log("LZString", LZString);
+                
+                
+                // 
                 try {
                   // window.localStorage.setItem("insights", base64);
                   window.localStorage.insights = lz;
-                  console.log("successfully set localStorage insights");
+                  
                 } catch (e) {
                   console.error(e);
                   console.error("failed to set localStorage");
@@ -968,7 +968,7 @@ export default function Insights() {
                             selectedColsSet = new Set(columns);
                             tempSelectedCols = [...columns];
                             setCheckboxRerender(checkboxRerender + 1);
-                            console.log(
+                            
                               "loaded config",
                               selectedColsSet,
                               tempSelectedCols
@@ -1065,7 +1065,7 @@ export default function Insights() {
                             selectedColsSet = new Set(columns);
                             tempSelectedCols = [...columns];
                             setCheckboxRerender(checkboxRerender + 1);
-                            console.log(
+                            
                               "loaded config",
                               selectedColsSet,
                               tempSelectedCols
@@ -1163,7 +1163,7 @@ export default function Insights() {
                   sortDir={sortDir}
                   onChange={(params) => {
                     const { dir, attr } = params;
-                    console.log("change sort", params);
+                    
                     prevSortDir = sortDir;
                     prevSortAttr = sortAttr;
                     setSortDir(dir);
@@ -1175,7 +1175,7 @@ export default function Insights() {
                   controlOpen={controlOpen}
                   onRowClick={(symb) => {
                     if (symb != symbolForExt) {
-                      console.log("rowClick new symbol", symbolForExt, "=>", {
+                      
                         symb: symb,
                       });
                       symbolForExt = symb;
@@ -1188,7 +1188,7 @@ export default function Insights() {
                       });
                       setExtOpen(true);
                     } else {
-                      console.log(
+                      
                         "rowClick same symbol",
                         symbolForExt,
                         "=>",
@@ -1202,7 +1202,7 @@ export default function Insights() {
                   {controlOpen == "filter" ? (
                     <>
                       {filters.map((filter, i) => {
-                        console.log("filter to render", filter);
+                        
                         return (
                           <Filter
                             key={filter}
@@ -1215,11 +1215,11 @@ export default function Insights() {
                               filterChanges = true;
                             }}
                             onChange={(changes) => {
-                              console.log("filter change", changes);
+                              
                               tempFilters = filters.map((filter, j) =>
                                 j == i ? Object.assign(filter, changes) : filter
                               );
-                              console.log("new temp filters", tempFilters);
+                              
                               filterChanges = true;
                             }}
                             {...filter}
@@ -1395,7 +1395,7 @@ export default function Insights() {
                                       }
                                     }
                                     selectedColsChanges = true;
-                                    console.log(
+                                    
                                       "temp Selected Cols",
                                       tempSelectedCols
                                     );
@@ -1426,7 +1426,7 @@ export default function Insights() {
                                 tempSelectedCols.push(col);
                               }
                             }
-                            console.log("temp Selected Cols", tempSelectedCols);
+                            
                             // setSelectedCols([...selectedCols]);
                             selectedColsChanges = true;
                             setCheckboxRerender(checkboxRerender + 1);
@@ -1449,7 +1449,7 @@ export default function Insights() {
                             tempSelectedCols = selectedCols.filter(
                               (col) => !toRemove.has(col)
                             );
-                            console.log("temp Selected Cols", tempSelectedCols);
+                            
                             selectedColsChanges = true;
                             setCheckboxRerender(checkboxRerender + 1);
                           }}

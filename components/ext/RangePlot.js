@@ -86,8 +86,6 @@ export default function RangePlot(props) {
     },
   ];
 
-  console.log("data for graph is", data);
-
   const daysBetween =
     props.points[props.points.length - 1].days - props.points[0].days;
 
@@ -234,7 +232,7 @@ export default function RangePlot(props) {
           pointBorderColor={{ from: "serieColor" }}
           pointLabelYOffset={-12}
           // enableArea={(item) => {
-          //   console.log("item", item);
+          //
           //   return false;
           // }}
           // areaOpacity={1}

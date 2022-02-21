@@ -20,7 +20,7 @@ export default function HeaderAndFooter(props) {
 
   const [bannerOpen, setBannerOpen] = useState(true);
 
-  console.log(
+  
     props,
     `#${theme.palette.mode == "dark" ? "000000" : "ffffff"}${
       props.overlayHeader === true ? "00" : "ff"

@@ -93,8 +93,6 @@ export default function Theme(props) {
     },
   });
 
-  console.log("theme at creation", theme);
-
   useEffect(() => {
     if (prefersDarkMode) {
       // document.body.style.backgroundColor = "#0E1723";
