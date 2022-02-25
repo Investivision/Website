@@ -51,7 +51,9 @@ const interpolateColor = (color1, color2, factor) => {
 };
 
 export default function Numeric(props) {
-  const hue = -10 + 130 * props.percentile;
+  const hue =
+    -10 +
+    130 * (props.colorsReversed ? 1 - props.percentile : props.percentile);
   const color = `hsl(${hue}, 100%, 38%)`;
   return (
     <div

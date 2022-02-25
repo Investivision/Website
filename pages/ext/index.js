@@ -200,7 +200,6 @@ export default function Ext(props) {
               const formatted = processSymbolData(data.insights[data.args[0]]);
               setArgs(data.args);
               const frames = orderTimeFrames(formatted);
-              console.log("formatted", JSON.stringify(formatted));
               if (
                 curtimeframe === undefined ||
                 !frames.includes(curtimeframe)
@@ -235,7 +234,8 @@ export default function Ext(props) {
   //   }
   //   postMessage("iframe loaded", "*");
   // });
-  console.log("currentTimeFrame", currentTimeFrame);
+  // console.log("currentTimeFrame", currentTimeFrame);
+  console.log("formatted", formatted);
   return (
     <div
       className={props.className}

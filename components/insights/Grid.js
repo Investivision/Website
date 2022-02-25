@@ -55,7 +55,12 @@ const getColFormatters = (cols) => {
     "Support",
   ];
   const percentages = ["Beta"];
-  const rounding = ["Sharpe", "True Range", "Relative Strength"];
+  const rounding = [
+    "Sharpe",
+    "True Range",
+    "Relative Direction",
+    "Trend Strength",
+  ];
   const out = {};
   cols.forEach((col) => {
     console.log("getting formatting for col", col);

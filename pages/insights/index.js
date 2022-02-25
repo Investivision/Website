@@ -414,7 +414,8 @@ export default function Insights() {
         .replace("Pr 5", "Forecast Range %")
         .replace("Natr", "True Range")
         .replace("3Mo", "3mo")
-        .replace("Rsi", "Relative Strength");
+        .replace("Adx", "Trend Strength")
+        .replace("Rsi", "Relative Direction");
       if (out.endsWith("_10")) {
         out = out.replace("_10", "_10yr");
       } else if (out.endsWith("_1")) {
