@@ -28,6 +28,7 @@
     "lz-string": "^1.4.4",
     "material-ui-phone-number": "^3.0.0",
     "next": "11.1.2",
+    "next-seo": "^5.1.0",
     "node-base91": "^0.3.4",
     "react": "17.0.2",
     "react-beautiful-dnd": "^13.1.0",

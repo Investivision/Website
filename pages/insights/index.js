@@ -777,10 +777,10 @@ export default function Insights() {
       ) {
         const negate = relation == "excludes";
         relation = relation
+          .replace("=", "==")
           .replace("≥", ">=")
           .replace("≤", "<=")
           .replace("≠", "!=")
-          .replace("=", "==")
           .replace("starts with", "startsWith")
           .replace("ends with", "endsWith")
           .replace("contains", "includes")
@@ -809,12 +809,20 @@ export default function Insights() {
           filterString = `!(${filterString})`;
         }
         console.log("filterString", filterString);
-        filtered = filtered.filter((row) => {
-          console.log("sharpe 10", row["Sharpe, 10yr"]);
-          const pass = eval(filterString);
-          console.log(pass, "row during filtering", row);
-          return pass;
-        });
+        // test if eval is valid or throws exception
+        const row = filtered[0];
+        try {
+          eval(filterString);
+          filtered = filtered.filter((row) => {
+            console.log("sharpe 10", row["Sharpe, 10yr"]);
+            const pass = eval(filterString);
+            console.log(pass, "row during filtering", row);
+            return pass;
+          });
+        } catch (e) {
+          alert(e);
+          console.error("error evaluating filter", e);
+        }
       } else {
         console.log("ignoring filter", filter);
       }
@@ -1208,7 +1216,7 @@ export default function Insights() {
                           <Filter
                             key={filter}
                             cols={cols}
-                            showDelete={filters.length > 1}
+                            showDelete={filters.length > 0}
                             onDelete={() => {
                               tempFilters = filters
                                 .slice(0, i)

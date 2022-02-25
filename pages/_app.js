@@ -2,10 +2,24 @@ import "../styles/globals.css";
 import Head from "next/head";
 import Theme from "./Theme";
 import CssBaseline from "@mui/material/CssBaseline";
+import { NextSeo } from "next-seo";
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
+      <NextSeo
+        title="Investivision"
+        description="Non-speculative, data-driven stock insights from the future."
+        openGraph={{
+          images: [
+            {
+              url: "/thumb.png",
+              width: 1200,
+              height: 803,
+            },
+          ],
+        }}
+      />
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
