@@ -1,6 +1,10 @@
 import { useRouter } from "next/router";
 import Growth from "../../components/ext/Growth";
 import Risk from "../../components/ext/Risk";
+import Candle from "../../components/ext/Candle";
+import Prophet from "../../components/ext/Prophet";
+import Momentum from "../../components/ext/Momentum";
+import Pivots from "../../components/ext/Pivots";
 import { useTheme } from "@mui/material/styles";
 import { useLayoutEffect, useState, useRef, useEffect } from "react";
 
@@ -12,10 +16,17 @@ const getTodaysDate = () => {
 const CONTENT_WIDTH = 420;
 
 const termMap = {
-  1: "year",
+  1: "1yr",
   5: "5yr",
   10: "10yr",
   "3mo": "3mo",
+};
+
+const timeframeMap = {
+  1: "Short-term",
+  5: "Med-term",
+  10: "Long-term",
+  "3mo": "Swing Trade",
 };
 
 export default function TwitterImage(props) {
@@ -45,10 +56,64 @@ export default function TwitterImage(props) {
   console.log("data", data, "section", section, "global", global);
 
   const getComponent = () => {
-    if (section == "Growth") {
-      return <Growth data={data} />;
-    }
-    return <Risk data={data} />;
+    if (section == "Growth") return <Growth data={data} global={global} />;
+    if (section == "Risk") return <Risk data={data} global={global} />;
+    if (section == "Candle Patterns")
+      return (
+        <Candle
+          data={data}
+          global={global}
+          style={{
+            transform: "scale(1.2)",
+            margin: "10px 0",
+          }}
+        />
+      );
+    if (section == "AI Forecast")
+      return (
+        <div
+          style={{
+            width: 320,
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            transform: "scale(1.2)",
+            margin: 24,
+          }}
+        >
+          <Prophet
+            data={data}
+            global={global}
+            plotStyles={{
+              height: 140,
+            }}
+          />
+        </div>
+      );
+    if (section == "Momentum")
+      return (
+        <div
+          style={{
+            transform: "scale(1.4)",
+            margin: "14px 0",
+            display: "flex",
+          }}
+        >
+          <Momentum data={data} global={global} />
+        </div>
+      );
+    if (section == "Pivot Points")
+      return (
+        <div
+          style={{
+            width: 300,
+            transform: "scale(1.3)",
+            margin: 14,
+          }}
+        >
+          <Pivots sup={data.sup} res={data.res} lastClose={global.lastclose} />
+        </div>
+      );
   };
 
   return (
@@ -100,7 +165,11 @@ export default function TwitterImage(props) {
             color: theme.palette.secondary.main,
           }}
         >
-          {`${section} insights, past ${termMap[timeframe]}`}
+          {`${section}${
+            section == "AI Forecast"
+              ? ` for next ${termMap[timeframe]}`
+              : `, ${timeframeMap[timeframe]} (${termMap[timeframe]})`
+          } `}
         </h2>
         <h2
           style={{
@@ -128,7 +197,7 @@ export default function TwitterImage(props) {
             justifyContent: "center",
             alignItems: "center",
             gap: 10,
-            marginTop: 20,
+            marginTop: 26,
           }}
         >
           <h2

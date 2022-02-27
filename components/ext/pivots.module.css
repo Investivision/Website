@@ -72,6 +72,10 @@
   padding-left: 3px;
 }
 
+:global(.dark-mode) .level span {
+  color: #fff;
+}
+
 .level p {
   padding: 2px 6px;
   font-size: 16px;

@@ -102,7 +102,12 @@ export default function RangePlot(props) {
       >
         80% Confidence Range
       </p>
-      <div className={styles.plot}>
+      <div
+        className={styles.plot}
+        style={{
+          ...props.plotStyles,
+        }}
+      >
         <ResponsiveLine
           data={data}
           theme={{

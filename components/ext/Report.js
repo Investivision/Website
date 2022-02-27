@@ -13,22 +13,10 @@ import InfoIcon from "@material-ui/icons/Info";
 import TextArea from "./TextArea";
 import Growth from "./Growth";
 import Risk from "./Risk";
-
-function UpgradeButton(props) {
-  return (
-    <Button
-      variant="contained"
-      // color="secondary"
-      onClick={() => {
-        props.port.postMessage({
-          message: "see pricing",
-        });
-      }}
-    >
-      Upgrade to Unlock
-    </Button>
-  );
-}
+import Candle from "./Candle";
+import UpgradeButton from "./UpgradeButton";
+import Momentum from "./Momentum";
+import Prophet from "./Prophet";
 
 export default function Report(props) {
   return (
@@ -38,16 +26,7 @@ export default function Report(props) {
       <h3>Risk Management</h3>
       <Risk {...props} />
       <h3>Candle Patterns</h3>
-      {props.data.pattern ? (
-        <Pattern
-          pattern={props.data.pattern}
-          style={{
-            width: "100%",
-          }}
-        />
-      ) : (
-        <UpgradeButton port={props.port} />
-      )}
+      <Candle {...props} />
       <ToolTip
         title={`Prediction computed from ${props.symbol}-specific AI model.`}
         arrow
@@ -65,77 +44,10 @@ export default function Report(props) {
           />
         </h3>
       </ToolTip>
-      {props.data.p && props.data.pr && props.data.prophet ? (
-        <>
-          <Numeric
-            percentile={props.data["p%"]}
-            value={`${Math.round(props.data.p * 10) / 10}%`}
-            desc={"Predicted Gain"}
-            style={{
-              margin: 4,
-            }}
-            toolTip={`Predicted total price growth ${
-              props.currentTimeFrame == "3mo"
-                ? "3 months"
-                : `${props.currentTimeFrame} year${
-                    props.currentTimeFrame != "1" ? "s" : ""
-                  }
-                `
-            } into the future`}
-          />
-          <Numeric
-            percentile={props.data["pr%"]}
-            value={`${Math.round(props.data.pr * 10) / 10}%`}
-            desc={"Forecast Range"}
-            style={{
-              margin: 4,
-            }}
-            toolTip={`The relative width of the predicted price gain interval`}
-          />
-          <RangePlot
-            points={props.data.prophet}
-            lastClose={props.global.lastclose}
-          />
-        </>
-      ) : (
-        <UpgradeButton port={props.port} />
-      )}
+      <Prophet {...props} />
 
       <h3>Current Momentum</h3>
-      {props.data.rsi && props.data.adx ? (
-        <>
-          <Numeric
-            percentile={props.data.rsi / 100}
-            value={`${Math.round(props.data.rsi * 10) / 10}`}
-            desc={"Trend Direction"}
-            style={{
-              margin: 4,
-            }}
-            toolTip={`Backed by the Relative Strength Index, low readings (<30) indicate undersold, high readings (>70) indicate oversold. Such signals often identify price movement reversals.`}
-          />
-          <Numeric
-            percentile={Math.min(1, 0.14 * Math.pow(props.data.adx, 0.45))}
-            value={`${Math.round(props.data.adx * 10) / 10}`}
-            desc={"Trend Strength"}
-            style={{
-              margin: 4,
-            }}
-            toolTip={`Backed by the Average Directional Index, high readings (>20) indicate a strong, clear, consistent trend`}
-          />
-        </>
-      ) : (
-        // <Numeric
-        //   percentile={props.data.rsi / 100}
-        //   value={`${Math.round(props.data.rsi * 10) / 10}%`}
-        //   desc={"Relative Strength"}
-        //   style={{
-        //     margin: 4,
-        //   }}
-        //   colorsReversed
-        //   toolTip={`Low relative strength indicates an undersold asset, and a high relative strength indicates an oversold asset. Such signals often identify movement reversals.`}
-        // />
-        <UpgradeButton port={props.port} />
-      )}
+      <Momentum {...props} />
 
       <ToolTip
         title="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
