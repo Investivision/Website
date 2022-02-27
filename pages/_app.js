@@ -2,15 +2,21 @@ import "../styles/globals.css";
 import Head from "next/head";
 import Theme from "./Theme";
 import CssBaseline from "@mui/material/CssBaseline";
-import { NextSeo } from "next-seo";
+import { NextSeo, SoftwareAppJsonLd, SocialProfileJsonLd } from "next-seo";
+
+const desc =
+  "Your source for (actually) non-speculative, data-driven stock insights from the future. Engage with our vast database of 4000+ stocks, updated daily.";
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
       <NextSeo
-        title="Investivision"
-        description="Your source for (actually) non-speculative, data-driven stock insights from the future. Explore our vast database of 4000+ stocks, updated daily."
+        titleTemplate="%s | Investivision"
+        defaultTitle="Investivision"
+        description={desc}
         openGraph={{
+          title: "Investivision",
+          description: desc,
           images: [
             {
               url: "/thumb.png",
@@ -19,6 +25,22 @@ function MyApp({ Component, pageProps }) {
             },
           ],
         }}
+        twitter={{
+          site: "@investivision",
+          cardType: "summary_large_image",
+        }}
+      />
+      <SoftwareAppJsonLd
+        name="Investivision"
+        price="0"
+        operatingSystem="Web Application"
+        applicationCategory="FinanceApplication"
+      />
+      <SocialProfileJsonLd
+        type="Organization"
+        name="Investivision"
+        url="https://investivision.com"
+        sameAs={["https://twitter.com/investivision"]}
       />
       <Head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -11,6 +11,8 @@ import Pivots from "./Pivots";
 import ToolTip from "./ToolTip";
 import InfoIcon from "@material-ui/icons/Info";
 import TextArea from "./TextArea";
+import Growth from "./Growth";
+import Risk from "./Risk";
 
 function UpgradeButton(props) {
   return (
@@ -32,86 +34,9 @@ export default function Report(props) {
   return (
     <div className={styles.report}>
       <h3>Growth</h3>
-      {props.data.alpha ? (
-        <Numeric
-          percentile={props.data["alpha%"]}
-          value={`${Math.round(props.data.alpha * 100 * 10) / 10}%`}
-          desc={"Alpha"}
-          style={{
-            margin: 4,
-          }}
-          toolTip="Annualized share price growth per year, exponentially"
-        />
-      ) : null}
-      {props.data.beta ? (
-        <Numeric
-          percentile={1 - props.data["beta%"]}
-          value={`${Math.round(props.data.beta * 100 * 10) / 10}%`}
-          desc={"Beta"}
-          style={{
-            margin: 4,
-          }}
-          toolTip={`Degree of correlation between ${props.symbol} and the S&P 500`}
-        />
-      ) : null}
-      {props.data.drawup ? (
-        <Numeric
-          percentile={props.data["drawup%"]}
-          value={`${Math.round(props.data.drawup * 100)}%`}
-          desc={"Max Profit"}
-          style={{
-            margin: 4,
-          }}
-          toolTip={`Maximum gain achieved between any two points over the past ${
-            props.currentTimeFrame == "3mo"
-              ? "3 months"
-              : `${props.currentTimeFrame} year${
-                  props.currentTimeFrame != "1" ? "s" : ""
-                }`
-          }`}
-        />
-      ) : null}
+      <Growth {...props} />
       <h3>Risk Management</h3>
-      {props.data.natr ? (
-        <Numeric
-          percentile={1 - props.data["natr%"]}
-          value={`${Math.round(props.data.natr * 100) / 100}`}
-          desc={"True Range"}
-          style={{
-            margin: 4,
-          }}
-          toolTip={`Normalized distance between price highs and lows over time`}
-        />
-      ) : null}
-      {props.data.sharpe ? (
-        <Numeric
-          percentile={props.data["sharpe%"]}
-          value={`${Math.round(props.data.sharpe * 100) / 100}`}
-          desc={"Sharpe Ratio"}
-          style={{
-            margin: 4,
-          }}
-          toolTip={`Reward-to-Risk coefficient. Higher values indicate more stable returns`}
-        />
-      ) : null}
-      {props.data.drawdown ? (
-        <Numeric
-          percentile={props.data["drawdown%"]}
-          value={`${Math.round(props.data.drawdown * 100 * 10) / 10}%`}
-          desc={"Max Loss"}
-          style={{
-            margin: 4,
-          }}
-          toolTip={`Greatest loss sufferred between any two points over the past ${
-            props.currentTimeFrame == "3mo"
-              ? "3 months"
-              : `${props.currentTimeFrame} year${
-                  props.currentTimeFrame != "1" ? "s" : ""
-                }
-              `
-          }`}
-        />
-      ) : null}
+      <Risk {...props} />
       <h3>Candle Patterns</h3>
       {props.data.pattern ? (
         <Pattern

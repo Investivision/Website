@@ -40,15 +40,20 @@
 }
 
 .imgWrapper {
-  padding: 8px;
+  padding: 7px;
   border-radius: 12px;
   margin-right: 14px;
-  padding-bottom: 4px;
+  width: 46px;
+  height: 46px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
 }
 
 .header img {
-  width: 30px;
-  height: 30px;
+  width: 100%;
+  /* width: 30px;
+  height: 30px; */
 }
 /* :global(.dark-mode) .nav {
   filter: invert(100%);
