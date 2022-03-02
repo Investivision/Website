@@ -121,7 +121,7 @@ export default function Pattern(props) {
 
   const theme = useTheme();
 
-  console.log("theme from pattern", theme);
+  // console.log("theme from pattern", theme);
 
   return (
     <div className={styles.container} style={props.style}>

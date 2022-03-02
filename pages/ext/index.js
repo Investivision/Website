@@ -169,7 +169,7 @@ export default function Ext(props) {
       return;
     }
     document.body.classList.add("transparent");
-    if (window.chrome && !port && !props.localFirebase) {
+    if (window.chrome && !port && !props.localFirebase && !props.data) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
       port.onMessage.addListener(function (data) {
         console.log("got data", data);
@@ -402,3 +402,5 @@ export default function Ext(props) {
     </div>
   );
 }
+
+module.exports.processSymbolData = processSymbolData;

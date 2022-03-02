@@ -1,5 +1,5 @@
 import Button from "@mui/material/Button";
-function UpgradeButton(props) {
+export default function UpgradeButton(props) {
   return (
     <Button
       variant="contained"

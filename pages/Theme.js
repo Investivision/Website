@@ -93,7 +93,7 @@ export default function Theme(props) {
     },
   });
 
-  console.log("theme at creation", theme);
+  // console.log("theme at creation", theme);
 
   useEffect(() => {
     if (prefersDarkMode) {

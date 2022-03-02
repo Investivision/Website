@@ -35,6 +35,8 @@ export default function TextArea(props) {
   const [saved, setSaved] = useState(true);
   const [notesLoading, setNotesLoading] = useState(props.localFirebase);
 
+  console.log("localFirebase", props.localFirebase);
+
   useEffect(() => {
     setNotesText(props.notes);
     setSaved(true);
@@ -86,7 +88,7 @@ export default function TextArea(props) {
         timestamp: new Date(),
         notes: curr,
       };
-    } else {
+    } else if (props.port) {
       props.port.postMessage({
         symbol: props.symbol,
         notes: curr,

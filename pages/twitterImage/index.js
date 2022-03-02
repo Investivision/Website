@@ -7,6 +7,7 @@ import Momentum from "../../components/ext/Momentum";
 import Pivots from "../../components/ext/Pivots";
 import { useTheme } from "@mui/material/styles";
 import { useLayoutEffect, useState, useRef, useEffect } from "react";
+import { processSymbolData } from "../ext";
 
 const getTodaysDate = () => {
   const now = new Date();
@@ -46,8 +47,10 @@ export default function TwitterImage(props) {
   if (!data) {
     return null;
   }
-  console.log(typeof data);
+  console.log("data", data);
   data = JSON.parse(data);
+  data = processSymbolData(data);
+  console.log("formatted", data);
   const global = data.global;
   data = data[timeframe];
 
@@ -127,7 +130,7 @@ export default function TwitterImage(props) {
         id="content"
         style={{
           width: CONTENT_WIDTH,
-          padding: 20,
+          padding: 30,
           //   border: `1px solid white`,
           display: "flex",
           justifyContent: "center",
