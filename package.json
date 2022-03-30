@@ -37,6 +37,7 @@
     "react-firebase-hooks": "^3.0.4",
     "react-table": "^7.7.0",
     "react-tsparticles": "^1.35.4",
+    "react-twitter-embed": "^4.0.4",
     "react-wavify": "^1.5.4",
     "uuid": "^8.3.2",
     "xlsx": "^0.17.4"

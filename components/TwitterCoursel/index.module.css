@@ -1,0 +1,39 @@
+.carousel {
+  /* width: 100vw; */
+  /* max-width: 1400px; */
+  /* overflow-x: hidden; */
+  align-self: flex-start;
+}
+
+.tweets:hover {
+  animation-play-state: paused;
+}
+
+.tweets > div {
+  padding: 0 20px;
+}
+
+.tweets {
+  left: 0;
+  display: flex;
+  justify-content: flex-start;
+  /* align-items: flex-start;
+  align-content: flex-start; */
+
+  /* width: auto !important; */
+  /* gap: 40px; */
+}
+
+@keyframes rotate {
+  from {
+    transform: translate(0);
+  }
+  to {
+    transform: translateX(-50%); /* calc(-50% - min(1400px, 100vw) / 2)*/
+  }
+}
+
+.tweets :global(.twitter-tweet-rendered) {
+  min-width: 350px;
+  /* min-height: 1000px; */
+}

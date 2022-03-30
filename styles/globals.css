@@ -10,6 +10,8 @@
 
 body {
   background-color: white;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body.dark-mode {

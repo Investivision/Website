@@ -1,3 +1,5 @@
+import Button from "@mui/material/Button";
+
 export default function InfoScreen(props) {
   return (
     <div
@@ -29,7 +31,7 @@ export default function InfoScreen(props) {
         <Button
           variant="contained"
           onClick={() => {
-            port.postMessage({
+            props.port.postMessage({
               message: "see pricing",
             });
           }}

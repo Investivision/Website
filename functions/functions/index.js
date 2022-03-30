@@ -51,7 +51,7 @@ exports.generateToken = functions.https.onCall(async (data, context) => {
 // );
 
 const apiVersion = "2020-08-27";
-// console.log(process.env);
+// logger.log(process.env);
 const stripeSecret = isLocal
   ? process.env.stripe_secret
   : functions.config().stripe.stripe_secret;
@@ -62,13 +62,13 @@ const stripe = new Stripe(stripeSecret, {
 
 const setCustomClaims = async (uid, claims) => {
   let oldClaims = (await admin.auth().getUser(uid)).customClaims || {};
-  console.log("claims before overwriting", oldClaims);
+  logger.log("claims before overwriting", oldClaims);
   const newClaims = { ...oldClaims, ...claims };
   const withoutNulls = Object.fromEntries(
     Object.entries(newClaims).filter(([_, v]) => v != null)
   );
   await admin.auth().setCustomUserClaims(uid, withoutNulls);
-  console.log(`set custom claims for ${uid}`, withoutNulls);
+  logger.log(`set custom claims for ${uid}`, withoutNulls);
   return withoutNulls;
 };
 
@@ -104,7 +104,7 @@ exports.createCheckoutSession = functions.https.onCall(
         "The function must be called while authenticated."
       );
     }
-    console.log("101", await admin.auth().getUser(context.auth.uid));
+    logger.log("101", await admin.auth().getUser(context.auth.uid));
     let { customClaims } = await admin.auth().getUser(context.auth.uid);
 
     if (customClaims && customClaims.role) {
@@ -117,7 +117,7 @@ exports.createCheckoutSession = functions.https.onCall(
     }
 
     if (!customClaims || !customClaims.stripeId) {
-      console.log("creating customer record");
+      logger.log("creating customer record");
       customClaims = await createCustomerRecord(
         context.auth.email,
         context.auth.uid
@@ -147,7 +147,7 @@ exports.createPortalLink = functions.https.onCall(async (data, context) => {
       "The function must be called while authenticated."
     );
   }
-  console.log("token from client", JSON.stringify(context.auth, null, "  "));
+  logger.log("token from client", JSON.stringify(context.auth, null, "  "));
   let { stripeId } = context.auth.token;
   if (!stripeId) {
     stripeId = (
@@ -180,7 +180,7 @@ const handleSubscriptionUpdate = async (subscriptionId, status, customerId) => {
   const { firebaseRole } = subscription.items.data[0].price.product.metadata;
 
   const customer = await stripe.customers.retrieve(customerId);
-  console.log(JSON.stringify(subscription, null, " "));
+  logger.log(JSON.stringify(subscription, null, " "));
   const role = ["active", "trialing"].includes(status) ? firebaseRole : null;
   await setCustomClaims(customer.metadata.firebaseUID, {
     role: role,
@@ -242,7 +242,7 @@ exports.hooks = functions.https.onRequest(async (req, resp) => {
     logger.log(`finished processing event: ${event.id}, ${event.type}`);
   } catch (error) {
     logger.log(`failed to process event: ${event.id}, ${event.type}`, error);
-    return resp.json({
+    return resp.status(500).json({
       error: "Webhook handler failed. View function logs in Firebase.",
     });
   }

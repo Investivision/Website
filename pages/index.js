@@ -2,13 +2,14 @@ import HeaderAndFooter from "../components/HeaderAndFooter";
 import styles from "./index.module.css";
 import Wave from "react-wavify";
 import { isChrome, isEdge } from "react-device-detect";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ExtensionRoundedIcon from "@material-ui/icons/ExtensionRounded";
 import GridOnRoundedIcon from "@material-ui/icons/GridOnRounded";
 import { useTheme } from "@mui/material/styles";
 import ExtView from "./ext";
 import Link from "next/link";
 import Button from "@mui/material/Button";
+import TwitterCarousel from "../components/TwitterCoursel";
 
 export default function Home() {
   const theme = useTheme();
@@ -311,6 +312,13 @@ export default function Home() {
             </Link>
           </div>
         </div>
+        <h4>Insight Coverage</h4>
+        <h3>
+          We investigate on every core aspect of stock evaluation,
+          <br />
+          from growth, to risk, to pivot studies, to AI forecasting
+        </h3>
+        <TwitterCarousel />
       </div>
     </HeaderAndFooter>
   );

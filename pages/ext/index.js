@@ -277,12 +277,14 @@ export default function Ext(props) {
       <>
         {forbidden ? (
           <InfoScreen
+            port={port}
             message="see pricing"
             text="This symbol falls outside your 50 symbol coverage."
             styles={styles}
           />
         ) : rateLimited ? (
           <InfoScreen
+            port={port}
             message="see pricing"
             text="You've already accessed 10 insights in the past 24 hours."
             styles={styles}
@@ -396,7 +398,11 @@ export default function Ext(props) {
             ) : null}
           </div>
         ) : haveMadeRequest ? (
-          <InfoScreen text="not tracking this symbol" styles={styles} />
+          <InfoScreen
+            text="not tracking this symbol"
+            styles={styles}
+            port={port}
+          />
         ) : null}
       </>
     </div>
