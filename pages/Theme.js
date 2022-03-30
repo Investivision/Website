@@ -3,8 +3,9 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const ThemeManager = createContext(undefined);
+const DarkTheme = createContext(undefined);
 
-export { ThemeManager };
+export { ThemeManager, DarkTheme };
 
 export default function Theme(props) {
   const envPrefersDark = useMediaQuery("(prefers-color-scheme: dark)");
@@ -29,6 +30,11 @@ export default function Theme(props) {
     }
     localStorage.setItem("theme", newMode ? "dark" : "light");
     setStoredPrefersDark(newMode);
+  };
+
+  const enforceDarkTheme = () => {
+    // localStorage.setItem("dark");
+    setStoredPrefersDark(true);
   };
 
   const prefersDarkMode =
@@ -107,12 +113,14 @@ export default function Theme(props) {
 
   return (
     <ThemeManager.Provider value={manuallyToggleTheme}>
-      <ThemeProvider
-        theme={theme}
-        className={prefersDarkMode ? "dark-mode" : "light-mode"}
-      >
-        {props.children}
-      </ThemeProvider>
+      <DarkTheme.Provider value={enforceDarkTheme}>
+        <ThemeProvider
+          theme={theme}
+          className={prefersDarkMode ? "dark-mode" : "light-mode"}
+        >
+          {props.children}
+        </ThemeProvider>
+      </DarkTheme.Provider>
     </ThemeManager.Provider>
   );
 }

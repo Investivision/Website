@@ -8,6 +8,8 @@ import Pivots from "../../components/ext/Pivots";
 import { useTheme } from "@mui/material/styles";
 import { useLayoutEffect, useState, useRef, useEffect } from "react";
 import { processSymbolData } from "../ext";
+import { useContext } from "react";
+import { DarkTheme } from "../Theme";
 
 const getTodaysDate = () => {
   const now = new Date();
@@ -44,6 +46,10 @@ export default function TwitterImage(props) {
   });
 
   let { data, section, timeframe, width = "420" } = router.query;
+
+  const enforceDarkTheme = useContext(DarkTheme);
+  enforceDarkTheme();
+
   if (!data) {
     return null;
   }
