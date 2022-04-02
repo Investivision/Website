@@ -136,6 +136,7 @@ export default function Ext(props) {
   }, []);
 
   useEffect(() => {
+    // handle data formatting and augmentation
     if (props.data) {
       const formatted = processSymbolData(
         props.data ? props.data.insights[props.data.args[0]] : undefined

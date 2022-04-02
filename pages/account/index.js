@@ -95,11 +95,13 @@ export default function Account() {
         console.log(user);
 
         try {
+          console.log("ext: trying to send message");
           chrome.runtime.sendMessage(extId, { uid: user.uid }, function (res) {
-            console.log("ext response", res);
+            console.log("ext: ext response", res);
             setExtStatus(res.synced ? "synced" : "not synced");
           });
         } catch (e) {
+          console.log("ext: error", e);
           setExtStatus(
             window.chrome ? "not installed" : "incompatible browser"
           );

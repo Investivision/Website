@@ -22,7 +22,7 @@ export default function Prophet(props) {
         } into the future`}
       />
       <Numeric
-        percentile={props.data["pr%"]}
+        percentile={1 - props.data["pr%"]}
         value={`${Math.round(props.data.pr * 10) / 10}%`}
         desc={"Forecast Range"}
         style={{
