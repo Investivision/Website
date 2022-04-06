@@ -172,6 +172,11 @@ export default function Ext(props) {
     document.body.classList.add("transparent");
     if (window.chrome && !port && !props.localFirebase && !props.data) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
+      console.log("new port");
+      // window.onbeforeunload = function (event) {
+      //   alert("refresh");
+      //   port.disconnect();
+      // };
       port.onMessage.addListener(function (data) {
         console.log("got data", data);
         setRateLimited(data.status == "rateLimited");
@@ -218,11 +223,9 @@ export default function Ext(props) {
         }
       });
       port.onDisconnect.addListener(function () {
-        alert("disconnecting");
         setPort(undefined);
       });
       window.onbeforeunload = function (event) {
-        alert("disconnecting");
         port.disconnect();
       };
       setPort(port);
