@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
 import { useTheme } from "@mui/material/styles";
 import Tooltip from "../ext/ToolTip";
+import { color } from "@mui/system";
 
 let draggedPosition;
 
@@ -31,10 +32,31 @@ const toList = (value) => {
   return value.join(", ");
 };
 
+const toDollars = (value) => {
+  let out = "$" + roundTo2Decimals(value);
+  if (out.charAt(out.length - 2) == ".") {
+    out += "0";
+  }
+  return out;
+};
+
 const controlMap = {
   filter: "Custom Filters",
   columns: "Show/Hide Columns",
 };
+
+const cellColors = {
+  dark: ["255, 0, 0", "0, 240, 0", 0.75],
+  light: ["255, 0, 0", "0, 255, 0", 1],
+};
+
+function getCellColor(percentile, mode) {
+  const colors = cellColors[mode];
+  let out = percentile > 0.5 ? colors[1] : colors[0];
+  out = `rgba(${out}, ${(Math.abs(0.5 - percentile) / 0.5) * colors[2]})`;
+  console.log("cellColor", out, percentile);
+  return out;
+}
 
 // const formatCellValue = (value, col) => {
 //   col = col.toLowerCase();
@@ -61,6 +83,7 @@ const getColFormatters = (cols) => {
     "Relative Direction",
     "Trend Strength",
   ];
+  const dollars = ["Last Close"];
   const out = {};
   cols.forEach((col) => {
     console.log("getting formatting for col", col);
@@ -114,9 +137,11 @@ const getColFormatters = (cols) => {
       out[originalCol] = toList;
       return;
     }
-    if (originalCol == "Last Close") {
-      out[originalCol] = roundTo2Decimals;
-      return;
+    for (let target of dollars) {
+      if (target == col) {
+        out[originalCol] = toDollars;
+        return;
+      }
     }
     out[originalCol] = noop;
   });
@@ -130,6 +155,7 @@ export default function Grid(props) {
   const colFormatters = useMemo(() => {
     return getColFormatters(props.allCols);
   }, [props.allCols]);
+  console.log("plot props", props);
   console.log("colFormatters", colFormatters);
 
   const [toolTipOpen, setToolTipOpen] = useState(false);
@@ -141,11 +167,59 @@ export default function Grid(props) {
       const cells = [];
       for (const col of props.cols) {
         const val = row[col];
+        let colorValue = undefined;
         if (val) {
-          console.log("push cell", col, val, colFormatters);
-          console.log(val, colFormatters[col](val));
+          if (col != "Symbol") {
+            if (col.includes("Patterns")) {
+              colorValue = Math.min(val.length * 0.1, 0.5);
+              colorValue =
+                0.5 + (col.startsWith("Bullish") ? 1 : -1) * colorValue;
+            } else if (col.startsWith("Resistance")) {
+              const support = row[col.replace("Resistance", "Support")];
+              colorValue = Math.min((val / (val - support)) * 0.5, 0.5); // 0.7 just to make more entries be blank
+            } else if (col.startsWith("Support")) {
+              const res = row[col.replace("Support", "Resistance")];
+              colorValue = Math.max(0.5, 1 + (val / (res - val)) * 0.5);
+            } else if (col.startsWith("Relative Direction")) {
+              colorValue = Math.min((val - 20) / 0.6 / 100, 1);
+            } else if (col.startsWith("Trend Strength")) {
+              colorValue = Math.min(1, 0.14 * Math.pow(val, 0.45));
+            } else {
+              colorValue = col.includes("%")
+                ? val
+                : row[col.replace(",", " %ile,").replace(" in ", " %ile in ")];
+              if (colorValue < 0 || colorValue > 1) {
+                colorValue = undefined;
+              }
+              if (col.startsWith("Beta") || col.startsWith("True Range")) {
+                colorValue = 1 - colorValue;
+              }
+            }
+          }
+          console.log(
+            "build cell",
+            col,
+            colorValue,
+            colorValue == val ? "same" : "different",
+            col.replace(",", " %ile,").replace(" in ", " %ile in "),
+            // props.allCols
+            row
+          );
+
           cells.push(
-            <td className={col == "Name" ? styles.capWidth : ""}>
+            <td
+              className={col == "Name" ? styles.capWidth : ""}
+              style={
+                colorValue === undefined
+                  ? {}
+                  : {
+                      backgroundColor: getCellColor(
+                        colorValue,
+                        theme.palette.type
+                      ),
+                    }
+              }
+            >
               {colFormatters[col](val)}
             </td>
           );
@@ -172,6 +246,16 @@ export default function Grid(props) {
     });
   }, [props.rows, props.cols]);
 
+  // useEffect(() => {
+  //   if (props.children) {
+  //     window.alert("found children");
+  //     if (toolTipTimeout) {
+  //       clearInterval(toolTipTimeout);
+  //       setToolTipOpen(false);
+  //     }
+  //   }
+  // }, [props.children]);
+
   return (
     <Tooltip
       id="tableTooltip"
@@ -184,15 +268,17 @@ export default function Grid(props) {
       //   maxWidth: "none",
       // }}
       onMouseEnter={() => {
-        if (toolTipTimeout) {
-          clearTimeout(toolTipTimeout);
-        }
-        toolTipTimeout = setTimeout(() => {
-          setToolTipOpen(true);
+        if (!props.children) {
+          if (toolTipTimeout) {
+            clearTimeout(toolTipTimeout);
+          }
           toolTipTimeout = setTimeout(() => {
-            setToolTipOpen(false);
-          }, 7000);
-        }, 4000);
+            setToolTipOpen(true);
+            toolTipTimeout = setTimeout(() => {
+              setToolTipOpen(false);
+            }, 7000);
+          }, 4000);
+        }
       }}
       onMouseLeave={() => {
         if (toolTipTimeout) {
@@ -206,9 +292,10 @@ export default function Grid(props) {
           style={{
             overflow: props.controlOpen ? "hidden" : "scroll",
             maxWidth: "100%",
-            height: "100%",
-            minHeight: 400,
-            maxHeight: "calc(100vh - 100px)",
+            // height: "100%",
+            // minHeight: 400,
+            // height: "calc(100vh - 120px)",
+            // maxHeight: "660px",
           }}
         >
           <table>

@@ -161,6 +161,11 @@ let commonConfigurations = [
         relation: "exists",
         value: "",
       },
+      {
+        feature: "Last Close",
+        relation: ">",
+        value: "20",
+      },
     ],
   },
   {
@@ -344,7 +349,7 @@ export default function Insights() {
         }
       }
       obj.notes = "";
-      console.log("rawObj", obj);
+      console.log("rawObj", JSON.stringify(obj));
       rawData[obj.symbol] = obj;
     });
     data2.slice(1).forEach((row) => {
@@ -411,7 +416,7 @@ export default function Insights() {
         .replace("P_", "AI Forecast_")
         .replace("Pr_", "Forecast Range_")
         .replace("P %", "AI Forecast %")
-        .replace("Pr 5", "Forecast Range %")
+        .replace("Pr %", "Forecast Range %")
         .replace("Natr", "True Range")
         .replace("3Mo", "3mo")
         .replace("Adx", "Trend Strength")
@@ -429,6 +434,21 @@ export default function Insights() {
       }
       return out;
     });
+    console.log(
+      "formatted cols",
+      formattedCols,
+      data[0].map((col) => {
+        return col
+          .toTitleCase()
+          .replace("Res_", "Resistance_")
+          .replace("Sup_", "Support_")
+          .replace("%_", " %ile_")
+          .replace("Lastclose", "Last Close")
+          .replace("Drawup", "Max Gain")
+          .replace("P_", "AI Forecast_")
+          .replace("Pr_", "Forecast Range_");
+      })
+    );
     const myRows = data.slice(1).map((row) => {
       const obj = {};
       for (let i = 0; i < formattedCols.length; i++) {
@@ -1218,10 +1238,13 @@ export default function Insights() {
                             cols={cols}
                             showDelete={filters.length > 0}
                             onDelete={() => {
-                              tempFilters = filters
-                                .slice(0, i)
-                                .concat(filters.slice(i + 1));
-                              filterChanges = true;
+                              // tempFilters = filters
+                              //   .slice(0, i)
+                              //   .concat(filters.slice(i + 1));
+                              // filterChanges = true;
+                              setFilters(
+                                filters.slice(0, i).concat(filters.slice(i + 1))
+                              );
                             }}
                             onChange={(changes) => {
                               console.log("filter change", changes);
@@ -1323,11 +1346,7 @@ export default function Insights() {
                               onChange={(e) =>
                                 setShowPercentiles(e.target.checked)
                               }
-                              color={
-                                theme.palette.mode == "dark"
-                                  ? "secondary"
-                                  : "primary"
-                              }
+                              color={"primary"}
                               sx={{
                                 "& .MuiSvgIcon-root": {
                                   fontSize: 22,
@@ -1335,7 +1354,7 @@ export default function Insights() {
                               }}
                             />
                           }
-                          label="Show Percentiles"
+                          label="Enable Percentiles"
                         />
                       </FormGroup>
                       <p>Potential Time Frames</p>
