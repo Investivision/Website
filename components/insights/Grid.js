@@ -169,7 +169,7 @@ export default function Grid(props) {
         const val = row[col];
         let colorValue = undefined;
         if (val) {
-          if (col != "Symbol") {
+          if (col != "Symbol" && col != "Last Close") {
             if (col.includes("Patterns")) {
               colorValue = Math.min(val.length * 0.1, 0.5);
               colorValue =
@@ -196,15 +196,6 @@ export default function Grid(props) {
               }
             }
           }
-          console.log(
-            "build cell",
-            col,
-            colorValue,
-            colorValue == val ? "same" : "different",
-            col.replace(",", " %ile,").replace(" in ", " %ile in "),
-            // props.allCols
-            row
-          );
 
           cells.push(
             <td
