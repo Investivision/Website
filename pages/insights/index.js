@@ -1154,7 +1154,7 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Manage Filters
+                    Filters
                   </Button>
                   <Button
                     size="small"
@@ -1169,7 +1169,7 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Manage Columns
+                    Columns
                   </Button>
                   <Button
                     size="small"
@@ -1206,7 +1206,7 @@ export default function Insights() {
                       setExportLoading(false);
                     }}
                   >
-                    Export to XLSX
+                    XLSX↓
                   </LoadingButton>
                 </div>
                 <Grid
