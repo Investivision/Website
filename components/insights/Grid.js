@@ -232,7 +232,7 @@ export default function Grid(props) {
             </td>
           );
         } else {
-          cells.push(<td></td>);
+          cells.push(<td>n/a</td>);
         }
       }
       //   alert("new rows to render");

@@ -50,7 +50,7 @@ let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
 
 let tempSelectedCols = [];
-let tempColorOpacity = 1;
+let tempColorOpacity = 0.7;
 let colorOpacityChanges = false;
 let selectedColsSet = new Set();
 let selectedColsChanges = false;

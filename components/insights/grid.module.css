@@ -13,13 +13,13 @@
 
 .aroundTable {
   box-shadow: 0 0 40px 0 rgba(0, 29, 158, 0.131);
-  overflow: visible;
+  /* overflow: visible; */
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 :global(.dark-mode) .aroundTable {
   box-shadow: 0 0 40px 0 rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  overflow: hidden;
 }
 
 .div table {
@@ -106,9 +106,9 @@
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.div tbody td:not(:first-child) {
+/* .div tbody td:not(:first-child) {
   opacity: 0.8;
-}
+} */
 
 :global(.dark-mode) .div tbody tr:hover {
   background-color: rgba(255, 255, 255, 0.09);
@@ -130,7 +130,7 @@
   width: 100%;
   height: 100%;
   z-index: 3;
-  background-color: rgb(238, 245, 255);
+  background-color: white;
   padding: 30px;
   transition: opacity 0.2s ease;
   overflow: scroll;
