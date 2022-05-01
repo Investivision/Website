@@ -43,17 +43,33 @@ const toDollars = (value) => {
 const controlMap = {
   filter: "Custom Filters",
   columns: "Show/Hide Columns",
+  pref: "Preferences",
 };
 
 const cellColors = {
-  dark: ["255, 0, 0", "0, 240, 0", 0.75],
-  light: ["255, 0, 0", "0, 255, 0", 1],
+  dark: [[255, 0, 0], [170, 170, 0], [0, 220, 40], 0.5, 0.7],
+  light: [[255, 0, 0], [170, 170, 0], [0, 255, 0], 0.7, 1],
 };
 
-function getCellColor(percentile, mode) {
+function getCellColor(percentile, mode, opacity) {
   const colors = cellColors[mode];
-  let out = percentile > 0.5 ? colors[1] : colors[0];
-  out = `rgba(${out}, ${(Math.abs(0.5 - percentile) / 0.5) * colors[2]})`;
+  const interp = (percentile % 0.5) * 2;
+  let lowColor;
+  let highColor;
+  if (percentile > 0.5) {
+    lowColor = colors[1];
+    highColor = colors[2];
+  } else {
+    lowColor = colors[0];
+    highColor = colors[1];
+  }
+  let out = [0, 0, 0];
+  for (var i = 0; i < 3; i++) {
+    out[i] = lowColor[i] + (highColor[i] - lowColor[i]) * interp;
+  }
+  // const opacity =
+  //   colors[3] + (Math.abs(0.5 - percentile) / 0.5) * (colors[4] - colors[3]);
+  out = `rgba(${out}, ${opacity})`; //${(Math.abs(0.5 - percentile) / 0.5) * colors[3]})
   console.log("cellColor", out, percentile);
   return out;
 }
@@ -206,7 +222,8 @@ export default function Grid(props) {
                   : {
                       backgroundColor: getCellColor(
                         colorValue,
-                        theme.palette.type
+                        theme.palette.type,
+                        props.colorOpacity
                       ),
                     }
               }
@@ -235,7 +252,7 @@ export default function Grid(props) {
         </tr>
       );
     });
-  }, [props.rows, props.cols]);
+  }, [props.rows, props.cols, theme.palette.mode, props.colorOpacity]);
 
   // useEffect(() => {
   //   if (props.children) {
@@ -280,6 +297,7 @@ export default function Grid(props) {
     >
       <div className={styles.div}>
         <div
+          className={styles.aroundTable}
           style={{
             overflow: props.controlOpen ? "hidden" : "scroll",
             maxWidth: "100%",

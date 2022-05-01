@@ -11,6 +11,17 @@
   white-space: nowrap;
 }
 
+.aroundTable {
+  box-shadow: 0 0 40px 0 rgba(0, 29, 158, 0.131);
+  overflow: visible;
+}
+
+:global(.dark-mode) .aroundTable {
+  box-shadow: 0 0 40px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
 .div table {
   border-collapse: collapse;
   /* width: 200%; */
@@ -19,7 +30,7 @@
 }
 
 .div thead tr > th {
-  background: rgb(232, 240, 255);
+  background: rgb(189, 223, 255);
   position: sticky;
   z-index: 2;
   top: 0;
@@ -28,6 +39,14 @@
   /* border: 0px solid transparent; */
   /* border-left: 4px solid transparent; */
 }
+
+/* .div thead th {
+  border-bottom: 1px solid black
+} */
+/* 
+.div thead th:nth-child(1) {
+  border-bottom-color: rgb(163, 232, 255);
+} */
 
 :global(.dark-mode) .div thead tr > th {
   background: rgb(0, 6, 26);
@@ -39,20 +58,25 @@
   top: 0;
 }
 
-.div td,
+/* .div td,
 .div th {
-  border: 0.5px solid rgb(205, 208, 221);
+  border: 0.5px solid transparent;
+}
+
+.div td:last-child() {
+  border: none;
 }
 
 :global(.dark-mode) :is(.div td, .div th) {
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-}
+  border: 0.5px solid transparent;
+} */
 
 .div tbody tr > :first-child {
-  background: rgb(232, 240, 255);
+  background: rgb(189, 223, 255);
   position: sticky;
   z-index: 1;
   left: 0;
+  font-weight: 1000;
 }
 
 /* .div tbody tr {
