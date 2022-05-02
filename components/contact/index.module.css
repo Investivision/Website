@@ -33,7 +33,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 100px;
+    padding: 20px;
     z-index: 9;
 }
 
@@ -43,11 +43,28 @@
     width: 600px;
     max-width: 100%;
     align-self: center;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(255,255,255,0.5);
     padding: 40px;
     border-radius: 16px;
-    max-height: calc(100vh - 230px);
+    max-height: calc(100vh - 200px);
     overflow-y: scroll; 
+}
+
+:global(.dark-mode) .form {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.title {
+    font-size: 26px;
+    text-align: center;
+}
+
+.caption {
+    font-size: 16px;
+    text-align: center;
+    opacity: 0.6;
+    margin-top: -18px;
+    margin-bottom: 15px;
 }
 
 .collapsableRow {
@@ -69,4 +86,10 @@
     display: flex;
     justify-content: center;
     width: 100%;
+}
+
+@media screen and (max-width: 600px) {
+    .fullScreen {
+        padding-top: 100px;
+    }
 }

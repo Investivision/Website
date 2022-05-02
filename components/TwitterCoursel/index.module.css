@@ -1,7 +1,8 @@
 .carousel {
-  /* width: 100vw; */
+  width: 100vw;
   /* max-width: 1400px; */
-  /* overflow-x: hidden; */
+  overflow-x: hidden;
+  margin-left: -40px;
   align-self: flex-start;
 }
 
@@ -36,4 +37,11 @@
 .tweets :global(.twitter-tweet-rendered) {
   min-width: 350px;
   /* min-height: 1000px; */
+}
+
+
+@media screen and (max-width: 660px) {
+  .carousel {
+    margin-left: -20px;
+  }
 }

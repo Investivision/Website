@@ -62,6 +62,8 @@ export default function Contact(props) {
               e.preventDefault();
             }}
           >
+            <p className={styles.title}>Support and Contact</p>
+            <p className={styles.caption}>Let us known how we can help!</p>
             <div className={styles.collapsableRow}>
               <TextField
                 label="Name"
