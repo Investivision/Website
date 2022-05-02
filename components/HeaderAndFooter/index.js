@@ -5,6 +5,7 @@ import { useTheme } from "@mui/styles";
 import ThemeToggle from "../ThemeToggle";
 import { useEffect, useState } from "react";
 import Banner from "./Banner";
+import Contact from "../contact";
 
 const bottomWaveHeight = 50;
 
@@ -189,6 +190,7 @@ export default function HeaderAndFooter(props) {
           </p>
         </footer>
       </div>
+      <Contact />
     </>
   );
 }

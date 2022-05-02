@@ -1,0 +1,72 @@
+.iconWrapper {
+    /* background-color: rgba(255,255,255,0.3); */
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    /* padding: 6px;
+    padding-bottom: 3px;
+    border-radius: 14px; */
+    border-radius: 50%;
+    box-shadow: 0 0 20px 0 rgba(0,0,0,0.3);
+    transition: transform 0.2s ease;
+}
+
+.iconWrapper:hover {
+    transform: scale(1.1);
+}
+
+.icon {
+    width: 20px !important;
+    height: 20px !important;
+    fill: white !important;
+    /* margin-bottom: -3px; */
+}
+
+.fullScreen {
+    height: 100vh;
+    min-height: 700px;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 100px;
+    z-index: 9;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    max-width: 100%;
+    align-self: center;
+    background-color: rgba(0,0,0,0.5);
+    padding: 40px;
+    border-radius: 16px;
+    max-height: calc(100vh - 230px);
+    overflow-y: scroll; 
+}
+
+.collapsableRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.collapsableRow > * {
+    flex: 1;
+    min-width: 200px;
+}
+
+.form {
+    gap: 16px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
