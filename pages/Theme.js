@@ -65,6 +65,9 @@ export default function Theme(props) {
             white: {
               main: "#FFFFFF",
             },
+            background: {
+              main: "#0e1723",
+            },
           }
         : {
             primary: {
@@ -78,6 +81,9 @@ export default function Theme(props) {
             },
             white: {
               main: "#FFFFFF",
+            },
+            background: {
+              main: "#ffffff",
             },
           }),
     },

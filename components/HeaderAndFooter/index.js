@@ -6,20 +6,12 @@ import ThemeToggle from "../ThemeToggle";
 import { useEffect, useState } from "react";
 import Banner from "./Banner";
 import Contact from "../contact";
+import Head from "next/head";
 
 const bottomWaveHeight = 50;
 
-const banners = [
-  {
-    title: "50% discount for new users!",
-    link: "/pricing",
-  },
-];
-
 export default function HeaderAndFooter(props) {
   const theme = useTheme();
-
-  const [bannerOpen, setBannerOpen] = useState(true);
 
   console.log(
     props,
@@ -64,6 +56,9 @@ export default function HeaderAndFooter(props) {
           })}
         </div>
       ) : null} */}
+      <Head>
+        <meta name="theme-color" content={theme.palette.background.main} />
+      </Head>
       <Banner />
       <div {...props} className={styles.page}>
         <header
