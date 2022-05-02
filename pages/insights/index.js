@@ -45,6 +45,7 @@ import base91 from "node-base91";
 import Base64String from "../../components/insights/LZString";
 import { useRouter } from "next/router";
 import Slider from "@mui/material/Slider";
+import { NextSeo } from "next-seo";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -897,6 +898,7 @@ export default function Insights() {
         symbolForExt = undefined;
       }}
     >
+      <NextSeo title="Insight Explorer" />
       {!userLoaded ? (
         <>
           <Skeleton

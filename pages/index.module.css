@@ -18,6 +18,7 @@
   overflow-y: scroll;
   border-radius: 14px;
   backdrop-filter: blur(6px);
+  animation: slide 2s ease-out;
 }
 
 .demoDisclaimer {
@@ -234,8 +235,8 @@
   }
 }
 
-.browserFound {
-  animation: fadein 2s ease-in;
+.meet {
+  animation: slideDown 2s ease-out;
 }
 
 @keyframes fadein {
@@ -244,5 +245,27 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes slide {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

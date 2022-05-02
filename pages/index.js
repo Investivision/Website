@@ -73,7 +73,156 @@ export default function Home() {
             </linearGradient>
           </defs>
         </Wave>
-        <div
+        {browserLoaded && (
+          <>
+            <div className={`${styles.flexCenter} ${styles.meet}`}>
+              <h2>
+                {`It's ${new Date().getFullYear()}. Meet your new `}
+                <br />
+                <span>
+                  Stock Investing
+                  <br />
+                  Assistant
+                </span>
+              </h2>
+              {browser ? (
+                <a
+                  href="dummyurl"
+                  className={styles.addButton}
+                >{`Add to ${browser}`}</a>
+              ) : null}
+            </div>
+            <div className={styles.spacer} />
+            <div
+              style={{
+                backgroundColor:
+                  theme.palette.mode == "dark" ? "#000000a0" : "#ffffffa0",
+              }}
+              className={styles.demo}
+            >
+              <ExtView
+                data={{
+                  args: ["NVDA"],
+                  insights: {
+                    NVDA: {
+                      notes: "",
+                      "alpha%_3mo": 0.198852410551572,
+                      "drawdown%_3mo": 0.2524772468537568,
+                      p45: [263.2, 276.6, 290.4],
+                      pattern_3mo: {},
+                      sup_3mo: -0.12211951121180079,
+                      p_5: 167.709363998159,
+                      drawdown_3mo: -0.3232799522741088,
+                      beta_10: 1.5170678693131916,
+                      sector: "Technology",
+                      adx_1: 32.01888050111412,
+                      "p%_3mo": 0.6716794087956137,
+                      alpha_10: 0.6368108835458466,
+                      "beta%_10": 0.9409183864569415,
+                      p_10: 319.47273982881484,
+                      sup_10: -0.15576718428243466,
+                      "p%_10": 0.9226646881593072,
+                      "pr%_10": 0.14206651614587573,
+                      "alpha%_1": 0.9998122691755946,
+                      "beta%_3mo": 0.9872907623393252,
+                      natr_5: 4.394430153405667,
+                      rsi_5: 43.23438712425556,
+                      p100: [280.7, 294.8, 308.2],
+                      len: 2516,
+                      "natr%_5": 0.7930308561383937,
+                      p700: [422.8, 463.7, 502.5],
+                      pr_1: 9.280802720586454,
+                      "drawup%_1": 0.9999998863832141,
+                      beta_1: 2.360095661938771,
+                      p63: [266.7, 281.2, 295.7],
+                      "sharpe%_1": 0.9133680119246541,
+                      sup_1: -0.1049047673145822,
+                      pr_5: 29.45710490710444,
+                      pr_10: 53.94774521225495,
+                      alpha_1: 1.306558970523533,
+                      drawdown_10: -0.5603844986717537,
+                      res_5: 0.03303499387855531,
+                      "drawup%_5": 0.9999998518665167,
+                      drawup_10: 126.69312478327731,
+                      "alpha%_5": 0.995783260458713,
+                      industry: "Semiconductors",
+                      "pr%_1": 0.17165388437521495,
+                      rsi_1: 39.669112537203276,
+                      res_3mo: 0.045491299916605395,
+                      adx_10: 10.224200552540339,
+                      name: "NVIDIA Corporation",
+                      beta_3mo: 2.733487422724532,
+                      rsi_3mo: 36.92906032747091,
+                      natr_10: 3.251859857142716,
+                      natr_1: 6.631083848442473,
+                      "alpha%_10": 0.9999996975007784,
+                      p15: [251.9, 266.3, 280.6],
+                      beta_5: 1.6595885756740338,
+                      sharpe_1: 1.4039550170186348,
+                      alpha_3mo: -0.7165338624535209,
+                      "pr%_5": 0.1441989397126937,
+                      lastclose: 234.77000427246094,
+                      "market cap": 759750000000.0,
+                      adx_5: 16.40797539695451,
+                      "beta%_5": 0.9710609814773935,
+                      drawup_5: 13.14562842822303,
+                      pr_3mo: 10.317546889002537,
+                      sharpe_3mo: -1.7827240239362854,
+                      p400: [356.7, 377.7, 398.8],
+                      symbol: "NVDA",
+                      rsi_10: 50.755407199401425,
+                      sup_5: -0.13727308400025484,
+                      "sharpe%_10": 0.9989929533975896,
+                      "pr%_3mo": 0.24058667825763086,
+                      adx_3mo: 46.213021341880896,
+                      pattern_1: { BELTHOLD: 100, THRUSTING: -100 },
+                      sharpe_5: 1.1767060567916627,
+                      "beta%_1": 0.9928670255034229,
+                      "drawup%_3mo": 0.5538726976239943,
+                      sharpe_10: 1.2219955773109723,
+                      pattern_5: { SPINNINGTOP: -100 },
+                      "drawdown%_1": 0.5247093587031895,
+                      caprank: 8.0,
+                      "natr%_3mo": 0.8222905170550212,
+                      res_10: 0.12924946408019664,
+                      "natr%_1": 0.8419561544506229,
+                      "sharpe%_3mo": 0.2322936577822523,
+                      p2520: [724.8, 984.8, 1256.0],
+                      p_3mo: 19.765598681741466,
+                      "p%_1": 0.8046493803622204,
+                      p30: [256.3, 271.4, 284.6],
+                      res_1: 0.1853496711320506,
+                      p1260: [535.9, 628.5, 721.0],
+                      drawdown_1: -0.3424410777967042,
+                      "natr%_10": 0.5945296751968866,
+                      natr_3mo: 6.959020302176924,
+                      pattern_10: { ENGULFING: -100 },
+                      p160: [299.1, 313.0, 327.9],
+                      p_1: 47.451625894365606,
+                      p1750: [620.2, 771.4, 928.4],
+                      "p%_5": 0.8888895311257533,
+                      drawup_3mo: 0.21696128701181117,
+                      "drawdown%_10": 0.6113833264260273,
+                      "sharpe%_5": 0.9945955569534879,
+                      "drawup%_10": 1.0,
+                      drawdown_5: -0.5603844986717537,
+                      p252: [330.5, 346.2, 362.6],
+                      alpha_5: 0.4922847122545826,
+                      "drawdown%_5": 0.5841093452046696,
+                      drawup_1: 1.8810782595064168,
+                    },
+                  },
+                  name: "Blake Sanie",
+                }}
+              />
+              <p className={styles.demoDisclaimer}>
+                Disclaimer: these visuals and figures are not updated nor live,
+                and exist for demo purposes only.
+              </p>
+            </div>
+          </>
+        )}
+        {/* <div
           className={`${styles.flexCenter} ${
             browserLoaded ? styles.browserFound : ""
           }`}
@@ -224,7 +373,7 @@ export default function Home() {
             Disclaimer: these visuals and figures are not updated nor live, and
             exist for demo purposes only.
           </p>
-        </div>
+        </div> */}
       </div>
       <div className={`${styles.about} ${styles.flexCenter}`}>
         <h4>Who are we?</h4>

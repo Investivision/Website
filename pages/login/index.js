@@ -21,6 +21,12 @@ import {
 import { auth, formatErrorCode } from "../../firebase";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { useRouter } from "next/router";
+import {
+  NextSeo,
+  SoftwareAppJsonLd,
+  SocialProfileJsonLd,
+  DefaultSeo,
+} from "next-seo";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -70,6 +76,7 @@ export default function Login() {
 
   return (
     <HeaderAndFooter bodyClassName={styles.body} hideFooterWave>
+      <NextSeo noindex title="Login" />
       {[0, 1].map((i) => {
         return (
           <Wave

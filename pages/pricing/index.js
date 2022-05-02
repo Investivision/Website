@@ -9,6 +9,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { getFunction, auth } from "../../firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/router";
+import { NextSeo } from "next-seo";
 
 const plans = [
   {
@@ -93,6 +94,7 @@ export default function Pricing(props) {
 
   return (
     <HeaderAndFooter bodyClassName={styles.body}>
+      <NextSeo title="Pricing" />
       <h1 className="pageHeader">Pricing and Plans</h1>
       <ToggleButtonGroup
         color={theme.palette.mode == "dark" ? "secondary" : "primary"}

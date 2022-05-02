@@ -2,7 +2,12 @@ import "../styles/globals.css";
 import Head from "next/head";
 import Theme from "./Theme";
 import CssBaseline from "@mui/material/CssBaseline";
-import { NextSeo, SoftwareAppJsonLd, SocialProfileJsonLd } from "next-seo";
+import {
+  NextSeo,
+  SoftwareAppJsonLd,
+  SocialProfileJsonLd,
+  DefaultSeo,
+} from "next-seo";
 
 const desc =
   "Your source for (actually) non-speculative, data-driven stock insights from the future. Engage with our vast database of 4000+ stocks, updated daily.";
@@ -10,10 +15,11 @@ const desc =
 function MyApp({ Component, pageProps }) {
   return (
     <>
-      <NextSeo
+      <DefaultSeo
         titleTemplate="%s | Investivision"
         defaultTitle="Investivision"
         description={desc}
+        dangerouslySetAllPagesToNoIndex={true}
         openGraph={{
           title: "Investivision",
           description: desc,
@@ -74,7 +80,7 @@ function MyApp({ Component, pageProps }) {
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#516fdb" />
         <meta name="msapplication-TileColor" content="#da532c" />
-        <meta name="theme-color" content="#ffffff" />
+        {/* <meta name="theme-color" content="#ffffff" /> */}
         {/* <meta
           id="vp"
           name="viewport"

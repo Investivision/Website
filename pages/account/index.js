@@ -20,7 +20,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { useRouter } from "next/router";
-import { setPriority } from "os";
+import { NextSeo } from "next-seo";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -115,6 +115,7 @@ export default function Account() {
 
   return (
     <HeaderAndFooter bodyClassName={styles.body}>
+      <NextSeo title="Account" />
       {!user ? (
         <>
           <Skeleton
