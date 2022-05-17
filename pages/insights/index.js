@@ -1231,6 +1231,7 @@ export default function Insights() {
                     setSortAttr(attr);
                   }}
                   onOrderChange={(newCols) => {
+                    console.log("change order", newCols);
                     setSelectedCols(newCols);
                   }}
                   controlOpen={controlOpen}

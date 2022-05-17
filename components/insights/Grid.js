@@ -29,7 +29,10 @@ const noop = (value) => {
 };
 
 const toList = (value) => {
-  return value.join(", ");
+  if (value.length) {
+    return value.join(", ");
+  }
+  return "None";
 };
 
 const toDollars = (value) => {
@@ -53,10 +56,10 @@ const cellColors = {
 
 function getCellColor(percentile, mode, opacity) {
   const colors = cellColors[mode];
-  const interp = (percentile % 0.5) * 2;
+  const interp = (Math.min(percentile, 0.999999) % 0.5) * 2;
   let lowColor;
   let highColor;
-  if (percentile > 0.5) {
+  if (percentile >= 0.5) {
     lowColor = colors[1];
     highColor = colors[2];
   } else {
@@ -181,6 +184,7 @@ export default function Grid(props) {
   const rowComponents = useMemo(() => {
     return props.rows.slice(0, 20).map((row) => {
       const cells = [];
+      console.log("row components, cols", props.cols);
       for (const col of props.cols) {
         const val = row[col];
         let colorValue = undefined;
@@ -331,9 +335,9 @@ export default function Grid(props) {
                       onDragOver={(e) => {
                         if (i > 0 && e.target.tagName == "TH") {
                           if (i > draggedPosition) {
-                            e.target.style.borderRight = "4px solid red";
+                            e.target.style.borderRight = `4px solid ${theme.palette.primary.main}`;
                           } else if (i < draggedPosition) {
-                            e.target.style.borderLeft = "4px solid red";
+                            e.target.style.borderLeft = `4px solid ${theme.palette.primary.main}`;
                           }
                         }
                         console.log(
@@ -358,7 +362,7 @@ export default function Grid(props) {
                         if (i > draggedPosition) {
                           const newOrder = [
                             ...props.cols.slice(0, draggedPosition),
-                            props.cols.slice(draggedPosition + 1, i + 1),
+                            ...props.cols.slice(draggedPosition + 1, i + 1),
                             props.cols[draggedPosition],
                             ...props.cols.slice(i + 1),
                           ];

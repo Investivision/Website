@@ -29,7 +29,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    backdrop-filter: blur(16px);
+    backdrop-filter: blur(30px);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -48,10 +48,12 @@
     border-radius: 16px;
     max-height: calc(100vh - 200px);
     overflow-y: scroll; 
+    box-shadow: 0 0 40px 0 rgba(0,0,0,0.1);
 }
 
 :global(.dark-mode) .form {
     background-color: rgba(0,0,0,0.5);
+    box-shadow: none;
 }
 
 .title {
