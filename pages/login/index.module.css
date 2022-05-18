@@ -28,6 +28,7 @@
   box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.05);
   border: 6px solid transparent;
   border-radius: 14px;
+  gap: 6px;
 }
 
 :global(.dark-mode) .toggle {
@@ -39,6 +40,7 @@
   padding: 7px 30px;
   transition: background-color 0.2s ease;
   border: none !important;
+  border-radius: 8px !important;
 }
 
 .textInput {

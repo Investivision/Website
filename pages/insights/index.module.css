@@ -216,7 +216,6 @@
 
 .gridActions button {
   background-color: white;
-  z-index: 10;
 }
 
 :global(.dark-mode) .gridActions button {

@@ -3,6 +3,7 @@ import AddCircleOutlineRoundedIcon from "@material-ui/icons/AddCircleOutlineRoun
 import RemoveRoundedIcon from "@material-ui/icons/RemoveRounded";
 import { useTheme } from "@mui/styles";
 import { useState, useRef } from "react";
+import { BorderStyleOutlined } from "@material-ui/icons";
 
 export default function Question({ question }) {
   const theme = useTheme();
@@ -51,7 +52,14 @@ export default function Question({ question }) {
         ref={topRef}
       >
         {question.q}
-        {open ? <RemoveRoundedIcon /> : <AddCircleOutlineRoundedIcon />}
+        <div className={styles.icons}>
+          <RemoveRoundedIcon />
+          <AddCircleOutlineRoundedIcon
+            style={{
+              fill: open ? "transparent" : "currentColor",
+            }}
+          />
+        </div>
       </p>
       {/* <div
         className={styles.spacer}
@@ -60,7 +68,7 @@ export default function Question({ question }) {
         }}
       ></div> */}
       <div ref={answerRef} className={styles.a}>
-        <p>{question.a}</p>
+        <p dangerouslySetInnerHTML={{ __html: question.a }} />
       </div>
     </div>
   );

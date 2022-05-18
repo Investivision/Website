@@ -2,12 +2,12 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 40px 0 rgba(0, 42, 255, 0.067);
-    padding: 30px 20px;
+    padding: 0 20px;
     /* padding-bottom: 0; */
     /* padding-bottom: 0px; */
     border-radius: 10px;
     cursor: pointer;
-    transition: height 0.1s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    transition: height 0.1s ease, box-shadow 0.2s ease, transform 0.3s ease;
     overflow: hidden;
 }
 
@@ -19,9 +19,12 @@
 :global(.dark-mode) .question {
 
     background-color: rgba(0, 6, 26, 0.8);
-
-    box-shadow: 0 0 40px 0 rgba(255, 255, 255, 0.01);
     box-shadow: none;
+}
+
+:global(.dark-mode) .question:hover {
+    box-shadow: 0 0 60px 0 rgba(255, 255, 255, 0.06);
+    /* transform: scale(1.01) */
 }
 
 .q {
@@ -33,7 +36,12 @@
     align-items: center;
     font-weight: 500;
     margin-right: 20px;
+    margin: 30px 0;
 }
+
+/* .question:hover .q {
+    color: rgb(220, 117, 0) !important;
+} */
 
 .spacer {
     transition: height 0.2s ease;
@@ -42,6 +50,33 @@
 .a {
     display: none;
     font-size: 18px;
-    padding-top: 10px;
-    opacity: 0.7;
+    /* padding-top: 10px; */
+    padding-bottom: 30px;
+    color: #888;
+}
+
+.question a {
+    text-decoration: underline;
+    color: black;
+    font-weight: 500;
+}
+
+:global(.dark-mode) .a * {
+    color: #bbb !important;
+}
+:global(.dark-mode) .question a {
+    color: white !important;
+}
+
+.icons {
+    display: flex;
+    height: 24px;
+    width: 24px;
+}
+
+.icons > * {
+    position: absolute;
+    height: 100% !important;
+    width: 100% !important;
+    transition: fill 0.2s ease !important;
 }

@@ -164,20 +164,28 @@ export default function HeaderAndFooter(props) {
             <div className={styles.linksGroup}>
               <p>Browse</p>
               <Link href="/">Home</Link>
+              <Link href="/insights">Insights</Link>
               <Link href="/">Extension</Link>
-              <Link href="/">Pricing</Link>
+              <Link href="/pricing">Pricing</Link>
+              <Link href="/faq">FAQ</Link>
             </div>
             <div className={styles.linksGroup}>
               <p>Account</p>
-              <Link href="/">Sign in</Link>
-              <Link href="/">Sign up</Link>
-              <Link href="/">View Account</Link>
-              <Link href="/">Subscription</Link>
+              <Link href="/login">Login | Sign</Link>
+              <Link href="/account">View Account</Link>
+              <Link href="/account#profile">Profile</Link>
+              <Link href="/account#subscription">Subscription</Link>
             </div>
             <div className={styles.linksGroup}>
               <p>Contact</p>
               <Link href="/">Twitter</Link>
-              <Link href="/">Support</Link>
+              <a
+                onClick={() => {
+                  document.getElementById("supportIcon").click();
+                }}
+              >
+                Support
+              </a>
             </div>
             <div className={styles.linksGroup}>
               <p>Legal</p>

@@ -166,7 +166,9 @@ export default function Login() {
               onClick={async () => {
                 try {
                   await sendPasswordResetEmail(auth, email);
-                  setSnackbarMessage(`Sent password reset email to ${email}`);
+                  setSnackbarMessage(
+                    `If you signed up with email, a password reset email was sent to ${email}`
+                  );
                   setSnackbarSeverity("success");
                 } catch (e) {
                   setSnackbarMessage(formatErrorCode(e.code));

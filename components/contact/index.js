@@ -33,6 +33,7 @@ export default function Contact(props) {
         }}
       >
         <IconButton
+          id="supportIcon"
           size="large"
           onClick={() => {
             user = getAuth().currentUser;

@@ -163,7 +163,7 @@ export default function Account() {
         <>
           <h1 className="pageHeader">Account</h1>
           <div className={styles.content}>
-            <h2>Profile</h2>
+            <h2 id="profile">Profile</h2>
             <h3>You know, the basics</h3>
             <div>
               <div>
@@ -202,9 +202,20 @@ export default function Account() {
                   }}
                 />
                 <TextField
-                  label="Email"
+                  label={`Email${
+                    user.providerData.length &&
+                    user.providerData[0].providerId != "password"
+                      ? ` - via ${capitalize(
+                          user.providerData[0].providerId.split(".")[0]
+                        )}`
+                      : ""
+                  }`}
                   variant="outlined"
                   type="email"
+                  disabled={
+                    user.providerData.length >= 1 &&
+                    user.providerData[0].providerId != "password"
+                  }
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -351,7 +362,7 @@ export default function Account() {
                 <Button variant="contained">View Pricing</Button>
               </div>
             </div> */}
-            <h2>Subscription</h2>
+            <h2 id="subscription">Subscription</h2>
             <h3>We need to pay the bills too</h3>
             <div>
               <div>
