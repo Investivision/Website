@@ -940,7 +940,7 @@ export default function Insights() {
         </>
       ) : (
         <>
-          <h1 className="pageHeader">Insight Library</h1>
+          <h1 className="pageHeader">Insight Screener</h1>
           <h2 className={styles.subHeader}>
             Explore our complete database according to your personalized
             criteria

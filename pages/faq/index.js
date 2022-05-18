@@ -22,7 +22,7 @@ const questions = {
       a: "Insights are computed immediately after every market close, and are available within the hour after.",
     },
     {
-      q: `Why is an insight metric n/a or empty?`,
+      q: `Why is an insight n/a or empty?`,
       a: "Some metrics depend on adequate price history. If this duration is not met, these metrics cannot be computed.",
     },
     {

@@ -188,12 +188,12 @@
   align-items: center;
   border-radius: 10px;
   padding: 30px;
-  background: linear-gradient(to bottom right, #006370, #242e81);
+  background: linear-gradient(to bottom right, #00cfcb, #623fc2);
   color: white;
 }
 
 :global(.dark-mode) .offerings div {
-  /* background-color: rgb(34, 62, 144, 0.7); */
+  /* background-color: rgb(34, 62, 144, 0.7); */background: linear-gradient(to bottom right, #007b7b, #2c2481);
 }
 
 .offerings svg {

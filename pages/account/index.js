@@ -293,20 +293,23 @@ export default function Account() {
                 )}
               </div>
               <div>
-                <LoadingButton
-                  variant="contained"
-                  loading={resetLoading}
-                  onClick={async () => {
-                    setResetLoading(true);
-                    await sendPasswordResetEmail(auth, user.email);
-                    setResetLoading(false);
-                    setSnackbarSeverity("success");
-                    setSnackbarMessage("Sent password reset email");
-                    setSnackbarIsOpen(true);
-                  }}
-                >
-                  Reset Password
-                </LoadingButton>
+                {user.providerData.length &&
+                user.providerData[0].providerId == "password" ? (
+                  <LoadingButton
+                    variant="contained"
+                    loading={resetLoading}
+                    onClick={async () => {
+                      setResetLoading(true);
+                      await sendPasswordResetEmail(auth, user.email);
+                      setResetLoading(false);
+                      setSnackbarSeverity("success");
+                      setSnackbarMessage("Sent password reset email");
+                      setSnackbarIsOpen(true);
+                    }}
+                  >
+                    Reset Password
+                  </LoadingButton>
+                ) : null}
                 <LoadingButton
                   variant="contained"
                   loading={signOutLoading}

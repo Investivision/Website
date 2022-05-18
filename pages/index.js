@@ -442,12 +442,12 @@ export default function Home() {
           </div>
           <div>
             <GridOnRoundedIcon />
-            <p className={styles.offeringTitle}>Insight Library</p>
+            <p className={styles.offeringTitle}>Insight Screener</p>
             <p className={styles.offeringCaption}>
               The ultimate workbench for stock discovery, evaluation, and
               comparison.
             </p>
-            <Link href="/insights">
+            <Link href="/screener">
               <Button
                 variant="contained"
                 color="white"

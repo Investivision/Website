@@ -106,7 +106,7 @@ export default function HeaderAndFooter(props) {
           <nav>
             <ul className={styles.nav}>
               <li>
-                <Link href="/insights">Insights</Link>
+                <Link href="/screener">Screener</Link>
               </li>
               <li>
                 <Link href="/extension">Extension</Link>
@@ -164,7 +164,7 @@ export default function HeaderAndFooter(props) {
             <div className={styles.linksGroup}>
               <p>Browse</p>
               <Link href="/">Home</Link>
-              <Link href="/insights">Insights</Link>
+              <Link href="/screener">Screener</Link>
               <Link href="/">Extension</Link>
               <Link href="/pricing">Pricing</Link>
               <Link href="/faq">FAQ</Link>
