@@ -96,3 +96,8 @@ a {
 #tableTooltip * {
   max-width: none !important;
 }
+
+
+*::selection {
+  background-color: rgba(255, 81, 0, 0.437);
+}

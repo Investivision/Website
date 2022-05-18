@@ -8,6 +8,7 @@ import {
   SocialProfileJsonLd,
   DefaultSeo,
 } from "next-seo";
+import app from "../firebase";
 
 const desc =
   "Your source for (actually) non-speculative, data-driven stock insights from the future. Engage with our vast database of 4000+ stocks, updated daily.";

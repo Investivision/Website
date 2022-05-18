@@ -1,0 +1,59 @@
+.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 24px;
+    padding-bottom: 100px;
+    padding-bottom: 100px;
+  }
+
+  .toggle {
+    margin-bottom: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.05);
+    border: 6px solid transparent;
+    border-radius: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 6px;
+  }
+  
+  :global(.dark-mode) .toggle {
+    background-color: rgba(0, 6, 26, 0.8);
+  }
+  
+  .toggle button {
+    font-size: 18px;
+    padding: 5px 22px;
+    transition: background-color 0.2s ease;
+    border: none !important;
+    flex: 1;
+    border-radius: 8px !important;
+  }
+
+  /* .toggle button::before {
+      content: "";
+      width: 0.8em;
+  }
+
+  .toggle button svg {
+      width: 0.7em;
+      height: 0.7em;
+      margin-left: 0.1em;
+  } */
+
+  .questions {
+      display: flex;
+      flex-direction: column;
+      max-width: 1000px;
+      width: 100%;
+      gap: 24px;
+      padding: 24px 0;
+      margin-top: 10px;
+  }
+
+  .questions > * {
+      width: 100%;
+  }

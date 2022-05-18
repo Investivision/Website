@@ -103,13 +103,27 @@ export default function HeaderAndFooter(props) {
               <h1>Investivision</h1>
             </div>
           </Link>
-          <div className={styles.nav}>
-            <Link href="/insights">Insights</Link>
-            <Link href="/extension">Extension</Link>
-            <Link href="/pricing">Pricing</Link>
-            <Link href="/account">Account</Link>
-            <ThemeToggle />
-          </div>
+          <nav>
+            <ul className={styles.nav}>
+              <li>
+                <Link href="/insights">Insights</Link>
+              </li>
+              <li>
+                <Link href="/extension">Extension</Link>
+              </li>
+              <li>
+                <Link href="/pricing">Pricing</Link>
+              </li>
+              <li>
+                <Link href="/faq">FAQ</Link>
+              </li>
+              <li>
+                <Link href="/account">Account</Link>
+              </li>
+
+              <ThemeToggle />
+            </ul>
+          </nav>
         </header>
         <div
           style={{

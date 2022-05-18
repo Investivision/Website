@@ -67,6 +67,7 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  list-style-type: none;
 }
 
 .nav > * {
@@ -131,7 +132,7 @@
   min-height: 100vh;
 }
 
-@media screen and (max-width: 660px) {
+@media screen and (max-width: 740px) {
   .header {
     flex-direction: column;
     justify-content: flex-start;
