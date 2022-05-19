@@ -21,8 +21,11 @@ export default function CookieConsent() {
       setSignedIn(true);
       window.localStorage.removeItem(localStorageKey);
     } else {
+      if (signedIn) {
+        // if just signed out, check token (will not exist) and then snackbar will appear
+        checkToken();
+      }
       setSignedIn(false);
-      //   checkToken();
     }
   });
 
