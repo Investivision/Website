@@ -22,7 +22,7 @@ export default function CookieConsent() {
       window.localStorage.removeItem(localStorageKey);
     } else {
       setSignedIn(false);
-      checkToken();
+      //   checkToken();
     }
   });
 
