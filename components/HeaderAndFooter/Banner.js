@@ -12,8 +12,8 @@ const banner = {
 };
 
 const colors = {
-  light: "#72DE83",
-  dark: "#2DA941",
+  light: "#46E58B",
+  dark: "#008149",
 };
 
 export default function Banner() {

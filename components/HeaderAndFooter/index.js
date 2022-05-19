@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Banner from "./Banner";
 import Contact from "../contact";
 import Head from "next/head";
+import CookieConsent from "./CookieConsent";
 
 const bottomWaveHeight = 50;
 
@@ -208,6 +209,7 @@ export default function HeaderAndFooter(props) {
         </footer>
       </div>
       <Contact />
+      <CookieConsent />
     </>
   );
 }

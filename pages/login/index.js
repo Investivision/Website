@@ -27,12 +27,13 @@ import {
   SocialProfileJsonLd,
   DefaultSeo,
 } from "next-seo";
+import Link from "next/link";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [checked, setChecked] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarIsOpen, setSnackbarIsOpen] = useState(false);
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
@@ -61,7 +62,7 @@ export default function Login() {
       try {
         if (isLogin) {
           await signInWithEmailAndPassword(auth, email, password);
-        } else if (checked) {
+        } else {
           await createUserWithEmailAndPassword(auth, email, password);
         }
       } catch (e) {
@@ -160,11 +161,46 @@ export default function Login() {
           type="password"
         />
 
-        {isLogin ? (
-          <div className={styles.checkboxContainer}>
-            <p
+        <div className={styles.actions}>
+          <LoadingButton
+            loading={submitLoading}
+            variant="contained"
+            className={styles.submit}
+            color="primary"
+            size="large"
+            type="submit"
+            disabled={!(email && password)}
+            onClick={handleSubmit}
+            id="submit"
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </LoadingButton>
+          {isLogin && (
+            <LoadingButton
+              loading={resetLoading}
+              variant="text"
+              className={styles.submit}
+              color={theme.palette.mode == "dark" ? "secondary" : "primary"}
+              sx={{
+                backgroundColor:
+                  theme.palette.mode == "dark"
+                    ? "#00000020"
+                    : theme.palette.primary.main + "15",
+                // fontWeight: 400,
+                fontSize: "14px !important",
+                "&:hover": {
+                  backgroundColor:
+                    theme.palette.mode == "dark"
+                      ? "#00000040"
+                      : theme.palette.primary.main + "30",
+                },
+              }}
+              size="large"
+              id="forgot"
+              disabled={!email}
               onClick={async () => {
                 try {
+                  setResetLoading(true);
                   await sendPasswordResetEmail(auth, email);
                   setSnackbarMessage(
                     `If you signed up with email, a password reset email was sent to ${email}`
@@ -175,42 +211,14 @@ export default function Login() {
                   setSnackbarSeverity("error");
                 }
                 setSnackbarIsOpen(true);
+                setResetLoading(false);
               }}
-              style={{
-                cursor: "pointer",
-              }}
-              className={styles.reset}
             >
-              Reset or generate password
-            </p>
-          </div>
-        ) : (
-          <div className={styles.checkboxContainer}>
-            <Checkbox
-              checked={checked}
-              onChange={(e) => {
-                console.log(e.target.checked);
-                setChecked(e.target.checked);
-              }}
-            />
-            <p>
-              I have read and acknowledged the <a>Terms and Conditions</a>.
-            </p>
-          </div>
-        )}
-        <LoadingButton
-          loading={submitLoading}
-          variant="contained"
-          className={styles.submit}
-          color="primary"
-          size="large"
-          type="submit"
-          disabled={!(email && password && (isLogin || checked))}
-          onClick={handleSubmit}
-          id="submit"
-        >
-          {isLogin ? "Login" : "Sign Up"}
-        </LoadingButton>
+              Forgot Password
+            </LoadingButton>
+          )}
+        </div>
+
         <div
           onClick={async () => {
             // sign in with google firebase
@@ -234,13 +242,21 @@ export default function Login() {
         >
           <img src="/images/google.png" />
           <p
-          // style={{
-          //   color: theme.palette.primary.main,
-          // }}
+            style={{
+              color:
+                theme.palette.mode == "dark"
+                  ? "white"
+                  : theme.palette.primary.main,
+            }}
           >
             Continue with Google
           </p>
         </div>
+        <p className={styles.consent}>
+          By registering with a third-party authenticator, you indicate
+          agreement with our <Link href="/terms">Terms and Conditions</Link> and{" "}
+          <Link href="/privacy">Privacy Policy</Link>.
+        </p>
       </div>
       <Snackbar
         open={snackbarIsOpen}

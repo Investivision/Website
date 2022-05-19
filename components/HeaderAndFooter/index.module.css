@@ -15,7 +15,7 @@
   /* background-color: rgb(151, 255, 168); */
   font-size: 16px;
   /* line-height: 300%; */
-  padding: 20px;
+  padding: 12px;
   justify-content: center; /* align-items: stretch; */
   cursor: pointer;
 }
@@ -136,6 +136,37 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.cookieConsent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 270px;
+  max-width: calc(100vw - 48px);
+  text-align: center;
+  padding: 10px;
+  padding-bottom: 20px;
+}
+
+.cookieConsent :global(.MuiAlert-root) > * {
+  margin: 0;
+}
+
+.cookieConsent :global(.MuiAlert-action) {
+  padding: 0 0px;
+  margin: 0;
+  margin-top:4px;
+}
+
+.cookieConsent button {
+  margin: 0 4px;
+  padding: 6px 14px;
+}
+
+.cookieConsent a {
+  color: inherit !important;
+  font-weight: 500;
 }
 
 @media screen and (max-width: 740px) {

@@ -138,15 +138,9 @@ export default function Login() {
           className={styles.toggle}
         >
           {Object.keys(questions).map((cat) => {
-            console.log(cat, "selected?", cat == selectedCat);
             return (
               <ToggleButton key={cat} value={cat} selected={cat == selectedCat}>
                 {cat}
-                {/* <CloseRoundedIcon
-                style={{
-                  opacity: selectedCategories.has(cat) ? 1 : 0,
-                }}
-              /> */}
               </ToggleButton>
             );
           })}
@@ -155,7 +149,7 @@ export default function Login() {
       {selectedCat && (
         <div className={styles.questions}>
           {questions[selectedCat].map((question) => {
-            return <Question question={question} />;
+            return <Question question={question} key={question.q} />;
           })}
         </div>
       )}
