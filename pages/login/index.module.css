@@ -14,7 +14,7 @@
 }
 
 :global(.dark-mode) .box {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 /* 
 .box * {
@@ -66,8 +66,7 @@
   justify-content: center;
   align-items: center;
   padding: 50px 30px;
-  padding-bottom: 100px;
-  min-height: 700px;
+  /* min-height: 420px; */
 }
 
 .submit {
@@ -104,22 +103,23 @@
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-  background-color: #0000000c; /*#5179ea40;*/
+  /* background-color: #0000000c; */
   /* border: 1px solid #00000010; */
   cursor: pointer;
   /* width: 100%; */
   padding: 14px 30px;
   border-radius: 8px;
   margin-top: 7.5px;
+  transition: background-color 0.2s ease;
 }
 
 :global(.dark-mode) .google {
-  background-color: #ffffff20;
+  /* background-color: #ffffff20; */
 }
 
 .google img {
   height: 100%;
-  margin-right: 20px;
+  margin-right: 12px;
 }
 
 .google p {

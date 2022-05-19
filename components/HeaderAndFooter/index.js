@@ -172,7 +172,7 @@ export default function HeaderAndFooter(props) {
             </div>
             <div className={styles.linksGroup}>
               <p>Account</p>
-              <Link href="/login">Login | Sign</Link>
+              <Link href="/login">Login | Sign Up</Link>
               <Link href="/account">View Account</Link>
               <Link href="/account#profile">Profile</Link>
               <Link href="/account#subscription">Subscription</Link>

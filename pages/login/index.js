@@ -28,6 +28,7 @@ import {
   DefaultSeo,
 } from "next-seo";
 import Link from "next/link";
+import Box from "@mui/material/Box";
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -74,6 +75,16 @@ export default function Login() {
       setSubmitLoading(false);
     }
   };
+
+  const altBackground =
+    theme.palette.mode == "dark"
+      ? "#00000020"
+      : theme.palette.primary.main + "15";
+
+  const altBackgroundHover =
+    theme.palette.mode == "dark"
+      ? "#00000040"
+      : theme.palette.primary.main + "30";
 
   return (
     <HeaderAndFooter bodyClassName={styles.body} hideFooterWave>
@@ -182,17 +193,11 @@ export default function Login() {
               className={styles.submit}
               color={theme.palette.mode == "dark" ? "secondary" : "primary"}
               sx={{
-                backgroundColor:
-                  theme.palette.mode == "dark"
-                    ? "#00000020"
-                    : theme.palette.primary.main + "15",
+                backgroundColor: altBackground,
                 // fontWeight: 400,
                 fontSize: "14px !important",
                 "&:hover": {
-                  backgroundColor:
-                    theme.palette.mode == "dark"
-                      ? "#00000040"
-                      : theme.palette.primary.main + "30",
+                  backgroundColor: altBackgroundHover,
                 },
               }}
               size="large"
@@ -219,7 +224,7 @@ export default function Login() {
           )}
         </div>
 
-        <div
+        <Box
           onClick={async () => {
             // sign in with google firebase
             setSubmitLoading(true);
@@ -239,6 +244,12 @@ export default function Login() {
             }
           }}
           className={styles.google}
+          sx={{
+            backgroundColor: altBackground,
+            "&:hover": {
+              backgroundColor: altBackgroundHover,
+            },
+          }}
         >
           <img src="/images/google.png" />
           <p
@@ -251,10 +262,10 @@ export default function Login() {
           >
             Continue with Google
           </p>
-        </div>
+        </Box>
         <p className={styles.consent}>
-          By registering with a third-party authenticator, you indicate
-          agreement with our <Link href="/terms">Terms and Conditions</Link> and{" "}
+          By logging in or signing up, you indicate agreement with our{" "}
+          <Link href="/terms">Terms and Conditions</Link> and{" "}
           <Link href="/privacy">Privacy Policy</Link>.
         </p>
       </div>

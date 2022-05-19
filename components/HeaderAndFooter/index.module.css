@@ -18,6 +18,7 @@
   padding: 12px;
   justify-content: center; /* align-items: stretch; */
   cursor: pointer;
+  z-index: 999999;
 }
 
 /* .banner p:first-child {
