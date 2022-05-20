@@ -190,7 +190,7 @@ export default function HeaderAndFooter(props) {
             </div>
             <div className={styles.linksGroup}>
               <p>Legal</p>
-              <Link href="/terms">Terms of Service</Link>
+              <Link href="/terms">Terms and Conditions</Link>
               <Link href="/privacy">Privacy Policy</Link>
             </div>
           </div>
