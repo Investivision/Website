@@ -2,7 +2,7 @@ import HeaderAndFooter from "../../components/HeaderAndFooter";
 import styles from "./index.module.css";
 import { useEffect, useState } from "react";
 import CheckCircleRoundedIcon from "@material-ui/icons/CheckCircleRounded";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import LoadingButton from "@mui/lab/LoadingButton";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";

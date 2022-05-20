@@ -1,6 +1,6 @@
 import styles from "./rangePlot.module.css";
 import { ResponsiveLine } from "@nivo/line";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import Switch from "@mui/material/Switch";
 import { useState } from "react";
 import ToggleButton from "@mui/material/ToggleButton";

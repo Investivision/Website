@@ -1,6 +1,6 @@
 import { TwitterTweetEmbed } from "react-twitter-embed";
 import { useMemo } from "react";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import styles from "./index.module.css";
 
 const tweetIds = [

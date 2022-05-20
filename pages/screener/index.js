@@ -1,7 +1,7 @@
 import HeaderAndFooter from "../../components/HeaderAndFooter";
 import styles from "./index.module.css";
 import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,

@@ -5,7 +5,7 @@ import Candle from "../../components/ext/Candle";
 import Prophet from "../../components/ext/Prophet";
 import Momentum from "../../components/ext/Momentum";
 import Pivots from "../../components/ext/Pivots";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import { useLayoutEffect, useState, useRef, useEffect } from "react";
 import { processSymbolData } from "../ext";
 import { useContext } from "react";

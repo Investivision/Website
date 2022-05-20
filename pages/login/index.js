@@ -9,7 +9,7 @@ import Snackbar from "@mui/material/Snackbar";
 import styles from "./index.module.css";
 import { useState, useEffect } from "react";
 import Wave from "react-wavify";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,

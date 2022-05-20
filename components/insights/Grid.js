@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import Tooltip from "../ext/ToolTip";
 import { color } from "@mui/system";
 

@@ -5,7 +5,7 @@ import { isChrome, isEdge } from "react-device-detect";
 import { useState, useEffect, useMemo } from "react";
 import ExtensionRoundedIcon from "@material-ui/icons/ExtensionRounded";
 import GridOnRoundedIcon from "@material-ui/icons/GridOnRounded";
-import { useTheme } from "@mui/material/styles";
+import { useTheme } from "@mui/styles";
 import ExtView from "./ext";
 import Link from "next/link";
 import Button from "@mui/material/Button";
