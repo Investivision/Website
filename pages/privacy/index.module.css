@@ -6,6 +6,10 @@
     padding-bottom: 100px;
   }
 
+:global(.dark-mode) .body * {
+    color: white;
+}
+
 .body h2 {
     font-size: 24px;
     font-weight: 500;
@@ -40,7 +44,10 @@
     text-decoration: underline;
 }
 
-.box h2, .box a, .body h3 {
-
+.body :is(h2, a, h3) {
     color: #0047ba !important;
+}
+
+:global(.dark-mode) .body :is(h2, a, h3) {
+    color: #94bdff !important;
 }
