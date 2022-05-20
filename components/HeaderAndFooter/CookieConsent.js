@@ -8,7 +8,8 @@ import { getAuth } from "firebase/auth";
 
 let stage = 1;
 const localStorageKey = "cookieConsentExp";
-const originalSnackbarText = "We use cookies to keep you securely signed in.";
+const originalSnackbarText =
+  "We use cookies for secure authentication and analytics.";
 
 export default function CookieConsent() {
   const [snackbarIsOpen, setSnackbarIsOpen] = useState(true);

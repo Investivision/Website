@@ -143,14 +143,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 270px;
+  width: 300px;
   max-width: calc(100vw - 48px);
   text-align: center;
   padding: 10px;
   padding-bottom: 20px;
 }
 
-.cookieConsent :global(.MuiAlert-root) > * {
+.cookieConsent :global(.MuiAlert-icon){
   margin: 0;
 }
 

@@ -37,11 +37,13 @@ export default function Contact(props) {
           size="large"
           onClick={() => {
             user = getAuth().currentUser;
-            if (!name) {
-              setName(user.displayName);
-            }
-            if (!email) {
-              setEmail(user.email);
+            if (user) {
+              if (!name) {
+                setName(user.displayName);
+              }
+              if (!email) {
+                setEmail(user.email);
+              }
             }
             setFormOpen(true);
           }}
@@ -125,7 +127,7 @@ export default function Contact(props) {
                 size="large"
                 onClick={() => {
                   const body = `${content}%0A%0A${name}`;
-                  const url = `mailto:investivision@gmail.com?subject=${subject}&body=${body}`;
+                  const url = `mailto:investivision.contact@gmail.com?subject=${subject}&body=${body}`;
                   window.location.href = url;
                 }}
               >
