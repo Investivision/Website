@@ -195,7 +195,6 @@ export default function Login() {
               sx={{
                 backgroundColor: altBackground,
                 // fontWeight: 400,
-                fontSize: "14px !important",
                 "&:hover": {
                   backgroundColor: altBackgroundHover,
                 },

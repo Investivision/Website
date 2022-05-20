@@ -77,6 +77,10 @@
   flex: 1;
 }
 
+.submit:nth-child(2) {
+  font-size: 14px !important;
+}
+
 
 .wave {
   height: 110%;

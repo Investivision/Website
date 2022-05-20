@@ -96,7 +96,7 @@ function MyApp({ Component, pageProps }) {
           }`}
         </script> */}
       </Head>
-      <CssBaseline />
+      {/* <CssBaseline /> */}
       <Theme>
         <Component {...pageProps} />
       </Theme>
