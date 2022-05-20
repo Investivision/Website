@@ -95,6 +95,13 @@
   opacity: 0.3;
 }
 
+.copyright {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 20px;
+  opacity: 0.3;
+}
+
 .footerLinks {
   display: flex;
   flex-direction: row;

@@ -206,6 +206,9 @@ export default function HeaderAndFooter(props) {
             accuracy, timeliness, or completeness of information presented or
             the data on which they are based.
           </p>
+          <p
+            className={styles.copyright}
+          >{`Copyright © Blake Sanie ${new Date().getFullYear()}`}</p>
         </footer>
       </div>
       <Contact />
