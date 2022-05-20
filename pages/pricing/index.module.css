@@ -13,7 +13,7 @@
   backdrop-filter: blur(5px);
   box-shadow: 0 0 60px 0 rgba(0, 0, 0, 0.05);
   border: 6px solid transparent;
-  border-radius: 14px;
+  border-radius: 14px !important;
   gap: 6px;
 }
 
