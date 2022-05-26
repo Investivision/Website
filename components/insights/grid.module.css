@@ -78,6 +78,7 @@
   z-index: 1;
   left: 0;
   font-weight: 1000;
+  font-size: 17px;
 }
 
 /* .div tbody tr {
@@ -94,7 +95,8 @@
 }
 
 .div td {
-  padding: 3px 6px;
+  padding: 6px 12px;
+  font-size: 15px;
 }
 
 .capWidth {

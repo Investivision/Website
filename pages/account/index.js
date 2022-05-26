@@ -111,6 +111,12 @@ export default function Account() {
         // window.location.href = "/login";
       }
     });
+    const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
+    port.onMessage.addListener(function (data) {
+      if (data.removeName) {
+        setExtStatus("not synced");
+      }
+    });
   }, []);
 
   return (
@@ -366,7 +372,7 @@ export default function Account() {
               </div>
             </div> */}
             <h2 id="subscription">Subscription</h2>
-            <h3>We need to pay the bills too</h3>
+            <h3>Your access, your way</h3>
             <div>
               <div>
                 {role ? (
@@ -499,6 +505,7 @@ export default function Account() {
                               extId,
                               { token: token },
                               function (res) {
+                                console.log("got res", res);
                                 setExtStatus(
                                   res.synced ? "synced" : "not synced"
                                 );
@@ -507,12 +514,13 @@ export default function Account() {
                                   "Synced Account with Extension"
                                 );
                                 setSnackbarIsOpen(true);
+                                setSyncLoading(false);
                               }
                             );
                           } catch (e) {
                             console.error(e);
+                            setSyncLoading(false);
                           }
-                          setSyncLoading(false);
                         }}
                       >
                         Sync Now

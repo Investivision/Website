@@ -1035,7 +1035,7 @@ export default function Insights() {
                   })}
                 </div>
               </div>
-              <h3 className={styles.sectionTitle}>Your Configurations</h3>
+              <h3 className={styles.sectionTitle}>Your Presets</h3>
               <div className={styles.configContainer}>
                 <div className={styles.configCenter}>
                   <div className={`${styles.config} ${styles.configAdd}`}>
