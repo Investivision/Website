@@ -7,25 +7,27 @@ import { color } from "@mui/system";
 
 let draggedPosition;
 
+const internationalNumberFormat = new Intl.NumberFormat("en-US");
+
 const toPercentage = (value) => {
   const val = Math.round(value * 100 * 10) / 10;
-  return val + "%";
+  return internationalNumberFormat.format(val) + "%";
 };
 
 const toPercentageChange = (value) => {
   const val = Math.round(value * 100 * 10) / 10;
   if (val >= 0) {
-    return "+" + val + "%";
+    return "+" + internationalNumberFormat.format(val) + "%";
   }
-  return val + "%";
+  return internationalNumberFormat.format(val) + "%";
 };
 
 const roundTo2Decimals = (value) => {
-  return Math.round(value * 100) / 100;
+  return internationalNumberFormat.format(Math.round(value * 100) / 100);
 };
 
 const noop = (value) => {
-  return value;
+  return internationalNumberFormat.format(value);
 };
 
 const toList = (value) => {

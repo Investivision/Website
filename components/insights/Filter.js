@@ -5,68 +5,41 @@ import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 import DeleteIcon from "@material-ui/icons/DeleteForeverRounded";
 
+const illegalChars = ["=", ","];
+
 const errorMessage = (value, cols, relation) => {
-  return undefined;
-  // if (!value && relation != 'exists') {
-  //   return "Missing Expression";
-  // }
-  // if (relation.charAt(0).match(/[a-z]/i)) { // if relation is not >, <, =, etc
+  if (!value && relation != "exists") {
+    return "Missing Expression";
+  }
 
-  // } else { // relation is <, >, etc
-  //   if (!value)
-  // }
-  // // const words = value.split(" ");
-  // // return words.every(word => {
-  // // const splitByOpenParen = value.split('(')
-  // // for (const part of splitByOpenParen) {
-  // //   if (part && (/[a-zA-Z]/).test(part.trim().charAt(part.length - 1)) ) {
-  // //     return "Cannot use functions"
-  // //   }
-  // // }
-  // if (/[a-zA-Z]/g.test(value) && !/^[a-zA-Z]+$/.test(value)) {
-  //   return "Misspelled column";
-  // }
-  // try {
-  //   // if all letters are alphabetic
-  //   if (/^[a-zA-Z]+$/.test(value)) {
-  //     value = `"${value}"`;
-  //   }
-  //   eval(value);
-  // } catch (e) {
-  //   return "Expression error";
-  // }
-};
+  for (const col of cols) {
+    value = value.replace(col, "123");
+  }
 
-const splitValue = (value, cols) => {
-  value = value.replaceAll(", ", ",").replaceAll(" %", "%");
-  let start = 0;
-  for (let i = value.length - 1; i >= 0; i--) {
+  let inQuote = false;
+  for (var i = 0; i < value.length; i++) {
     const char = value.charAt(i);
-    if (
-      !(
-        /[a-zA-Z]/.test(char) ||
-        char == "," ||
-        char == "%" ||
-        (!isNaN(char) &&
-          (value.charAt(i - 1) == "," ||
-            (value.charAt(i - 2) == "," && !isNaN(value.charAt(i - 1)))))
-      )
-    ) {
-      start = i + 1;
-      break;
+    for (const illegal of illegalChars) {
+      if (char == illegal) {
+        return "Illegal Character " + char;
+      }
+    }
+    if (char == '"') {
+      inQuote = !inQuote;
+    } else if (!inQuote && /[a-zA-Z]/g.test(char)) {
+      return "Use quotes around text";
     }
   }
 
-  const lastWord = value
-    .substring(start)
-    .replaceAll(",", ", ")
-    .replaceAll("%", " %");
-  const before = value
-    .substring(0, start)
-    .replaceAll(",", ", ")
-    .replaceAll("%", " %");
-  console.log("value split", before, "|", lastWord);
-  return [before, lastWord];
+  // if (/[a-zA-Z]/g.test(value)) {
+  //   return "Use quotes around text";
+  // }
+
+  try {
+    eval(value);
+  } catch (e) {
+    return "Expression Error";
+  }
 };
 
 export default function Filter(props) {
@@ -104,7 +77,6 @@ export default function Filter(props) {
     "contains",
     "excludes",
     "exists",
-    "custom (JS)",
   ];
   const relationsSet = new Set(relations);
   const relationMap = {
@@ -119,13 +91,36 @@ export default function Filter(props) {
   };
 
   const filterOptions = (options, { inputValue }) => {
-    const [before, lastWord] = splitValue(inputValue, cols);
-    return cols.filter((element) => {
-      return (
-        element.toLowerCase().startsWith(lastWord.toLowerCase()) &&
-        element.length >= lastWord.length
-      );
-    });
+    let out = [];
+    let bestLen = 1;
+    while (
+      inputValue.length > bestLen &&
+      inputValue.charAt(inputValue.length - bestLen - 1).match(/[a-z]/i)
+    ) {
+      bestLen++;
+    }
+    console.log("filter pattern initial is", bestLen);
+    inputValue = inputValue.toLowerCase();
+    for (let col of cols) {
+      // console.log("filter pattern try col", col);
+      for (let i = bestLen; i <= Math.min(col.length, inputValue.length); i++) {
+        if (
+          col
+            .toLowerCase()
+            .startsWith(inputValue.substring(inputValue.length - i))
+        ) {
+          if (i > bestLen) {
+            console.log("filter pattern new best", col, i);
+            bestLen = i;
+            out = [col];
+          } else {
+            console.log("filter pattern", col);
+            out.push(col);
+          }
+        }
+      }
+    }
+    return out;
   };
 
   console.log("row props", props);
@@ -232,12 +227,27 @@ export default function Filter(props) {
           };
         })}
         onChange={(e) => {
-          const newValue = splitValue(tempValue, cols)[0] + e.target.innerText;
-          props.onChange({
-            value: newValue,
-            valid: errorMessage(newValue, cols, tempRelation) ? false : true,
-          });
-          setTempValue(newValue);
+          const col = e.target.innerText;
+
+          for (
+            let i = tempValue.length - col.length;
+            i < tempValue.length;
+            i++
+          ) {
+            if (
+              col.toLowerCase().startsWith(tempValue.substring(i).toLowerCase())
+            ) {
+              const newValue = tempValue.substring(0, i) + col;
+              props.onChange({
+                value: newValue,
+                valid: errorMessage(newValue, cols, tempRelation)
+                  ? false
+                  : true,
+              });
+              setTempValue(newValue);
+              break;
+            }
+          }
         }}
         disableClearable
         freeSolo
@@ -268,17 +278,15 @@ export default function Filter(props) {
           );
         }}
       />
-      {props.showDelete ? (
-        <DeleteIcon
-          className={styles.deleteIcon}
-          onClick={() => {
-            props.onDelete();
-          }}
-          style={{
-            color: theme.palette.error.main,
-          }}
-        />
-      ) : null}
+      <DeleteIcon
+        className={styles.deleteIcon}
+        onClick={() => {
+          props.onDelete();
+        }}
+        style={{
+          color: theme.palette.error.main,
+        }}
+      />
     </div>
   );
 }

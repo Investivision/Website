@@ -839,10 +839,10 @@ export default function Insights() {
 
         let filterString = op;
 
-        const isNum = !isNaN(value) && !isNaN(parseFloat(value));
-        if (!isNum) {
-          value = `"${value}"`;
-        }
+        // const isNum = !isNaN(value) && !isNaN(parseFloat(value));
+        // if (!isNum) {
+        //   value = `"${value}"`;
+        // }
 
         filterString = filterString
           .replace("RIGHT", value)
