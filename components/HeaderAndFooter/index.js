@@ -179,7 +179,7 @@ export default function HeaderAndFooter(props) {
             </div>
             <div className={styles.linksGroup}>
               <p>Contact</p>
-              <Link href="/">Twitter</Link>
+              <Link href="https://twitter.com/investivision">Twitter</Link>
               <a
                 onClick={() => {
                   document.getElementById("supportIcon").click();

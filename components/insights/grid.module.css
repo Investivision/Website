@@ -5,6 +5,8 @@
   /* height: 100%; */
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+  min-height: min(600px, 100vh);
 }
 
 .div * {
@@ -202,4 +204,20 @@
 
 .toolTip div[role="tooltip"] {
   max-width: none !important;
+}
+
+.listItem {
+  /* background-color: rgba(255,255,255,0.5); */
+  /* border: 1px solid rgba(0,0,0,0.2); */
+  /* box-shadow: 0 0 100px 0 rgba(0,0,0,0.7); */
+  background-color: rgba(255,255,255,0.25);
+  /* backdrop-filter: saturate(200%); */
+  padding: 3px 6px;
+  border-radius: 5px;
+  margin-right:4px;
+  font-size: 13px;
+}
+
+:global(.dark-mode) .listItem {
+  background-color: rgba(0,0,0,0.15);
 }

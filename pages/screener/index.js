@@ -810,54 +810,49 @@ export default function Insights() {
         (value || relation == "exists") &&
         valid != false
       ) {
-        const negate = relation == "excludes";
-        relation = relation
-          .replace("=", "==")
-          .replace("≥", ">=")
-          .replace("≤", "<=")
-          .replace("≠", "!=")
-          .replace("starts with", "startsWith")
-          .replace("ends with", "endsWith")
-          .replace("contains", "includes")
-          .replace("excludes", "includes")
-          .replace("exists", "!== ''");
-        let filterString = `row['${feature}']`;
-        if (/[a-zA-Z]/.test(relation.charAt(0))) {
-          filterString += `.${relation}(VAL)`;
-        } else {
-          filterString += ` ${relation} VAL`;
+        let op;
+        if (relation == "=") {
+          op = "LEFT == RIGHT";
+        } else if (relation == ">") {
+          op = "LEFT > RIGHT";
+        } else if (relation == "<") {
+          op = "LEFT < RIGHT";
+        } else if (relation == "≥") {
+          op = "LEFT >= RIGHT";
+        } else if (relation == "≤") {
+          op = "LEFT <= RIGHT";
+        } else if (relation == "≠") {
+          op = "LEFT != RIGHT";
+        } else if (relation == "starts with") {
+          op = "LEFT.startsWith(RIGHT)";
+        } else if (relation == "ends with") {
+          op = "LEFT.endsWith(RIGHT)";
+        } else if (relation == "contains") {
+          op = "LEFT.includes(RIGHT)";
+        } else if (relation == "exists") {
+          op = "LEFT";
+        } else if (relation == "excludes") {
+          op = "!(LEFT.includes(RIGHT))";
+        } else if (relation == "custom (JS)") {
+          op = "LEFT RIGHT";
         }
-        if (relation != "exists") {
-          let accessibleValue = value;
-          for (const col of sortedCols) {
-            accessibleValue = accessibleValue.replaceAll(col, `row['${col}']`);
-          }
-          // if all letters are alphabetic
-          if (/^[a-zA-Z]+$/.test(accessibleValue)) {
-            accessibleValue = `"${accessibleValue}"`;
-          }
-          filterString = filterString.replace("VAL", accessibleValue);
-        } else {
-          filterString = filterString.replace("VAL", "");
+
+        let filterString = op;
+
+        const isNum = !isNaN(value) && !isNaN(parseFloat(value));
+        if (!isNum) {
+          value = `"${value}"`;
         }
-        if (negate) {
-          filterString = `!(${filterString})`;
-        }
+
+        filterString = filterString
+          .replace("RIGHT", value)
+          .replace("LEFT", `row["${feature}"]`);
+
         console.log("filterString", filterString);
-        // test if eval is valid or throws exception
-        const row = filtered[0];
-        try {
-          eval(filterString);
-          filtered = filtered.filter((row) => {
-            console.log("sharpe 10", row["Sharpe, 10yr"]);
-            const pass = eval(filterString);
-            console.log(pass, "row during filtering", row);
-            return pass;
-          });
-        } catch (e) {
-          alert(e);
-          console.error("error evaluating filter", e);
-        }
+
+        filtered = filtered.filter((row) => {
+          return eval(filterString);
+        });
       } else {
         console.log("ignoring filter", filter);
       }
@@ -1160,7 +1155,7 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Filters
+                    {`Filters${filters.length ? ` (${filters.length})` : ""}`}
                   </Button>
                   <Button
                     size="small"
@@ -1175,7 +1170,11 @@ export default function Insights() {
                       theme.palette.mode == "dark" ? "secondary" : "primary"
                     }
                   >
-                    Columns
+                    {`Columns${
+                      selectedCols.length - 1
+                        ? ` (${selectedCols.length - 1})`
+                        : "" // -1 is because symbol is always chosen
+                    }`}
                   </Button>
                   <Button
                     size="small"

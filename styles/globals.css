@@ -93,6 +93,11 @@ a {
   /* background-color: red; */
 }
 
+.MuiButton-root, .MuiFormControl-root * {
+
+  transition: none !important;
+}
+
 #tableTooltip * {
   max-width: none !important;
 }

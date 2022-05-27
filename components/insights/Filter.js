@@ -6,34 +6,35 @@ import { useEffect, useState } from "react";
 import DeleteIcon from "@material-ui/icons/DeleteForeverRounded";
 
 const errorMessage = (value, cols, relation) => {
-  console.log("errorMessage", value, cols);
-  if (!value) {
-    return undefined;
-  }
-  for (const col of cols) {
-    value = value.split(col).join("123");
-  }
-  // const words = value.split(" ");
-  // return words.every(word => {
-  // const splitByOpenParen = value.split('(')
-  // for (const part of splitByOpenParen) {
-  //   if (part && (/[a-zA-Z]/).test(part.trim().charAt(part.length - 1)) ) {
-  //     return "Cannot use functions"
-  //   }
-  // }
-  if (/[a-zA-Z]/g.test(value) && !/^[a-zA-Z]+$/.test(value)) {
-    return "Misspelled column";
-  }
-  try {
-    // if all letters are alphabetic
-    if (/^[a-zA-Z]+$/.test(value)) {
-      value = `"${value}"`;
-    }
-    eval(value);
-  } catch (e) {
-    return "Expression error";
-  }
   return undefined;
+  // if (!value && relation != 'exists') {
+  //   return "Missing Expression";
+  // }
+  // if (relation.charAt(0).match(/[a-z]/i)) { // if relation is not >, <, =, etc
+
+  // } else { // relation is <, >, etc
+  //   if (!value)
+  // }
+  // // const words = value.split(" ");
+  // // return words.every(word => {
+  // // const splitByOpenParen = value.split('(')
+  // // for (const part of splitByOpenParen) {
+  // //   if (part && (/[a-zA-Z]/).test(part.trim().charAt(part.length - 1)) ) {
+  // //     return "Cannot use functions"
+  // //   }
+  // // }
+  // if (/[a-zA-Z]/g.test(value) && !/^[a-zA-Z]+$/.test(value)) {
+  //   return "Misspelled column";
+  // }
+  // try {
+  //   // if all letters are alphabetic
+  //   if (/^[a-zA-Z]+$/.test(value)) {
+  //     value = `"${value}"`;
+  //   }
+  //   eval(value);
+  // } catch (e) {
+  //   return "Expression error";
+  // }
 };
 
 const splitValue = (value, cols) => {
@@ -103,6 +104,7 @@ export default function Filter(props) {
     "contains",
     "excludes",
     "exists",
+    "custom (JS)",
   ];
   const relationsSet = new Set(relations);
   const relationMap = {
@@ -250,7 +252,7 @@ export default function Filter(props) {
             <TextField
               {...params}
               error={message ? true : false}
-              label={message || "Expression"}
+              label={message || "Expression, other Column"}
               variant="standard"
               value={tempValue}
               disabled={tempRelation == "exists"}

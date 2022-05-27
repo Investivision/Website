@@ -30,9 +30,19 @@ const noop = (value) => {
 
 const toList = (value) => {
   if (value.length) {
-    return value.join(", ");
+    return value.map((item) => {
+      return <span className={styles.listItem}>{item}</span>;
+    });
   }
-  return "None";
+  return (
+    <span
+      style={{
+        opacity: 0.5,
+      }}
+    >
+      None
+    </span>
+  );
 };
 
 const toDollars = (value) => {
@@ -236,7 +246,15 @@ export default function Grid(props) {
             </td>
           );
         } else {
-          cells.push(<td>n/a</td>);
+          cells.push(
+            <td
+              style={{
+                opacity: 0.5,
+              }}
+            >
+              n/a
+            </td>
+          );
         }
       }
       //   alert("new rows to render");
