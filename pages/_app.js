@@ -60,7 +60,7 @@ function MyApp({ Component, pageProps }) {
           rel="stylesheet"
           href="https://fonts.googleapis.com/icon?family=Material+Icons"
         />
-        <meta name="viewport" content="width=500" />
+        {/* <meta name="viewport" content="width=500" /> */}
         <link
           rel="apple-touch-icon"
           sizes="180x180"
@@ -82,12 +82,12 @@ function MyApp({ Component, pageProps }) {
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#516fdb" />
         <meta name="msapplication-TileColor" content="#da532c" />
         {/* <meta name="theme-color" content="#ffffff" /> */}
-        {/* <meta
+        <meta
           id="vp"
           name="viewport"
           content="width=device-width, initial-scale=1"
         />
-        <script>
+        {/* <script>
           {`window.onload = function() {
               if (screen.width < 500) {
                   var mvp = document.getElementById('vp');

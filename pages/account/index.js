@@ -111,12 +111,14 @@ export default function Account() {
         // window.location.href = "/login";
       }
     });
-    const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
-    port.onMessage.addListener(function (data) {
-      if (data.removeName) {
-        setExtStatus("not synced");
-      }
-    });
+    if (window.chrome) {
+      const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
+      port.onMessage.addListener(function (data) {
+        if (data.removeName) {
+          setExtStatus("not synced");
+        }
+      });
+    }
   }, []);
 
   return (
