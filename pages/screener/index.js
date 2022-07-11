@@ -210,6 +210,47 @@ let commonConfigurations = [
     filters: [],
     cols: ["True Range, 1yr", "Beta, 1yr", "Resistance, 3mo", "Support, 3mo"],
   },
+  {
+    name: "Forecasted Long-Term Winners",
+    desc: "Top picks by our AI-driven forecasting service",
+    sort: ["AI Forecast in 10yr", "asc"],
+    filters: [
+      {
+        feature: "AI Forecast in 10yr",
+        relation: "exists",
+        value: "",
+      },
+      {
+        feature: "Forecast Range in 10yr",
+        relation: "<",
+        value: "80",
+      },
+    ],
+    cols: [
+      "AI Forecast in 10yr",
+      "AI Forecast in 5yr",
+      "AI Forecast in 1yr",
+      "AI Forecast in 3mo",
+    ],
+  },
+  {
+    name: "The Tech Backbone",
+    desc: "Tech companies leading the way for stock growth",
+    sort: ["Alpha, 5yr", "asc"],
+    filters: [
+      {
+        feature: "Sector",
+        relation: "=",
+        value: '"Technology"',
+      },
+      {
+        feature: "Alpha, 5yr",
+        relation: "exists",
+        value: "",
+      },
+    ],
+    cols: ["Alpha, 5yr", "Sharpe, 5yr", "Industry"],
+  },
   // {
   //   name: "Short-Term Bearish Candles",
   //   sort: sortByBearishCandles,
@@ -804,6 +845,14 @@ export default function Insights() {
     for (const filter of filters) {
       let { feature, relation, value, valid } = filter;
       console.log("filterString", filter);
+      if (value) {
+        for (const col of cols) {
+          value = value.replace(col, `row["${col}"]`);
+        }
+        // if (/[a-zA-Z]/g.test(value)) {
+        //   value = `"${value}"`;
+        // }
+      }
       if (
         feature &&
         relation &&
@@ -1015,6 +1064,7 @@ export default function Insights() {
                             );
                           }
                           if (config.filters) {
+                            console.log("7/10 set filters", config.filters);
                             setFilters(config.filters);
                           }
                         }}

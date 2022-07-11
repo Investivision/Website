@@ -257,7 +257,8 @@ export default function Filter(props) {
         disabled={tempRelation == "exists"}
         renderInput={(params) => {
           delete params.inputProps.value;
-          const message = errorMessage(tempValue, cols, tempRelation);
+          let message = errorMessage(tempValue, cols, tempRelation);
+          console.log("7/10 new message", message);
           return (
             <TextField
               {...params}
@@ -268,6 +269,15 @@ export default function Filter(props) {
               disabled={tempRelation == "exists"}
               color={theme.palette.mode == "dark" ? "secondary" : "primary"}
               onChange={(e) => {
+                message = errorMessage(e.target.value, cols, tempRelation);
+                console.log(
+                  "7/10 sending filter",
+                  {
+                    value: e.target.value,
+                    valid: message ? false : true,
+                  },
+                  message
+                );
                 props.onChange({
                   value: e.target.value,
                   valid: message ? false : true,

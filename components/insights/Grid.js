@@ -14,10 +14,18 @@ const toPercentage = (value) => {
   return internationalNumberFormat.format(val) + "%";
 };
 
+const addPercentSign = (value) => {
+  return internationalNumberFormat.format(value) + "%";
+};
+
 const toPercentageChange = (value) => {
-  const val = Math.round(value * 100 * 10) / 10;
+  let val = Math.round(value * 100 * 10) / 10;
   if (val >= 0) {
-    return "+" + internationalNumberFormat.format(val) + "%";
+    val = internationalNumberFormat.format(val) + "%";
+    if (val.charAt(0) == "-") {
+      val = val.substring(1);
+    }
+    return "+" + val;
   }
   return internationalNumberFormat.format(val) + "%";
 };
@@ -103,7 +111,6 @@ const getColFormatters = (cols) => {
   const percentageChanges = [
     "%ile",
     "Alpha",
-    "Forecast",
     "Drawdown",
     "Max Gain",
     "Resistance",
@@ -117,6 +124,7 @@ const getColFormatters = (cols) => {
     "Trend Strength",
   ];
   const dollars = ["Last Close"];
+  const percentSign = ["AI", "Forecast"];
   const out = {};
   cols.forEach((col) => {
     console.log("getting formatting for col", col);
@@ -176,6 +184,12 @@ const getColFormatters = (cols) => {
         return;
       }
     }
+    for (let target of percentSign) {
+      if (col.startsWith(target)) {
+        out[originalCol] = addPercentSign;
+        return;
+      }
+    }
     out[originalCol] = noop;
   });
   console.log("col formats", out);
@@ -225,7 +239,11 @@ export default function Grid(props) {
               if (colorValue < 0 || colorValue > 1) {
                 colorValue = undefined;
               }
-              if (col.startsWith("Beta") || col.startsWith("True Range")) {
+              if (
+                col.startsWith("Beta") ||
+                col.startsWith("True Range") ||
+                col.startsWith("Forecast Range")
+              ) {
                 colorValue = 1 - colorValue;
               }
             }
