@@ -27,7 +27,9 @@ const roundTo2Decimals = (value) => {
 };
 
 const noop = (value) => {
-  return internationalNumberFormat.format(value);
+  const out = internationalNumberFormat.format(value);
+  if (isNaN(out)) return value;
+  return out;
 };
 
 const toList = (value) => {
@@ -228,7 +230,13 @@ export default function Grid(props) {
               }
             }
           }
-
+          console.log(
+            "solvingNaN",
+            colFormatters[col](val),
+            col,
+            colFormatters[col],
+            val
+          );
           cells.push(
             <td
               className={col == "Name" ? styles.capWidth : ""}
@@ -276,7 +284,7 @@ export default function Grid(props) {
         </tr>
       );
     });
-  }, [props.rows, props.cols, theme.palette.mode, props.colorOpacity]);
+  }, [props.rows, props.cols, props.colorOpacity]);
 
   // useEffect(() => {
   //   if (props.children) {
