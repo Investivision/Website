@@ -69,7 +69,7 @@ export default function Pricing(props) {
     if (user) {
       await user.getIdToken(true);
       const token = await user.getIdTokenResult(true);
-      console.log("found token", token);
+
       if (token.claims.role) {
         setRole(token.claims.role);
       } else {
@@ -79,8 +79,6 @@ export default function Pricing(props) {
       setRole(undefined);
     }
   };
-
-  console.log(user);
 
   onAuthStateChanged(auth, async (user) => {
     setUser(user);

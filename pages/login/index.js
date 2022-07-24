@@ -234,7 +234,6 @@ export default function Login() {
 
             try {
               const res = await signInWithPopup(auth, provider);
-              console.log(res);
             } catch (e) {
               setSnackbarMessage(formatErrorCode(e.code));
               setSnackbarSeverity("error");

@@ -13,10 +13,7 @@ const tweetIds = [
 export default function TwitterCarousel() {
   const theme = useTheme();
 
-  console.log("theme from func", theme);
-
   const tweetComponents = useMemo(() => {
-    console.log("theme from memo", theme);
     let out = tweetIds
       .concat(tweetIds)
       .map((id, i) => (

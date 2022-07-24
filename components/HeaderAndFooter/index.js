@@ -14,13 +14,6 @@ const bottomWaveHeight = 50;
 export default function HeaderAndFooter(props) {
   const theme = useTheme();
 
-  console.log(
-    props,
-    `#${theme.palette.mode == "dark" ? "000000" : "ffffff"}${
-      props.overlayHeader === true ? "00" : "ff"
-    })`
-  );
-
   const footerColor = theme.palette.mode == "dark" ? "#ffffff10" : "#f5f5f5";
 
   const headerBackground = `#ffffff${

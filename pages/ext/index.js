@@ -104,7 +104,7 @@ const orderTimeFrames = (data) => {
       return -1;
     }
   });
-  console.log(out);
+
   return out;
 };
 
@@ -141,15 +141,8 @@ export default function Ext(props) {
       const formatted = processSymbolData(
         props.data ? props.data.insights[props.data.args[0]] : undefined
       );
-      console.log("props.data", props.data, formatted);
+
       const frames = orderTimeFrames(formatted);
-      console.log(
-        "try to set new time frame",
-        frames,
-        curtimeframe,
-        !frames.includes(curtimeframe),
-        frames && (curtimeframe === undefined || !frames.includes(curtimeframe))
-      );
       if (
         frames &&
         (curtimeframe === undefined || !frames.includes(curtimeframe))
@@ -165,20 +158,18 @@ export default function Ext(props) {
   }, [props.data]);
 
   useEffect(() => {
-    console.log("props", props);
     if (props.name) {
       return;
     }
     document.body.classList.add("transparent");
     if (window.chrome && !port && !props.localFirebase && !props.data) {
       const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
-      console.log("new port");
+
       // window.onbeforeunload = function (event) {
       //   alert("refresh");
       //   port.disconnect();
       // };
       port.onMessage.addListener(function (data) {
-        console.log("got data", data);
         setRateLimited(data.status == "rateLimited");
         if (["forbidden", "rateLimited"].includes(data.status)) {
           setLoading(false);
@@ -193,11 +184,9 @@ export default function Ext(props) {
         } else {
           // do we need to test data.status == 'done'
           if (data.name) {
-            console.log("got new name", data);
             setName(data.name);
           }
           if (data.removeName) {
-            console.log("removing name", data);
             setName(undefined);
           }
           if (data.insights && data.args.length == 1) {
@@ -238,8 +227,8 @@ export default function Ext(props) {
   //   }
   //   postMessage("iframe loaded", "*");
   // });
-  // console.log("currentTimeFrame", currentTimeFrame);
-  console.log("formatted", formatted);
+  //
+
   return (
     <div
       className={props.className}
@@ -348,16 +337,10 @@ export default function Ext(props) {
                 }}
                 label="Time Frame"
                 onChange={(event) => {
-                  console.log("event", event);
                   if (event.target.value) {
                     setCurrentTimeFrame(event.target.value);
                     curtimeframe = event.target.value;
                   }
-                  console.log(
-                    "set current time frame to",
-                    event.target.value,
-                    typeof event.target.value
-                  );
                 }}
               >
                 {timeFrames.map((key) => {

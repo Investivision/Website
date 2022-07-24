@@ -53,16 +53,14 @@ export default function TwitterImage(props) {
   if (!data) {
     return null;
   }
-  console.log("data", data);
+
   data = JSON.parse(data);
   data = processSymbolData(data);
-  console.log("formatted", data);
+
   const global = data.global;
   data = data[timeframe];
 
   width = parseInt(width);
-
-  console.log("data", data, "section", section, "global", global);
 
   const getComponent = () => {
     if (section == "Growth") return <Growth data={data} global={global} />;

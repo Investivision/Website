@@ -3,7 +3,9 @@ import RangePlot from "./RangePlot";
 import UpgradeButton from "./UpgradeButton";
 
 export default function Prophet(props) {
-  return props.data.p && props.data.pr && props.data.prophet ? (
+  return props.data.p !== undefined &&
+    props.data.pr !== undefined &&
+    props.data.prophet !== undefined ? (
     <>
       <Numeric
         percentile={props.data["p%"]}

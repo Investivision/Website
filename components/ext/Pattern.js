@@ -66,8 +66,6 @@ import candleMap from "../insights/candleMap";
 //   XSIDEGAP3METHODS: "Upside/Downside Gap Three Methods",
 // };
 
-console.log(JSON.stringify(candleMap));
-
 const Item = function (props) {
   return (
     <div
@@ -120,8 +118,6 @@ export default function Pattern(props) {
   }
 
   const theme = useTheme();
-
-  // console.log("theme from pattern", theme);
 
   return (
     <div className={styles.container} style={props.style}>

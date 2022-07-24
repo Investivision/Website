@@ -32,7 +32,7 @@ export default function CookieConsent() {
 
   const checkToken = () => {
     const stored = window.localStorage.getItem(localStorageKey);
-    console.log("stored cookie token", new Date(stored), "now", new Date());
+    //
     if (stored) {
       const exp = new Date(stored);
       setTokenExpired(new Date() > exp);

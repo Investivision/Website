@@ -63,8 +63,6 @@ export default function Filter(props) {
     setTempValue(props.value);
   }, [props.value]);
 
-  console.log("tempRelation is", tempRelation);
-
   const relations = [
     "=",
     ">",
@@ -99,10 +97,10 @@ export default function Filter(props) {
     ) {
       bestLen++;
     }
-    console.log("filter pattern initial is", bestLen);
+
     inputValue = inputValue.toLowerCase();
     for (let col of cols) {
-      // console.log("filter pattern try col", col);
+      //
       for (let i = bestLen; i <= Math.min(col.length, inputValue.length); i++) {
         if (
           col
@@ -110,11 +108,9 @@ export default function Filter(props) {
             .startsWith(inputValue.substring(inputValue.length - i))
         ) {
           if (i > bestLen) {
-            console.log("filter pattern new best", col, i);
             bestLen = i;
             out = [col];
           } else {
-            console.log("filter pattern", col);
             out.push(col);
           }
         }
@@ -123,7 +119,6 @@ export default function Filter(props) {
     return out;
   };
 
-  console.log("row props", props);
   return (
     <div className={styles.row} style={props.style}>
       <Autocomplete
@@ -258,7 +253,6 @@ export default function Filter(props) {
         renderInput={(params) => {
           delete params.inputProps.value;
           let message = errorMessage(tempValue, cols, tempRelation);
-          console.log("7/10 new message", message);
           return (
             <TextField
               {...params}
@@ -270,14 +264,6 @@ export default function Filter(props) {
               color={theme.palette.mode == "dark" ? "secondary" : "primary"}
               onChange={(e) => {
                 message = errorMessage(e.target.value, cols, tempRelation);
-                console.log(
-                  "7/10 sending filter",
-                  {
-                    value: e.target.value,
-                    valid: message ? false : true,
-                  },
-                  message
-                );
                 props.onChange({
                   value: e.target.value,
                   valid: message ? false : true,

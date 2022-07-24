@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import styles from "./grid.module.css";
 import SortToggle from "./SortToggle";
 import { useTheme } from "@mui/styles";
@@ -95,7 +95,7 @@ function getCellColor(percentile, mode, opacity) {
   // const opacity =
   //   colors[3] + (Math.abs(0.5 - percentile) / 0.5) * (colors[4] - colors[3]);
   out = `rgba(${out}, ${opacity})`; //${(Math.abs(0.5 - percentile) / 0.5) * colors[3]})
-  console.log("cellColor", out, percentile);
+
   return out;
 }
 
@@ -127,7 +127,6 @@ const getColFormatters = (cols) => {
   const percentSign = ["AI", "Forecast"];
   const out = {};
   cols.forEach((col) => {
-    console.log("getting formatting for col", col);
     const originalCol = col;
     col = col.replace(", ", " ");
     const words = new Set(col.split(" "));
@@ -192,7 +191,7 @@ const getColFormatters = (cols) => {
     }
     out[originalCol] = noop;
   });
-  console.log("col formats", out);
+
   return out;
 };
 
@@ -202,8 +201,6 @@ export default function Grid(props) {
   const colFormatters = useMemo(() => {
     return getColFormatters(props.allCols);
   }, [props.allCols]);
-  console.log("plot props", props);
-  console.log("colFormatters", colFormatters);
 
   const [toolTipOpen, setToolTipOpen] = useState(false);
 
@@ -212,7 +209,7 @@ export default function Grid(props) {
   const rowComponents = useMemo(() => {
     return props.rows.slice(0, 20).map((row) => {
       const cells = [];
-      console.log("row components, cols", props.cols);
+
       for (const col of props.cols) {
         const val = row[col];
         let colorValue = undefined;
@@ -248,13 +245,7 @@ export default function Grid(props) {
               }
             }
           }
-          console.log(
-            "solvingNaN",
-            colFormatters[col](val),
-            col,
-            colFormatters[col],
-            val
-          );
+
           cells.push(
             <td
               className={col == "Name" ? styles.capWidth : ""}
@@ -286,7 +277,6 @@ export default function Grid(props) {
         }
       }
       //   alert("new rows to render");
-      console.log("new rows to render", props.rows, props.cols);
       return (
         <tr
           key={row["Symbol"]}
@@ -313,6 +303,11 @@ export default function Grid(props) {
   //     }
   //   }
   // }, [props.children]);
+  props.extractScrollPositionFunction(() => {
+    tableRef.current.scrollLeft = 0;
+  });
+
+  const tableRef = useRef();
 
   return (
     <Tooltip
@@ -356,6 +351,7 @@ export default function Grid(props) {
             // height: "calc(100vh - 120px)",
             // maxHeight: "660px",
           }}
+          ref={tableRef}
         >
           <table>
             <thead>
@@ -367,7 +363,6 @@ export default function Grid(props) {
                       index={i}
                       draggable={i > 0}
                       onDragStart={(e) => {
-                        console.log("drag start", e);
                         // document.body.style.cursor = "move";
                         e.target.style.opacity = 0.3;
                         draggedPosition = i;
@@ -375,7 +370,6 @@ export default function Grid(props) {
                         // e.dataTransfer.effectAllowed = "copyMove";
                       }}
                       onDragEnd={(e) => {
-                        console.log("drag end");
                         e.target.style.opacity = 1;
                       }}
                       onDragOver={(e) => {
@@ -386,11 +380,7 @@ export default function Grid(props) {
                             e.target.style.borderLeft = `4px solid ${theme.palette.primary.main}`;
                           }
                         }
-                        console.log(
-                          "drag over",
-                          e.target.innerText,
-                          i > draggedPosition
-                        );
+
                         e.stopPropagation();
                         e.preventDefault();
                       }}
@@ -402,7 +392,7 @@ export default function Grid(props) {
                         if (i == 0) {
                           return;
                         }
-                        console.log("drop", e.target.innerText);
+
                         e.target.style.borderLeft = "0px solid transparent";
                         e.target.style.borderRight = "0px solid transparent";
                         if (i > draggedPosition) {

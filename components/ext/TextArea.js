@@ -35,7 +35,7 @@ export default function TextArea(props) {
   const [saved, setSaved] = useState(true);
   const [notesLoading, setNotesLoading] = useState(props.localFirebase);
 
-  console.log("localFirebase", props.localFirebase);
+  //
 
   useEffect(() => {
     setNotesText(props.notes);
@@ -94,12 +94,12 @@ export default function TextArea(props) {
         notes: curr,
       });
     }
-    console.log("new saved value is", curr);
+    //
     savedValue = curr;
-    console.log("reading from saved value", savedValue);
+    //
   };
 
-  console.log("TextArea props", props);
+  //
   return (
     <>
       <p

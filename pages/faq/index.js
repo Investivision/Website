@@ -103,7 +103,7 @@ export default function Login() {
   //   const query = router.asPath.split("topic=");
   //   const initial = query.length > 1 ? query[1] : Object.keys(questions)[1];
 
-  //   console.log("router", router, "query", query, "initial", initial);
+  //
 
   const [selectedCat, setSelectedCat] = useState();
 

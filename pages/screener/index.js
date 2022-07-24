@@ -1,20 +1,10 @@
 import HeaderAndFooter from "../../components/HeaderAndFooter";
 import styles from "./index.module.css";
-import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useTheme } from "@mui/styles";
 import { onAuthStateChanged } from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  getDocs,
-  query,
-  collection,
-  where,
-  deleteDoc,
-} from "firebase/firestore";
-import { getStorage, ref, getBlob, getBytes } from "firebase/storage";
-import firebase, { auth, formatErrorCode } from "../../firebase";
+import { getFirestore, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { auth } from "../../firebase";
 import Skeleton from "@mui/material/Skeleton";
 import LoadingButton from "@mui/lab/LoadingButton";
 import Button from "@mui/material/Button";
@@ -24,7 +14,6 @@ import Sort from "../../components/insights/Sort";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-// import { WrapperVariantContext } from "@mui/lab/internal/pickers/wrappers/WrapperVariantContext";
 import { DataGrid } from "@mui/x-data-grid";
 import Grid from "../../components/insights/Grid";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -34,18 +23,20 @@ import ArrowIcon from "@material-ui/icons/ArrowForwardIosRounded";
 import CloseRoundedIcon from "@material-ui/icons/CloseRounded";
 import DeleteForeverRoundedIcon from "@material-ui/icons/DeleteForeverRounded";
 import { v4 as uuidv4 } from "uuid";
-import { common } from "@mui/material/colors";
 import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
 import ExtView from "../ext";
-import candleMap from "../../components/insights/candleMap";
-import Base256 from "base256-encoding";
-import Base128 from "base128-encoding";
-import base91 from "node-base91";
-import Base64String from "../../components/insights/LZString";
 import { useRouter } from "next/router";
 import Slider from "@mui/material/Slider";
 import { NextSeo } from "next-seo";
+import {
+  tryToExtractExistingInsights,
+  pullRemoteInsights,
+  getExistingSymbolInsights,
+  getRemoteUserConfigs,
+  setRemoteUserConfig,
+} from "../../utils/insights";
+import commonConfigurations from "../../utils/commonConfigurations";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -56,36 +47,7 @@ let colorOpacityChanges = false;
 let selectedColsSet = new Set();
 let selectedColsChanges = false;
 
-const rawData = {};
-
-function getLastInsightUpdateTime() {
-  const date = new Date();
-  const initialOffset = date.getTimezoneOffset();
-  date.setTime(date.getTime() + initialOffset * 60 * 1000); // utc
-  let estOffset = -300;
-  if (date.isDstObserved()) {
-    estOffset += 60;
-  }
-  date.setTime(date.getTime() + estOffset * 60 * 1000); // est
-  if (date.getHours() < 17) {
-    date.setTime(date.getTime() - 1000 * 60 * 60 * 24);
-  }
-  date.setHours(17, 0, 0, 0);
-  const dayOffsets = {
-    0: -2,
-    6: -1,
-  };
-  console.log("date before offset", date);
-  const offset = dayOffsets[date.getDay()];
-  console.log("offset is", offset);
-  if (offset) {
-    date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * offset);
-  }
-  console.log("date in eastern time", date);
-  date.setTime(date.getTime() - estOffset * 60 * 1000);
-  date.setTime(date.getTime() - initialOffset * 60 * 1000);
-  return date;
-}
+let scrollPositionFunction;
 
 // extend the string prototype to title case
 String.prototype.toTitleCase = function () {
@@ -94,174 +56,7 @@ String.prototype.toTitleCase = function () {
   });
 };
 
-// String.prototype.toTitleCase = () => {
-//   console.log("toTitleCase", this);
-//   return this.replace(/\w\S*/g, function (txt) {
-//     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-//   });
-// };
-
-Date.prototype.stdTimezoneOffset = function () {
-  var jan = new Date(this.getFullYear(), 0, 1);
-  var jul = new Date(this.getFullYear(), 6, 1);
-  return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-};
-
-Date.prototype.isDstObserved = function () {
-  return this.getTimezoneOffset() < this.stdTimezoneOffset();
-};
-
-function blobToBase64(blob) {
-  console.log("blob before base64", blob);
-  return new Promise((resolve, _) => {
-    const reader = new FileReader();
-    reader.onloadend = (result) => {
-      console.log("blog to base64", result.currentTarget.result);
-      resolve(result.currentTarget.result);
-    };
-    reader.readAsDataURL(blob);
-  });
-}
-
-function downloadBlob(blob, name = "file.txt") {
-  // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
-  const blobUrl = URL.createObjectURL(blob);
-
-  // Create a link element
-  const link = document.createElement("a");
-
-  // Set link's href to point to the Blob URL
-  link.href = blobUrl;
-  link.download = name;
-
-  // Append link to the body
-  document.body.appendChild(link);
-
-  // Dispatch click event on the link
-  // This is necessary as link.click() does not work on the latest firefox
-  link.dispatchEvent(
-    new MouseEvent("click", {
-      bubbles: true,
-      cancelable: true,
-      view: window,
-    })
-  );
-
-  // Remove link from body
-  document.body.removeChild(link);
-}
-
 var workbook;
-
-let commonConfigurations = [
-  {
-    name: "Stable Long-Term Picks",
-    sort: ["Sharpe, 10yr", "asc"],
-    cols: ["Sharpe, 10yr", "Alpha, 10yr", "Last Close"],
-    desc: "Best Sharpe, 10yr",
-    filters: [
-      {
-        feature: "Sharpe, 10yr",
-        relation: "exists",
-        value: "",
-      },
-      {
-        feature: "Last Close",
-        relation: ">",
-        value: "20",
-      },
-    ],
-  },
-  {
-    name: "Past-Year Champions",
-    sort: ["Alpha, 1yr", "asc"],
-    cols: ["Alpha, 1yr", "Sharpe, 1yr", "Last Close"],
-    desc: "Best Alpha, 1yr",
-    filters: [
-      {
-        feature: "Alpha, 1yr",
-        relation: "exists",
-        value: "",
-      },
-    ],
-  },
-  {
-    name: "Nearby Expected Rebounds",
-    sort: ["Support, 3mo", "asc"],
-    desc: "Close to Support Line with weak Relative Strength",
-    filters: [
-      {
-        feature: "Resistance, 3mo",
-        relation: "exists",
-        value: "",
-      },
-      {
-        feature: "Resistance, 3mo",
-        relation: ">",
-        value: "Support, 3mo + 0.07",
-      },
-    ],
-    cols: ["Support, 3mo", "Resistance, 3mo", "Last Close"],
-  },
-  {
-    name: "High Volatility Movers",
-    desc: "Choppy prices with extreme movements",
-    sort: ["True Range, 1yr", "asc"],
-    filters: [],
-    cols: ["True Range, 1yr", "Beta, 1yr", "Resistance, 3mo", "Support, 3mo"],
-  },
-  {
-    name: "Forecasted Long-Term Winners",
-    desc: "Top picks by our AI-driven forecasting service",
-    sort: ["AI Forecast in 10yr", "asc"],
-    filters: [
-      {
-        feature: "AI Forecast in 10yr",
-        relation: "exists",
-        value: "",
-      },
-      {
-        feature: "Forecast Range in 10yr",
-        relation: "<",
-        value: "80",
-      },
-    ],
-    cols: [
-      "AI Forecast in 10yr",
-      "AI Forecast in 5yr",
-      "AI Forecast in 1yr",
-      "AI Forecast in 3mo",
-    ],
-  },
-  {
-    name: "The Tech Backbone",
-    desc: "Tech companies leading the way for stock growth",
-    sort: ["Alpha, 5yr", "asc"],
-    filters: [
-      {
-        feature: "Sector",
-        relation: "=",
-        value: '"Technology"',
-      },
-      {
-        feature: "Alpha, 5yr",
-        relation: "exists",
-        value: "",
-      },
-    ],
-    cols: ["Alpha, 5yr", "Sharpe, 5yr", "Industry"],
-  },
-  // {
-  //   name: "Short-Term Bearish Candles",
-  //   sort: sortByBearishCandles,
-  //   desc: "High net number of bearish candle patterns",
-  // },
-  // {
-  //   name: "Short-Term Bullish Candles",
-  //   sort: sortByBullishCandles,
-  //   desc: "High net number of bullish candle patterns",
-  // },
-];
 
 let prevSortedRows = undefined;
 
@@ -293,9 +88,6 @@ export default function Insights() {
   const [sortDir, setSortDir] = useState("asc");
 
   const [filters, setFilters] = useState([]);
-
-  const [firstConfigWidth, setFirstConfigWidth] = useState(0);
-  const firstConfigRef = useRef(null);
 
   const [user, setUser] = useState(undefined);
   const [userLoaded, setUserLoaded] = useState(false);
@@ -337,6 +129,19 @@ export default function Insights() {
   const [colorOpacity, setColorOpacity] = useState(tempColorOpacity);
   const [sliderRerender, setSliderRerender] = useState(0);
 
+  const gridRef = useRef(null);
+
+  const handleExtractWorkbook = useCallback((result) => {
+    const { cols, selectedCols, sortedCols, rows, wb } = result;
+    setCols(cols);
+    setSelectedCols(selectedCols);
+    setSortedCols(sortedCols);
+    setRows(rows);
+    workbook = wb;
+    selectedColsSet = new Set(selectedCols);
+    tempSelectedCols = [...selectedCols];
+  }, []);
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -347,21 +152,13 @@ export default function Insights() {
         } else {
           setUser(user);
           setUserLoaded(true);
-          const stored = window.localStorage.getItem("insightsTimestamp");
-          console.log("stored insights", stored);
-          if (stored && Date.parse(stored) > getLastInsightUpdateTime()) {
-            setDownloading(true);
-            extractWorkbook(
-              XLSX.read(
-                Base64String.decompressFromUTF16(
-                  localStorage.getItem("insights")
-                ),
-                {
-                  type: "base64",
-                }
-              )
-            );
+          setDownloading(true);
+          const existing = await tryToExtractExistingInsights();
+          if (existing) {
+            handleExtractWorkbook(existing);
+            setUserConfigs(await getRemoteUserConfigs());
           }
+          setDownloading(false);
         }
       } else {
         setUser(undefined);
@@ -369,225 +166,6 @@ export default function Insights() {
       }
     });
   }, []);
-
-  console.log(firstConfigRef);
-  useEffect(() => {
-    if (firstConfigRef.current) {
-      setFirstConfigWidth(firstConfigRef.current.clientWidth);
-    }
-  }, [rows]);
-
-  const extractWorkbook = async (wb) => {
-    workbook = wb;
-    var first_worksheet = wb.Sheets[wb.SheetNames[0]];
-    var second_worksheet = wb.Sheets[wb.SheetNames[1]];
-    let data = XLSX.utils.sheet_to_json(first_worksheet, {
-      header: 1,
-    });
-    let data2 = XLSX.utils.sheet_to_json(second_worksheet, {
-      header: 1,
-    });
-    data.slice(1).forEach((row) => {
-      const obj = {};
-      for (let i = 0; i < data[0].length; i++) {
-        if (row[i]) {
-          obj[data[0][i]] = data[0][i].includes("pattern")
-            ? JSON.parse(row[i].replaceAll("'", '"'))
-            : row[i];
-        }
-      }
-      obj.notes = "";
-      console.log("rawObj", JSON.stringify(obj));
-      rawData[obj.symbol] = obj;
-    });
-    data2.slice(1).forEach((row) => {
-      const obj = {};
-      for (let i = 0; i < data2[0].length; i++) {
-        if (row[i]) {
-          obj[data2[0][i]] = data2[0][i].startsWith("p")
-            ? JSON.parse(row[i])
-            : row[i];
-        }
-      }
-      rawData[obj.symbol] = { ...rawData[obj.symbol], ...obj };
-    });
-    console.log("rawData", rawData);
-    // const rawCols = data[0];
-    console.log("raw data", data);
-
-    // data = [data[0]].concat(
-    //   data.slice(1).map((row) => {
-    //     row = { ...row };
-    //     for (const timeFrame of ["3mo", "1", "5", "10"]) {
-    //       const colName = `pattern_${timeFrame}`;
-    //       const rawStr = row[colName];
-    //       if (rawStr) {
-    //         const bullish = [];
-    //         const bearish = [];
-    //         const list = JSON.parse(rawStr);
-    //         for (const [key, value] of Object.entries(list)) {
-    //           if (value > 0) {
-    //             bullish.push(candleMap[key]);
-    //           } else {
-    //             bearish.push(candleMap[key]);
-    //           }
-    //         }
-    //         delete row[colName];
-    //         const split = colName.split("_");
-    //         row["Bullish Pattern" + split[1]] = bullish.join(", ");
-    //         row["Bearish Pattern" + split[1]] = bearish.join(", ");
-    //       }
-    //     }
-    //     return row;
-    //   })
-    // );
-    // console.log("data after formatting", data);
-    const formattedCols = data[0].map((col) => {
-      //   original = col
-      // #     col = col.title().replace('Res_', 'Resistance_').replace(
-      // #         'Sup_', 'Support_').replace('%_', ' %ile_').replace('Lastclose', 'Last Close').replace('Drawup', 'Max Gain').replace('P_', 'AI Forecast_').replace('Pr_', 'Forecast Range_').replace('P %', 'AI Forecast %').replace('Pr 5', 'Forecast Range %').replace('Natr', 'True Range').replace('3Mo', '3mo')
-      // #     if col.endswith('_10'):
-      // #         col = col.replace('_10', '_10yr')
-      // #     elif col.endswith('_1'):
-      // #         col = col.replace('_1', '_1yr')
-      // #     col = col.replace('_5', '_5yr').replace('_', ', ')
-      // #     if 'Forecast' in col:
-      // #         col = col.replace(', ', ' in ')
-      // #     nameChanges[original] = col
-      let out = col
-        .toTitleCase()
-        .replace("Res_", "Resistance_")
-        .replace("Sup_", "Support_")
-        .replace("%_", " %ile_")
-        .replace("Lastclose", "Last Close")
-        .replace("Drawup", "Max Gain")
-        .replace("P_", "AI Forecast_")
-        .replace("Pr_", "Forecast Range_")
-        .replace("P %", "AI Forecast %")
-        .replace("Pr %", "Forecast Range %")
-        .replace("Natr", "True Range")
-        .replace("3Mo", "3mo")
-        .replace("Adx", "Trend Strength")
-        .replace("Rsi", "Relative Direction");
-      if (out.endsWith("_10")) {
-        out = out.replace("_10", "_10yr");
-      } else if (out.endsWith("_1")) {
-        out = out.replace("_1", "_1yr");
-      } else if (out.endsWith("_5")) {
-        out = out.replace("_5", "_5yr");
-      }
-      out = out.replace("_", ", ");
-      if (out.includes("Forecast")) {
-        out = out.replace(", ", " in ");
-      }
-      return out;
-    });
-    console.log(
-      "formatted cols",
-      formattedCols,
-      data[0].map((col) => {
-        return col
-          .toTitleCase()
-          .replace("Res_", "Resistance_")
-          .replace("Sup_", "Support_")
-          .replace("%_", " %ile_")
-          .replace("Lastclose", "Last Close")
-          .replace("Drawup", "Max Gain")
-          .replace("P_", "AI Forecast_")
-          .replace("Pr_", "Forecast Range_");
-      })
-    );
-    const myRows = data.slice(1).map((row) => {
-      const obj = {};
-      for (let i = 0; i < formattedCols.length; i++) {
-        if (row[i]) {
-          if (formattedCols[i].includes("Pattern")) {
-            let rawStr = row[i];
-            if (rawStr) {
-              const bullish = [];
-              const bearish = [];
-              rawStr = rawStr.replaceAll("'", '"');
-              const list = JSON.parse(rawStr);
-              for (const [key, value] of Object.entries(list)) {
-                if (value > 0) {
-                  bullish.push(candleMap[key]);
-                } else {
-                  bearish.push(candleMap[key]);
-                }
-              }
-              const split = formattedCols[i].split("Pattern");
-              obj["Bullish Patterns" + split[1]] = bullish;
-              obj["Bearish Patterns" + split[1]] = bearish;
-            }
-          } else {
-            obj[formattedCols[i]] = row[i];
-          }
-        }
-      }
-      return obj;
-    });
-    const set = new Set(formattedCols);
-    set.delete("Symbol");
-    for (const timeFrame of ["3mo", "1yr", "5yr", "10yr"]) {
-      set.delete("Pattern, " + timeFrame);
-      set.add("Bullish Patterns, " + timeFrame);
-      set.add("Bearish Patterns, " + timeFrame);
-    }
-    const sorted = ["Symbol", ...Array.from(set).sort()];
-    set.add("Symbol");
-    setCols(set);
-    const withoutPercentiles = sorted.filter((col) => !col.includes("%ile"));
-    selectedColsSet = new Set(withoutPercentiles);
-    tempSelectedCols = [...withoutPercentiles];
-    setSelectedCols(withoutPercentiles);
-    setSortedCols(sorted);
-    console.log("sortedCols", sorted);
-    console.log("myRows", myRows);
-    try {
-      console.log("uid is", auth.currentUser.uid);
-      const remoteConfigsRes = await getDocs(
-        query(
-          collection(getFirestore(), "configs"),
-          where("uid", "==", auth.currentUser.uid)
-        )
-      );
-
-      const freshRemoteConfigs = [];
-      remoteConfigsRes.forEach((doc) => {
-        freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
-      });
-
-      setUserConfigs(freshRemoteConfigs);
-    } catch (e) {
-      console.error("error getting user configs", e);
-    }
-
-    setRows(myRows);
-
-    try {
-      console.log("uid is", user.uid);
-      const remoteConfigsRes = await getDocs(
-        query(
-          collection(getFirestore(), "configs"),
-          where("uid", "==", user.uid)
-        )
-      );
-
-      const freshRemoteConfigs = [];
-      remoteConfigsRes.forEach((doc) => {
-        freshRemoteConfigs.push({ ...doc.data(), id: doc.id });
-      });
-
-      setUserConfigs(freshRemoteConfigs);
-    } catch (e) {
-      console.error("error getting user configs", e);
-    }
-
-    setDownloading(false);
-    window.onbeforeunload = function () {
-      return "test";
-    };
-  };
 
   const handleControlChange = () => {
     if (filterChanges) {
@@ -604,62 +182,15 @@ export default function Insights() {
     }
   };
 
-  //   if (!userLoaded) {
-  //     return (
-  //       <Skeleton
-  //         variant="text"
-  //         animation="wave"
-  //         height={60}
-  //         style={{
-  //           width: "100%",
-  //           maxWidth: 300,
-  //           marginTop: 20,
-  //         }}
-  //         sx={{
-  //           transform: "none",
-  //         }}
-  //       />
-  //     );
-  //   }
-
   const theme = useTheme();
-
-  console.log("theme", theme);
 
   const colors =
     theme.palette.mode == "dark"
-      ? [
-          theme.palette.primary.main + "50",
-          // "hsl(207, 100%, 14%)",
-          // "hsl(165, 100%, 25%)",
-          // "hsl(170, 100%, 24%)",
-          // "hsl(175, 100%, 22%)",
-          // "hsl(180, 100%, 24%)",
-          // "hsl(190, 100%, 25%)",
-          // "hsl(195, 100%, 26%)",
-          // "hsl(200, 100%, 27%)",
-        ]
-      : [
-          theme.palette.primary.main + "24",
-          // "hsl(207, 100%, 93%)",
-          // "hsl(165, 85%, 80%)",
-          // "hsl(170, 85%, 79%)",
-          // "hsl(175, 85%, 77%)",
-          // "hsl(180, 85%, 79%)",
-          // "hsl(190, 85%, 80%)",
-          // "hsl(195, 85%, 81%)",
-          // "hsl(200, 85%, 82%)",
-        ];
-
-  // if (theme.palette.mode && !commonConfigurations[0].color) {
-  //   alert(theme.palette.mode);
-  //   commonConfigurations = commonConfigurations.map((config) => {
-  //     config.color = colors[Math.floor(Math.random() * colors.length)];
-  //     return config;
-  //   });
-  // }
+      ? [theme.palette.primary.main + "50"]
+      : [theme.palette.primary.main + "24"];
 
   const [colTypes, timeFrames] = useMemo(() => {
+    // extract all column types (base, not including %ile) and timeframes
     if (!sortedCols) {
       return [undefined, undefined];
     }
@@ -687,7 +218,6 @@ export default function Insights() {
         visitedTimeFrames.add(frame);
       }
     }
-    console.log("timeFrames", frames);
     frames = frames
       .map((frame) => {
         console.log("timeFrame", frame);
@@ -723,7 +253,6 @@ export default function Insights() {
     } else {
       set.add(e.target.value);
     }
-    console.log("new set", set, setter);
     setter(new Set(set));
   };
 
@@ -735,57 +264,20 @@ export default function Insights() {
       if (col == "Symbol") {
         return false;
       }
-      console.log("determining if", col, "is to be selectable");
-      console.log("toggled items", toggledCols, toggledFrames);
       let split = col.split(", ");
       if (split.length == 1) {
         split = col.split(" in ");
       }
       if (split.length == 2 && !toggledFrames.has(split[1])) {
-        console.log(
-          "filtering col on first condition",
-          col,
-          split[1],
-          Array.from(toggledFrames)
-        );
-
-        console.log("determining if", col, "is to be selectable", false);
         return false;
       }
-      console.log("toggledCols", toggledCols, col, split[0]);
       if (showPercentiles) {
         split[0] = split[0].replace(" %ile", "");
       }
 
-      console.log("determining if", col, toggledCols.has(split[0]));
       return toggledCols.has(split[0]);
     });
   }, [sortedCols, toggledCols, toggledFrames, showPercentiles]);
-
-  // let selectableCols;
-  // if (sortedCols) {
-  //   selectableCols = sortedCols.filter((col) => {
-  //     console.log("toggled items", toggledCols, toggledFrames);
-  //     let split = col.split(", ");
-  //     if (split.length == 1) {
-  //       split = col.split(" in ");
-  //     }
-  //     if (split.length == 2 && !toggledFrames.has(split[1])) {
-  //       console.log(
-  //         "filtering col on first condition",
-  //         col,
-  //         split[1],
-  //         Array.from(toggledFrames)
-  //       );
-  //       return false;
-  //     }
-  //     console.log("toggledCols", toggledCols, col, split[0]);
-  //     if (showPercentiles) {
-  //       split[0] = split[0].replace(" (%ile)", "");
-  //     }
-  //     return toggledCols.has(split[0]);
-  //   });
-  // }
 
   const valuesForSort = useMemo(() => {
     if (!sortedCols) {
@@ -798,16 +290,8 @@ export default function Insights() {
     if (!rows) {
       return undefined;
     }
-    console.log(
-      "values for sort dict",
-      valuesForSort,
-      sortAttr,
-      valuesForSort[sortAttr]
-    );
     let out = [...rows];
     if (sortAttr == prevSortAttr && sortDir != prevSortDir) {
-      // console.log("sortedRows", prevSortedRows);
-      // alert("naive");
       return [...prevSortedRows].reverse();
     }
     out = out.sort((a, b) => {
@@ -844,14 +328,10 @@ export default function Insights() {
     let filtered = [...sortedRows];
     for (const filter of filters) {
       let { feature, relation, value, valid } = filter;
-      console.log("filterString", filter);
       if (value) {
         for (const col of cols) {
           value = value.replace(col, `row["${col}"]`);
         }
-        // if (/[a-zA-Z]/g.test(value)) {
-        //   value = `"${value}"`;
-        // }
       }
       if (
         feature &&
@@ -886,27 +366,15 @@ export default function Insights() {
           op = "LEFT RIGHT";
         }
 
-        let filterString = op;
-
-        // const isNum = !isNaN(value) && !isNaN(parseFloat(value));
-        // if (!isNum) {
-        //   value = `"${value}"`;
-        // }
-
-        filterString = filterString
-          .replace("RIGHT", value)
-          .replace("LEFT", `row["${feature}"]`);
-
-        console.log("filterString", filterString);
+        op = op.replace("RIGHT", value).replace("LEFT", `row["${feature}"]`);
 
         filtered = filtered.filter((row) => {
-          return eval(filterString);
+          return eval(op);
         });
       } else {
         console.log("ignoring filter", filter);
       }
     }
-    console.log("new filtered rows", filtered);
     return filtered;
   }, [filters, sortedRows]);
 
@@ -942,7 +410,7 @@ export default function Insights() {
         symbolForExt = undefined;
       }}
     >
-      <NextSeo title="Insight Explorer" />
+      <NextSeo title="Insight Screener" />
       {!userLoaded ? (
         <>
           <Skeleton
@@ -1003,32 +471,8 @@ export default function Insights() {
                   router.push("/pricing");
                   return;
                 }
-                const blob = await getBlob(ref(getStorage(), "/all_raw.xlsx"));
-
-                // console.log("bytes from firebase", bytes);
-                // const base64 = base91.encode(bytes);
-                // console.log("encoded length", base64.length);
-                // console.log("encoded string", base64);
-                let base64 = (await blobToBase64(blob)).split(",")[1];
-                console.log("encoded LZ", Base64String.compressToUTF16);
-                const lz = Base64String.compressToUTF16(base64);
-                console.log("encoded length", base64.length, lz.length);
-                console.log("encoded string", base64, lz);
-                // console.log("LZString", LZString);
-                try {
-                  // window.localStorage.setItem("insights", base64);
-                  window.localStorage.insights = lz;
-                  console.log("successfully set localStorage insights");
-                } catch (e) {
-                  console.error(e);
-                  console.error("failed to set localStorage");
-                }
-                window.localStorage.setItem("insightsTimestamp", new Date());
-                extractWorkbook(
-                  XLSX.read(base64, {
-                    type: "base64",
-                  })
-                );
+                handleExtractWorkbook(await pullRemoteInsights());
+                setDownloading(false);
               }}
               disabled={rows !== undefined}
             >
@@ -1045,7 +489,6 @@ export default function Insights() {
                     return (
                       <div
                         key={i}
-                        ref={i == 0 ? firstConfigRef : null}
                         onClick={() => {
                           if (config.sort) {
                             setSortAttr(config.sort[0]);
@@ -1120,19 +563,16 @@ export default function Insights() {
                             ),
                             desc: newConfigDesc,
                             uid: user.uid,
+                            filters: filters.filter((filt) => {
+                              return (
+                                filt.feature && filt.relation && filt.valid
+                              );
+                            }),
                           };
-                          const filts = filters.filter((filt) => {
-                            return filt.feature && filt.relation && filt.valid;
-                          });
-                          if (filts.length) {
-                            obj.filters = filts;
-                          }
                           const key =
                             user.uid + "-" + uuidv4().replaceAll("-", "");
-                          await setDoc(
-                            doc(getFirestore(), "configs", key),
-                            obj
-                          );
+
+                          await setRemoteUserConfig(key, obj);
                           setUserConfigs([{ ...obj, id: key }, ...userConfigs]);
                         }}
                       >
@@ -1266,6 +706,9 @@ export default function Insights() {
                 </div>
                 <Grid
                   cols={selectedCols}
+                  extractScrollPositionFunction={(func) => {
+                    scrollPositionFunction = func;
+                  }}
                   allCols={sortedCols}
                   rows={pageRows}
                   sortAttr={sortAttr}
@@ -1278,6 +721,14 @@ export default function Insights() {
                     prevSortAttr = sortAttr;
                     setSortDir(dir);
                     setSortAttr(attr);
+                    setSelectedCols([
+                      "Symbol",
+                      attr,
+                      ...selectedCols.filter((col) => {
+                        return col != attr && col != "Symbol";
+                      }),
+                    ]);
+                    scrollPositionFunction();
                   }}
                   onOrderChange={(newCols) => {
                     console.log("change order", newCols);
@@ -1293,7 +744,7 @@ export default function Insights() {
 
                       setDataForExt({
                         insights: {
-                          [symb]: rawData[symb],
+                          [symb]: getExistingSymbolInsights(symb),
                         },
                         args: [symb],
                       });

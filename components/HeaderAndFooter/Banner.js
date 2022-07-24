@@ -32,7 +32,7 @@ export default function Banner() {
 
   useEffect(() => {
     const stored = window.localStorage[banner.id];
-    console.log("stored banner status", stored);
+    //
     if (!stored) {
       setShowing(true);
     }
