@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 import Head from "next/head";
 import Theme from "./Theme";
-import CssBaseline from "@mui/material/CssBaseline";
+// import CssBaseline from "@mui/material/CssBaseline";
 import {
   NextSeo,
   SoftwareAppJsonLd,
@@ -9,6 +9,7 @@ import {
   DefaultSeo,
 } from "next-seo";
 import app from "../firebase";
+import Affiliate from "../components/Affiliate";
 
 const desc =
   "Your source for (actually) non-speculative, data-driven stock insights from the future. Engage with our vast database of 4000+ stocks, updated daily.";
@@ -96,6 +97,7 @@ function MyApp({ Component, pageProps }) {
           }`}
         </script> */}
       </Head>
+      <Affiliate />
       {/* <CssBaseline /> */}
       <Theme>
         <Component {...pageProps} />

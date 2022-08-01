@@ -3,6 +3,7 @@ import RangePlot from "./RangePlot";
 import UpgradeButton from "./UpgradeButton";
 
 export default function Prophet(props) {
+  console.log("prophet props", props);
   return props.data.p !== undefined &&
     props.data.pr !== undefined &&
     props.data.prophet !== undefined ? (

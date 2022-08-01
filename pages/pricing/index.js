@@ -32,6 +32,7 @@ const plans = [
       "Growth & Risk Metrics",
       "Pattern Recognition",
       "AI Forecasting",
+      "Cycle Detection",
     ],
     monthlyPriceId: "price_1K6j11ACbhl0jE7ZuLJoDW54",
     yearlyPriceId: "price_1K6jPbACbhl0jE7ZoGLvulow",
@@ -47,6 +48,8 @@ const plans = [
       "Growth & Risk Metrics",
       "Pattern Recognition",
       "AI Forecasting",
+      "Cycle Detection",
+      "Screener Access",
       "Integrated Notes",
       "Ranking & Filtering",
       "Batch Excel Export",
@@ -149,7 +152,13 @@ export default function Pricing(props) {
                   return (
                     <div key={feature} className={styles.feature}>
                       <CheckCircleRoundedIcon />
-                      <p>{feature}</p>
+                      <p
+                        style={{
+                          opacity: parseInt(feature.charAt(0)) ? 0.5 : 1,
+                        }}
+                      >
+                        {feature}
+                      </p>
                     </div>
                   );
                 })}
@@ -169,19 +178,25 @@ export default function Pricing(props) {
                     await user.getIdToken(true);
                     let res;
                     if ((await user.getIdTokenResult()).claims.role) {
-                      res = await getFunction("createPortalLink")({
+                      const body = {
                         returnUrl:
                           window.location.origin + "/account?success=true",
-                      });
+                      };
+                      res = await getFunction("createPortalLink")(body);
                     } else {
-                      res = await getFunction("createCheckoutSession")({
+                      const body = {
                         successUrl:
                           window.location.origin + "/account?success=true",
                         cancelUrl: window.location.href,
                         priceId: isMonthly
                           ? plan.monthlyPriceId
                           : plan.yearlyPriceId,
-                      });
+                      };
+                      const am = window.localStorage.getItem("am");
+                      if (am) {
+                        body.am = am;
+                      }
+                      res = await getFunction("createCheckoutSession")(body);
                     }
                     router.push(res.data);
                   }}

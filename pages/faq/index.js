@@ -27,7 +27,7 @@ const questions = {
     },
     {
       q: "Why are percentiles important?",
-      a: "Percentiles indicate a stock's metric score in comparison to the rest of the market. For example, a stock with an alpha percentile of 95% means that is alpha metric is estimated to be better than 95% of stocks in the market.",
+      a: "Percentiles indicate a stock's metric score in comparison to the rest of the market. For example, a stock with an alpha percentile of 95% means that its alpha metric is estimated to be better than 95% of stocks in the market.",
     },
   ],
   Account: [

@@ -51,11 +51,9 @@ function getLastInsightUpdateTime() {
 }
 
 function blobToBase64(blob) {
-  
   return new Promise((resolve, _) => {
     const reader = new FileReader();
     reader.onloadend = (result) => {
-      
       resolve(result.currentTarget.result);
     };
     reader.readAsDataURL(blob);
@@ -110,22 +108,22 @@ const extractWorkbook = async (wb) => {
       }
     }
     obj.notes = "";
-    
+
     rawData[obj.symbol] = obj;
   });
   data2.slice(1).forEach((row) => {
     const obj = {};
     for (let i = 0; i < data2[0].length; i++) {
       if (row[i]) {
-        obj[data2[0][i]] = data2[0][i].startsWith("p")
-          ? JSON.parse(row[i])
-          : row[i];
+        obj[data2[0][i]] =
+          data2[0][i].startsWith("p") || data2[0][i].startsWith("cyc")
+            ? JSON.parse(row[i])
+            : row[i];
       }
     }
     rawData[obj.symbol] = { ...rawData[obj.symbol], ...obj };
   });
-  
-  
+
   const formattedCols = data[0].map((col) => {
     let out = col
       .toTitleCase()
@@ -141,7 +139,10 @@ const extractWorkbook = async (wb) => {
       .replace("Natr", "True Range")
       .replace("3Mo", "3mo")
       .replace("Adx", "Trend Strength")
-      .replace("Rsi", "Relative Direction");
+      .replace("Rsi", "Relative Direction")
+      .replace("Cycfit", "Cycle Fit")
+      .replace("Cycup", "Cycle Gain")
+      .replace("Cycdown", "Cycle Loss");
     if (out.endsWith("_10")) {
       out = out.replace("_10", "_10yr");
     } else if (out.endsWith("_1")) {
@@ -195,11 +196,8 @@ const extractWorkbook = async (wb) => {
   set.add("Symbol");
   const withoutPercentiles = sorted.filter((col) => !col.includes("%ile"));
 
-  
-  
-
   // try {
-  //   
+  //
   //   const remoteConfigsRes = await getDocs(
   //     query(
   //       collection(getFirestore(), "configs"),
@@ -225,7 +223,7 @@ const extractWorkbook = async (wb) => {
     rows: myRows,
     wb: wb,
   };
-  
+
   return out;
 };
 

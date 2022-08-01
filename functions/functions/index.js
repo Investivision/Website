@@ -72,7 +72,7 @@ const setCustomClaims = async (uid, claims) => {
   return withoutNulls;
 };
 
-const createCustomerRecord = async (email, uid) => {
+const createCustomerRecord = async (email, uid, affiliate) => {
   try {
     logger.log(`will create customer record for ${uid}`);
     const customerData = {
@@ -80,6 +80,9 @@ const createCustomerRecord = async (email, uid) => {
         firebaseUID: uid,
       },
     };
+    if (affiliate) {
+      customerData.metadata.affiliate = affiliate;
+    }
     if (email) customerData.email = email;
     const customer = await stripe.customers.create(customerData);
     const claims = await setCustomClaims(uid, {
@@ -165,12 +168,12 @@ exports.createPortalLink = functions.https.onCall(async (data, context) => {
   return session.url;
 });
 
-const unsubscribed = async (customerId) => {
-  const customer = await stripe.customers.retrieve(customerId);
-  await setCustomClaims(customer.metadata.firebaseUID, {
-    role: null,
-  });
-};
+// const unsubscribed = async (customerId) => {
+//   const customer = await stripe.customers.retrieve(customerId);
+//   await setCustomClaims(customer.metadata.firebaseUID, {
+//     role: null,
+//   });
+// };
 
 const handleSubscriptionUpdate = async (subscriptionId, status, customerId) => {
   const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
@@ -254,6 +257,11 @@ exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
   await admin
     .firestore()
     .collection("notes")
+    .where("uid", "==", user.uid)
+    .delete();
+  await admin
+    .firestore()
+    .collection("configs")
     .where("uid", "==", user.uid)
     .delete();
   logger.log(

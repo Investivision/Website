@@ -14,6 +14,7 @@ import InfoScreen from "../../components/ext/InfoScreen";
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
 const processSymbolData = (data) => {
+  console.log("prophet props process", data);
   if (!data) {
     return undefined;
   }
@@ -25,6 +26,7 @@ const processSymbolData = (data) => {
     const [feature, timeframe, z] = key.split("_");
     if (!timeframe) {
       if (feature.charAt(0) == "p" && parseInt(feature.charAt(1))) {
+        console.log("prophet props pass", key);
         const days = parseInt(feature.substring(1));
         let obj = {
           days: days,
@@ -34,6 +36,7 @@ const processSymbolData = (data) => {
         };
         prophet.push(obj);
       } else {
+        console.log("prophet props fail", key);
         out.global[feature] = value;
       }
       continue;
@@ -63,7 +66,7 @@ const processSymbolData = (data) => {
     [63, "3mo"],
     [252, 1],
     [1260, 5],
-    [2520, 10],
+    [2520 - 5, 10],
   ];
   let j = 0;
   for (var i = 1; i < prophet.length; i++) {
@@ -72,7 +75,7 @@ const processSymbolData = (data) => {
       j++;
     }
   }
-
+  console.log("prophet props out", out);
   return out;
 };
 
@@ -111,6 +114,7 @@ const orderTimeFrames = (data) => {
 let curtimeframe = undefined;
 
 export default function Ext(props) {
+  console.log("ext props", props);
   const formatted = processSymbolData(
     props.data ? props.data.insights[props.data.args[0]] : undefined
   );

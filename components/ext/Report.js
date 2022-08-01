@@ -17,6 +17,7 @@ import Candle from "./Candle";
 import UpgradeButton from "./UpgradeButton";
 import Momentum from "./Momentum";
 import Prophet from "./Prophet";
+import Cycle from "./Cycle";
 
 export default function Report(props) {
   return (
@@ -75,6 +76,8 @@ export default function Report(props) {
       ) : (
         <UpgradeButton port={props.port} />
       )}
+      <h3>Cycle Studies</h3>
+      <Cycle {...props} />
       <h3>Notes</h3>
       {props.global.notes !== undefined ? (
         <TextArea

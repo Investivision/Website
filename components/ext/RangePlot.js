@@ -24,28 +24,28 @@ const monthNames = [
 export default function RangePlot(props) {
   const theme = useTheme();
 
-  const totalLength = props.points[props.points.length - 1].days;
-  let min = Infinity;
-  let max = -Infinity;
-  for (var point of props.points) {
-    min = Math.min(min, point.low);
-    max = Math.max(max, point.high);
-  }
+  // const totalLength = props.points[props.points.length - 1].days;
+  // let min = Infinity;
+  // let max = -Infinity;
+  // for (var point of props.points) {
+  //   min = Math.min(min, point.low);
+  //   max = Math.max(max, point.high);
+  // }
 
-  const range = max - min;
+  // const range = max - min;
 
-  let lows = props.points.map((point) => [
-    point.days / totalLength,
-    (point.low - min) / range,
-  ]);
-  let mids = props.points.map((point) => [
-    point.days / totalLength,
-    (point.mid - min) / range,
-  ]);
-  let highs = props.points.map((point) => [
-    point.days / totalLength,
-    (point.high - min) / range,
-  ]);
+  // let lows = props.points.map((point) => [
+  //   point.days / totalLength,
+  //   (point.low - min) / range,
+  // ]);
+  // let mids = props.points.map((point) => [
+  //   point.days / totalLength,
+  //   (point.mid - min) / range,
+  // ]);
+  // let highs = props.points.map((point) => [
+  //   point.days / totalLength,
+  //   (point.high - min) / range,
+  // ]);
 
   const getFutureDate = (days) => {
     const today = new Date();

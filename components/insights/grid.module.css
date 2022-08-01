@@ -13,47 +13,30 @@
   white-space: nowrap;
 }
 
-.aroundTable {
-  box-shadow: 0 0 40px 0 rgba(0, 29, 158, 0.131);
-  /* overflow: visible; */
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-:global(.dark-mode) .aroundTable {
-  box-shadow: 0 0 40px 0 rgba(255, 255, 255, 0.1);
-}
 
 .div table {
   border-collapse: collapse;
-  /* width: 200%; */
-  /* margin-top: -10px; */
-  transform: translate(-1px, -1px);
 }
 
 .div thead tr > th {
-  background: rgb(189, 223, 255);
   position: sticky;
   z-index: 2;
   top: 0;
   padding-left: 6px;
   transition: border-width 0.1s ease;
   cursor: ew-resize;
-  /* border: 0px solid transparent; */
-  /* border-left: 4px solid transparent; */
 }
 
-/* .div thead th {
-  border-bottom: 1px solid black
-} */
-/* 
-.div thead th:nth-child(1) {
-  border-bottom-color: rgb(163, 232, 255);
-} */
-
-:global(.dark-mode) .div thead tr > th {
-  background: rgb(0, 6, 26);
+.div thead tr > th, .symbolCell, .div tbody tr:hover  {
+  background: #f8f8f8;
+  color: black;
 }
+
+:global(.dark-mode) .div thead tr > th, :global(.dark-mode) .symbolCell, :global(.dark-mode) .div tbody tr:hover  {
+  background: rgb(5, 12, 26);
+  color: white;
+}
+
 
 .div thead tr > :first-child {
   z-index: 3;
@@ -61,44 +44,82 @@
   top: 0;
 }
 
-/* .div td,
-.div th {
-  border: 0.5px solid transparent;
+.div tbody tr {
+  border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
-.div td:last-child() {
-  border: none;
+:global(.dark-mode) .div tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
-
-:global(.dark-mode) :is(.div td, .div th) {
-  border: 0.5px solid transparent;
-} */
 
 .div tbody tr > :first-child {
-  background: rgb(189, 223, 255);
   position: sticky;
   z-index: 1;
   left: 0;
-  font-weight: 1000;
   font-size: 17px;
 }
 
-/* .div tbody tr {
-  box-sizing: border-box;
-  border: 1px solid transparent;
-} */
-
-/* .div tbody tr:nth-child(2n) {
-  background-color: rgba(255, 255, 255, 0.03);
-} */
-
-:global(.dark-mode) .div tbody tr > :first-child {
-  background: rgb(0, 6, 26);
+.div td {
+  padding: 7px 10px;
+  font-size: 15px;
+  color: #666;
+  /* font-weight: 300; */
 }
 
-.div td {
-  padding: 6px 12px;
-  font-size: 15px;
+.symbolCell {
+  display: flex;
+  align-items: center;
+  color: black !important;
+  padding-left: 5px !important; 
+  padding-right: 5px !important; 
+}
+
+:global(.dark-mode) .symbolCell {
+  color: white !important;
+}
+
+.symbolCell > svg {
+  height: 0.9em;
+  width: 0.9em;
+  cursor: pointer;
+}
+
+.likeIcon {
+  opacity: 0.2;
+  /* transition: opacity 0.2s ease; */
+}
+
+.symbolCell > svg:hover {
+  opacity: 1 !important;
+  transition: opacity 0.2s ease;
+}
+
+.rowExpandIcon {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.div tr:hover .rowExpandIcon {
+  opacity: 0.4;
+  pointer-events: all;
+}
+
+
+/* .rowExpandIcon:not(.div tr:hover) {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}
+
+.div table tbody tr:hover .rowExpandIcon {
+  opacity: 0.3 !important;  
+  pointer-events: all !important;
+} */
+
+.symbolCell span {
+  font-weight: 1000;
+  flex: 1;
+  padding: 0 5px;
 }
 
 .capWidth {
@@ -107,18 +128,6 @@
   max-width: 250px;
 }
 
-.div tbody tr:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-/* .div tbody td:not(:first-child) {
-  opacity: 0.8;
-} */
-
-:global(.dark-mode) .div tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.09);
-  /* border-color: white; */
-}
 
 .div tr > :first-child {
   padding-left: 10px;
@@ -133,16 +142,17 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100%; 
   z-index: 3;
-  background-color: white;
+  background-color: rgba(255,255,255,0.5);
+  backdrop-filter: blur(10px);
   padding: 30px;
   transition: opacity 0.2s ease;
   overflow: scroll;
 }
 
 :global(.dark-mode) .overlay {
-  background-color: rgb(6, 10, 22);
+  background-color: rgba(6, 10, 22, 0.5);
 }
 
 .overlay > div {
@@ -207,17 +217,9 @@
 }
 
 .listItem {
-  /* background-color: rgba(255,255,255,0.5); */
-  /* border: 1px solid rgba(0,0,0,0.2); */
-  /* box-shadow: 0 0 100px 0 rgba(0,0,0,0.7); */
-  background-color: rgba(255,255,255,0.25);
-  /* backdrop-filter: saturate(200%); */
   padding: 3px 6px;
   border-radius: 5px;
   margin-right:4px;
   font-size: 13px;
-}
-
-:global(.dark-mode) .listItem {
-  background-color: rgba(0,0,0,0.15);
+  /* border: 1px solid red; */
 }

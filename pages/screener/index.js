@@ -493,6 +493,8 @@ export default function Insights() {
                           if (config.sort) {
                             setSortAttr(config.sort[0]);
                             setSortDir(config.sort[1]);
+                            setCurrentPage(1);
+                            pageTextFieldRef.current.value = 1;
                           }
                           if (config.cols) {
                             const columns = ["Symbol", ...config.cols];
@@ -588,6 +590,8 @@ export default function Insights() {
                           if (config.sort) {
                             setSortAttr(config.sort[0]);
                             setSortDir(config.sort[1]);
+                            setCurrentPage(1);
+                            pageTextFieldRef.current.value = 1;
                           }
                           if (config.cols) {
                             const columns = ["Symbol", ...config.cols];
@@ -714,6 +718,7 @@ export default function Insights() {
                   sortAttr={sortAttr}
                   sortDir={sortDir}
                   colorOpacity={colorOpacity}
+                  extSymbol={extOpen ? dataForExt?.args[0] : undefined}
                   onChange={(params) => {
                     const { dir, attr } = params;
                     console.log("change sort", params);
@@ -721,13 +726,17 @@ export default function Insights() {
                     prevSortAttr = sortAttr;
                     setSortDir(dir);
                     setSortAttr(attr);
-                    setSelectedCols([
-                      "Symbol",
-                      attr,
-                      ...selectedCols.filter((col) => {
-                        return col != attr && col != "Symbol";
-                      }),
-                    ]);
+                    setCurrentPage(1);
+                    pageTextFieldRef.current.value = 1;
+                    if (attr != "Symbol") {
+                      setSelectedCols([
+                        "Symbol",
+                        attr,
+                        ...selectedCols.filter((col) => {
+                          return col != attr && col != "Symbol";
+                        }),
+                      ]);
+                    }
                     scrollPositionFunction();
                   }}
                   onOrderChange={(newCols) => {
@@ -741,13 +750,20 @@ export default function Insights() {
                         symb: symb,
                       });
                       symbolForExt = symb;
-
-                      setDataForExt({
+                      const symbolData = getExistingSymbolInsights(symb);
+                      console.log("rowClick new symbol data", {
                         insights: {
-                          [symb]: getExistingSymbolInsights(symb),
+                          [symb]: symbolData,
                         },
                         args: [symb],
                       });
+                      setDataForExt({
+                        insights: {
+                          [symb]: symbolData,
+                        },
+                        args: [symb],
+                      });
+                      console.log(symbolForExt);
                       setExtOpen(true);
                     } else {
                       console.log(
