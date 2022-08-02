@@ -39,6 +39,17 @@ export default function Cycle(props) {
   //       return <UpgradeButton port={props.port} />;
   //     }
   //   }
+  if (
+    !(
+      props.data.cycargs !== undefined &&
+      props.data.cycfit !== undefined &&
+      props.data.cycup !== undefined &&
+      props.data.cycdown !== undefined &&
+      props.data.period !== undefined &&
+      props.data.phase !== undefined
+    )
+  )
+    return <UpgradeButton port={props.port} />;
 
   const [amp, period, phase, slope, yOffset] = props.data.cycargs;
 
