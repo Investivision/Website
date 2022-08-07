@@ -269,14 +269,18 @@ export default function Login() {
       </div>
       <Snackbar
         open={snackbarIsOpen}
-        anchorOrigin={{ vertical: "top", horizontal: "right", zIndex: 9999 }}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+          zIndex: 999999999999,
+        }}
         onClose={() => {
           setSnackbarIsOpen(false);
         }}
         autoHideDuration={3000}
         message={snackbarMessage}
       >
-        <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
+        <Alert severity={snackbarSeverity} sx={{ zIndex: 9999999999999 }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>

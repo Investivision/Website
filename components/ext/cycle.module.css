@@ -53,16 +53,24 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
+}
 
-.plot {width: 100%; height:120px}
+.plot {
+    width: 100%;
+    height:120px;
+    /* margin-top: -20px; */
+}
 
-  .phase {
+.plot > *:last-child {
+    margin-top: -20px;
+}
+
+.phase {
     font-size: 22px;
     margin-top: 14px;
-  }
+}
 
-  .phaseSentence {
+.phaseSentence {
     font-size: 13px;
     opacity: 0.6
-  }
+}

@@ -3,8 +3,10 @@ import Numeric from "./Numeric";
 import UpgradeButton from "./UpgradeButton";
 import InfoIcon from "@material-ui/icons/Info";
 import Tooltip from "./ToolTip";
+import NotFound from "./NotFound";
 
 import { ResponsiveLine } from "@nivo/line";
+import { linearGradientDef } from "@nivo/core";
 import { useTheme } from "@mui/styles";
 import {
   OutdoorGrillRounded,
@@ -48,18 +50,26 @@ export default function Cycle(props) {
       props.data.period !== undefined &&
       props.data.phase !== undefined
     )
-  )
+  ) {
+    if (props.localFirebase) {
+      return <NotFound message="No fluctuating cycle found" />;
+    }
     return <UpgradeButton port={props.port} />;
+  }
+
+  if (props.data.cycup < 0 || props.data.cycdown < 0) {
+    return <NotFound message="No fluctuating cycle found" />;
+  }
 
   const [amp, period, phase, slope, yOffset] = props.data.cycargs;
 
   const daysBetween = period * 2;
 
-  const resolution = 20; // points per cycle
+  const resolution = 15; // points per cycle
 
-  let beforePoints = [];
+  // let beforePoints = [];
   let insidePoints = [];
-  let afterPoints = [];
+  // let afterPoints = [];
 
   const extrema = [];
 
@@ -136,36 +146,36 @@ export default function Cycle(props) {
       x: instant,
       y: wave((i / resolution) * period),
     };
-
-    if (i < -phase * resolution) {
-      beforePoints.push(point);
-    } else if (i > (1 - phase) * resolution) {
-      afterPoints.push(point);
-    } else {
-      insidePoints.push(point);
-    }
+    insidePoints.push(point);
+    // if (i < -phase * resolution) {
+    //   beforePoints.push(point);
+    // } else if (i > (1 - phase) * resolution) {
+    //   afterPoints.push(point);
+    // } else {
+    //   insidePoints.push(point);
+    // }
   }
 
-  const instant = new Date();
-  instant.setTime(now.getTime() - phase * msPeriod);
+  const cycleStart = new Date();
+  cycleStart.setTime(now.getTime() - phase * msPeriod);
 
-  const instant2 = new Date();
-  instant2.setTime(now.getTime() - phase * msPeriod + msPeriod);
+  const cycleEnd = new Date();
+  cycleEnd.setTime(now.getTime() - phase * msPeriod + msPeriod);
 
-  insidePoints = [
-    {
-      x: instant,
-      y: wave(-phase * period),
-    },
-    ...insidePoints,
-    {
-      x: instant2,
-      y: wave(-phase * period + period),
-    },
-  ];
+  // insidePoints = [
+  //   {
+  //     x: instant,
+  //     y: wave(-phase * period),
+  //   },
+  //   ...insidePoints,
+  //   {
+  //     x: instant2,
+  //     y: wave(-phase * period + period),
+  //   },
+  // ];
 
-  beforePoints.push(insidePoints[0]);
-  afterPoints = [insidePoints[insidePoints.length - 1], ...afterPoints];
+  // beforePoints.push(insidePoints[0]);
+  // afterPoints = [insidePoints[insidePoints.length - 1], ...afterPoints];
 
   //   console.log(
   //     "cycle points",
@@ -179,22 +189,22 @@ export default function Cycle(props) {
   //   );
 
   const data = [
-    {
-      id: "Before" + props.global.symbol,
-      color:
-        theme.palette.mode == "dark"
-          ? theme.palette.primary.main + "80"
-          : theme.palette.primary.main + "40",
-      data: beforePoints,
-    },
-    {
-      id: "After" + props.global.symbol,
-      color:
-        theme.palette.mode == "dark"
-          ? theme.palette.primary.main + "80"
-          : theme.palette.primary.main + "40",
-      data: afterPoints,
-    },
+    // {
+    //   id: "Before" + props.global.symbol,
+    //   color:
+    //     theme.palette.mode == "dark"
+    //       ? theme.palette.primary.main + "80"
+    //       : theme.palette.primary.main + "40",
+    //   data: beforePoints,
+    // },
+    // {
+    //   id: "After" + props.global.symbol,
+    //   color:
+    //     theme.palette.mode == "dark"
+    //       ? theme.palette.primary.main + "80"
+    //       : theme.palette.primary.main + "40",
+    //   data: afterPoints,
+    // },
     {
       id: "Inside" + props.global.symbol,
       color:
@@ -204,6 +214,18 @@ export default function Cycle(props) {
       data: insidePoints,
     },
   ];
+
+  const lineColor =
+    theme.palette.mode == "dark"
+      ? theme.palette.primary.light
+      : theme.palette.primary.main;
+
+  const outsideColor =
+    theme.palette.mode == "dark"
+      ? theme.palette.primary.main + "60"
+      : theme.palette.primary.main + "40";
+
+  console.log("theme", theme);
 
   return (
     <>
@@ -248,33 +270,97 @@ export default function Cycle(props) {
         </p>
         <p className={styles.phaseSentence}>{`Day ${Math.round(
           props.data.period * props.data.phase
-        )} of ${Math.round(props.data.period)}`}</p>
-        <div className={styles.plot}>
-          <Tooltip
-            title="The current progression through a standard cycle. 0% denotes the first low, 50% the peak, and 100% the final low."
-            arrow
+        )} of ${Math.round(props.data.period)} (Period)`}</p>
+        <Tooltip
+          title="The current progression through a standard cycle. 0% denotes the first low, 50% the peak, and 100% the final low."
+          arrow
+        >
+          <p
+            style={{
+              fontSize: 13,
+              textAlign: "center",
+              marginTop: 0,
+            }}
           >
-            <p
+            Phase
+            <InfoIcon
               style={{
-                fontSize: 13,
-                textAlign: "center",
-                marginTop: 0,
+                width: 14,
+                marginLeft: 3,
+                marginTop: -2,
+                opacity: 0.3,
+                verticalAlign: "middle",
               }}
-            >
-              Phase
-              <InfoIcon
-                style={{
-                  width: 14,
-                  marginLeft: 3,
-                  marginTop: -2,
-                  opacity: 0.3,
-                  verticalAlign: "middle",
-                }}
-              />
-            </p>
-          </Tooltip>
+            />
+          </p>
+        </Tooltip>
+        <div className={styles.plot}>
+          <svg
+            style={{
+              maxHeight: 0,
+              maxWidth: 0,
+            }}
+          >
+            <defs aria-hidden="true">
+              <linearGradient
+                id="gradientA"
+                x1="0"
+                x2="0"
+                y1="0"
+                y2="1"
+                gradientTransform="rotate(-90, 0.5, 0.5)"
+              >
+                <stop
+                  offset="0%"
+                  stop-color={outsideColor}
+                  stop-opacity="1"
+                ></stop>
+                <stop
+                  offset={`${50 - 50 * phase}%`}
+                  stop-color={outsideColor}
+                  stop-opacity="1"
+                ></stop>
+                <stop
+                  offset={`${50 - 50 * phase}%`}
+                  stop-color={lineColor}
+                  stop-opacity="1"
+                ></stop>
+                <stop
+                  offset={`${100 - 50 * phase}%`}
+                  stop-color={lineColor}
+                  stop-opacity="1"
+                ></stop>
+                <stop
+                  offset={`${100 - 50 * phase}%`}
+                  stop-color={outsideColor}
+                  stop-opacity="1"
+                ></stop>
+                <stop
+                  offset="100%"
+                  stop-color={outsideColor}
+                  stop-opacity="1"
+                ></stop>
+              </linearGradient>
+            </defs>
+          </svg>
           <ResponsiveLine
             data={data}
+            // defs={[
+            //   linearGradientDef(
+            //     "gradientA",
+            //     [
+            //       { offset: 0, color: outsideColor },
+            //       { offset: 10, color: outsideColor },
+            //       { offset: 10, color: lineColor },
+            //       { offset: 60, color: lineColor },
+            //       { offset: 60, color: outsideColor },
+            //       { offset: 100, color: outsideColor },
+            //     ],
+            //     {
+            //       gradientTransform: "rotate(180 0.5 0.5)",
+            //     }
+            //   ),
+            // ]}
             theme={{
               fontSize: 12,
               fontFamily: "rubik",
@@ -286,7 +372,7 @@ export default function Cycle(props) {
                 },
               },
             }}
-            margin={{ top: 5, right: 20, bottom: 20, left: 20 }}
+            margin={{ top: 5, right: 20, bottom: 26, left: 20 }}
             xScale={{ type: "time" }}
             // xFormat="time:%Y-%m-%dT%H:%M:%S.%L%Z"
             // axisBottom={{
@@ -308,16 +394,14 @@ export default function Cycle(props) {
               // ((val - props.lastClose) / props.lastClose) * 100 - 100
             }}
             curve="basis"
-            colors={(d) => d.color}
+            // colors={(d) => d.color}
+            colors={["url(#gradientA)"]}
             axisTop={null}
             axisRight={null}
             axisBottom={{
-              tickValues: [
-                insidePoints[0].x,
-                insidePoints[insidePoints.length - 1].x,
-              ], //daysBetween < 150 ? 4 : 5,
+              tickValues: [cycleStart, cycleEnd], //daysBetween < 150 ? 4 : 5,
               tickSize: 0,
-              tickPadding: 7,
+              tickPadding: 4,
               tickRotation: 0,
               format: (value) => {
                 if (daysBetween < 150)
@@ -329,9 +413,9 @@ export default function Cycle(props) {
               },
               background: "white",
             }}
-            gridXValues={[insidePoints[0].x, afterPoints[0].x]}
+            // gridXValues={[cycleStart, cycleEnd]}
             axisLeft={null}
-            enableGridX={true}
+            enableGridX={false}
             enableGridY={false}
             enablePoints={false}
             // enableArea={(item) => {
@@ -384,8 +468,10 @@ export default function Cycle(props) {
 }
 
 function ArrowBox({ upPercent, downPercent }) {
+  // downPercent = -downPercent;
   const origUpPercent = upPercent;
   const origDownPercent = downPercent;
+  debugger;
   if (upPercent > downPercent) {
     downPercent *= 1 + upPercent / 100;
   } else {
