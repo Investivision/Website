@@ -238,23 +238,25 @@ export default function Grid(props) {
           if (col == "Symbol") {
             cells.push(
               <td className={styles.symbolCell}>
-                <GradeOutlined className={styles.likeIcon} />
-                <span>{val}</span>
-                <ManageSearchRoundedIcon
-                  className={styles.rowExpandIcon}
-                  onClick={(e) => {
-                    props.onRowClick(val);
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                  style={
-                    val == props.extSymbol
-                      ? {
-                          opacity: 1,
-                        }
-                      : {}
-                  }
-                />
+                <div>
+                  <GradeOutlined className={styles.likeIcon} />
+                  <span>{val}</span>
+                  <ManageSearchRoundedIcon
+                    className={styles.rowExpandIcon}
+                    onClick={(e) => {
+                      props.onRowClick(val);
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    style={
+                      val == props.extSymbol
+                        ? {
+                            opacity: 1,
+                          }
+                        : {}
+                    }
+                  />
+                </div>
               </td>
             );
             continue;
