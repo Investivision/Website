@@ -82,7 +82,6 @@ const toDollars = (value, color) => {
 const controlMap = {
   filter: "Custom Filters",
   columns: "Show/Hide Columns",
-  pref: "Preferences",
 };
 
 const cellColors = {
@@ -337,7 +336,7 @@ export default function Grid(props) {
       //   alert("new rows to render");
       return <tr key={row["Symbol"]}>{cells}</tr>;
     });
-  }, [props.rows, props.cols, props.colorOpacity, props.extSymbol]);
+  }, [props.rows, props.cols, props.extSymbol]);
 
   props.extractScrollPositionFunction(() => {
     tableRef.current.scrollLeft = 0;

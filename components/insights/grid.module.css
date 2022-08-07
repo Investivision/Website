@@ -61,7 +61,7 @@
 
 .div td {
   padding: 7px 10px;
-  font-size: 15px;
+  font-size: 15px !important;
   color: #666;
   /* font-weight: 300; */
 }

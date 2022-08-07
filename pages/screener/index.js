@@ -42,8 +42,6 @@ let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
 
 let tempSelectedCols = [];
-let tempColorOpacity = 0.7;
-let colorOpacityChanges = false;
 let selectedColsSet = new Set();
 let selectedColsChanges = false;
 
@@ -126,7 +124,6 @@ export default function Insights() {
   const [dataForExt, setDataForExt] = useState(undefined);
   const [extOpen, setExtOpen] = useState(false);
 
-  const [colorOpacity, setColorOpacity] = useState(tempColorOpacity);
   const [sliderRerender, setSliderRerender] = useState(0);
 
   const gridRef = useRef(null);
@@ -175,10 +172,6 @@ export default function Insights() {
     if (selectedColsChanges) {
       setSelectedCols([...tempSelectedCols]);
       selectedColsChanges = false;
-    }
-    if (colorOpacityChanges) {
-      setColorOpacity(tempColorOpacity);
-      colorOpacityChanges = false;
     }
   };
 
@@ -670,21 +663,6 @@ export default function Insights() {
                         : "" // -1 is because symbol is always chosen
                     }`}
                   </Button>
-                  <Button
-                    size="small"
-                    onClick={(e) => {
-                      const name = "pref";
-                      handleControlChange();
-                      setControlOpen(controlOpen == name ? false : name);
-                      e.stopPropagation();
-                    }}
-                    variant="outlined"
-                    color={
-                      theme.palette.mode == "dark" ? "secondary" : "primary"
-                    }
-                  >
-                    Preferences
-                  </Button>
                   <LoadingButton
                     size="small"
                     variant="outlined"
@@ -717,7 +695,6 @@ export default function Insights() {
                   rows={pageRows}
                   sortAttr={sortAttr}
                   sortDir={sortDir}
-                  colorOpacity={colorOpacity}
                   extSymbol={extOpen ? dataForExt?.args[0] : undefined}
                   onChange={(params) => {
                     const { dir, attr } = params;
@@ -1045,44 +1022,6 @@ export default function Insights() {
                           Exit
                         </Button>
                       </div>
-                    </>
-                  ) : controlOpen == "pref" ? (
-                    <>
-                      <p
-                        style={{
-                          marginTop: 0,
-                          marginBottom: 20,
-                        }}
-                      >
-                        Cell Color Opacity
-                      </p>
-                      <Slider
-                        value={tempColorOpacity}
-                        min={0}
-                        max={1}
-                        valueLabelDisplay="on"
-                        sx={{
-                          maxWidth: 200,
-                        }}
-                        valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
-                        step={0.01}
-                        onChange={(e) => {
-                          tempColorOpacity = e.target.value;
-                          colorOpacityChanges = true;
-                          setSliderRerender(sliderRerender + 1);
-                        }}
-                      />
-                      <Button
-                        color="warning"
-                        variant="outlined"
-                        size="small"
-                        onClick={() => {
-                          handleControlChange();
-                          setControlOpen(false);
-                        }}
-                      >
-                        Exit
-                      </Button>
                     </>
                   ) : null}
                 </Grid>

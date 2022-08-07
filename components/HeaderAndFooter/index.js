@@ -103,7 +103,10 @@ export default function HeaderAndFooter(props) {
                 <Link href="/screener">Screener</Link>
               </li>
               <li>
-                <Link href="/extension">Extension</Link>
+                <Link href="/compare">Compare</Link>
+              </li>
+              <li>
+                <Link href="/extension">Ext</Link>
               </li>
               <li>
                 <Link href="/pricing">Pricing</Link>
