@@ -5,13 +5,37 @@ import { isChrome, isEdge } from "react-device-detect";
 import { useState, useEffect, useMemo } from "react";
 import ExtensionRoundedIcon from "@material-ui/icons/ExtensionRounded";
 import GridOnRoundedIcon from "@material-ui/icons/GridOnRounded";
+import LocalOfferRoundedIcon from "@material-ui/icons/LocalOfferRounded";
+import LiveHelpRounded from "@material-ui/icons/LiveHelpRounded";
+import LayersRounded from "@material-ui/icons/LayersRounded";
 import { useTheme } from "@mui/styles";
 import ExtView from "./ext";
 import Link from "next/link";
 import Button from "@mui/material/Button";
 import TwitterCarousel from "../components/TwitterCoursel";
+import { TwitterApi } from "twitter-api-v2";
 
-export default function Home() {
+export async function getStaticProps(context) {
+  const twitterClient = new TwitterApi(process.env.TWITTER_BEARER_TOKEN);
+  const roClient = twitterClient.readOnly;
+  const tweets = await roClient.v2.userTimeline("1256736165903794176", {
+    exclude: "replies",
+  });
+  const data = [];
+  let i = 0;
+  for (const tweet of tweets) {
+    if (i > 9) break;
+    data.push(tweet);
+    i++;
+  }
+  return {
+    props: {
+      tweets: data,
+    },
+  };
+}
+
+export default function Home(props) {
   const theme = useTheme();
 
   const [browser, setBrowser] = useState(undefined);
@@ -27,6 +51,10 @@ export default function Home() {
     }
     setBrowserLoaded(true);
   }, []);
+
+  const screenerMockup = useMemo(() => {
+    return <img src={`/images/screenerMockup_${theme.palette.mode}.png`} />;
+  }, [theme.palette.mode]);
 
   return (
     <HeaderAndFooter overlayHeader={true}>
@@ -376,6 +404,16 @@ export default function Home() {
         </div> */}
       </div>
       <div className={`${styles.about} ${styles.flexCenter}`}>
+        <h4>We crunch the numbers, you boost your strategy</h4>
+        <h3>
+          Stock investing is a difficult game to conquer - that is, without{" "}
+          <span>the right tools</span>. We sail today's ocean of data to empower
+          your journey to, and <span>beyond trade profitability</span>.
+        </h3>
+        <div className={styles.mockups}>
+          <img src="/images/tradingviewMockup.png" />
+          {screenerMockup}
+        </div>
         <h4>Who are we?</h4>
         <h3>
           {/* <img
@@ -412,12 +450,26 @@ export default function Home() {
           <span>utilize alongside your current setup</span>, including
         </h3>
         <div className={styles.brokers}>
-          <img src="/images/etrade.png" width={130} />
-          <img src="/images/finviz.png" width={90} />
-          <img src="/images/robinhood.png" width={140} />
-          <img src="/images/td.png" width={150} />
-          <img src="/images/tradingview.png" width={150} />
+          <img src="/images/etrade.png" />
+          <img src="/images/finviz.png" />
+          <img src="/images/robinhood.png" />
+          <img src="/images/wallstreetzen.png" />
+          <img src="/images/tradingview.png" />
+          <img src="/images/morningstar.png" />
+          <img src="/images/zacks.png" />
+          <img src="/images/motleyfool.png" />
         </div>
+        <h4>Why not the other players?</h4>
+        <h3>
+          Other existing investment tools obsess over too-good-to-be-true
+          signals and alerts, "professional" chat rooms, or get-rich-quick
+          schemes. We focus on{" "}
+          <span>
+            thorough technical analysis research coupled with intuitive
+            interfaces and integrations, all without breaking the bank
+          </span>
+          .
+        </h3>
         <h4>Get Started</h4>
         <h3>Explore our essential offerings</h3>
         <div className={styles.offerings}>
@@ -460,6 +512,63 @@ export default function Home() {
               </Button>
             </Link>
           </div>
+          <div>
+            <LayersRounded />
+            <p className={styles.offeringTitle}>Direct Comparison</p>
+            <p className={styles.offeringCaption}>
+              Highlight key insight differences between 2+ stocks.
+            </p>
+            <Link href="/compare">
+              <Button
+                variant="contained"
+                color="white"
+                sx={{
+                  color: theme.palette.primary.main + " !important",
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Get Started
+              </Button>
+            </Link>
+          </div>
+          <div>
+            <LocalOfferRoundedIcon />
+            <p className={styles.offeringTitle}>Pricing Explorer</p>
+            <p className={styles.offeringCaption}>
+              Compare plans, features, costs, and connect to Stripe for billing.
+            </p>
+            <Link href="/pricing">
+              <Button
+                variant="contained"
+                color="white"
+                sx={{
+                  color: theme.palette.primary.main + " !important",
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Visit
+              </Button>
+            </Link>
+          </div>
+          <div>
+            <LiveHelpRounded />
+            <p className={styles.offeringTitle}>FAQ</p>
+            <p className={styles.offeringCaption}>
+              Your source for commonly requested information.
+            </p>
+            <Link href="/faq">
+              <Button
+                variant="contained"
+                color="white"
+                sx={{
+                  color: theme.palette.primary.main + " !important",
+                  backgroundColor: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Visit
+              </Button>
+            </Link>
+          </div>
         </div>
         <h4>Insight Coverage</h4>
         <h3>
@@ -467,7 +576,7 @@ export default function Home() {
           <br />
           from growth, to risk, to pivot studies, to AI forecasting
         </h3>
-        <TwitterCarousel />
+        <TwitterCarousel ids={props.tweets.map((obj) => obj.id)} />
       </div>
     </HeaderAndFooter>
   );

@@ -148,6 +148,8 @@
 .brokers img {
   filter: contrast(0) brightness(0);
   opacity: 0.5;
+  width: 200px;
+  margin: 20px;
 }
 
 :global(.dark-mode) .brokers img {
@@ -158,38 +160,46 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   width: 100%;
   max-width: 1400px;
   margin: 20px 0;
-  gap: 20px;
 }
 
 .offerings {
   display: flex;
   flex-direction: row;
+  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 40px;
-  margin: 30px 0;
+  gap: 28px;
+  margin: 30px;
 }
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 900px) {
   .offerings {
     flex-direction: column;
+  }
+  .offerings div {
+    min-width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
 .offerings div {
   flex: 1;
-  max-width: 900px;
+  min-width: 360px;
+  max-width: 360px;
+  /* height: 270px; */
   display: flex;
   flex-direction: column;
   align-items: center;
   border-radius: 10px;
   padding: 30px;
-  background: linear-gradient(to bottom right, #00cfcb, #623fc2);
+  background: linear-gradient(to bottom right, #00c6c2, #5a39b7);
   color: white;
+  line-height: 140%;
 }
 
 :global(.dark-mode) .offerings div {
@@ -199,11 +209,12 @@
 .offerings svg {
   width: 30px;
   height: 30px;
+  margin-bottom: 6px;
 }
 
 .offeringTitle {
   font-size: 24px;
-  margin: 10px;
+  margin: 13px;
 }
 
 .offeringCaption {
@@ -267,5 +278,30 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+.mockups {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  margin-top: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mockups img {
+  width: 45%;
+  flex: 1;
+  margin: 16px;
+}
+
+@media screen and (max-width: 900px) {
+  .mockups {
+    flex-direction: column;
+  }
+  .mockups img {
+    max-width: 95vw;
+    width: 500px;
   }
 }
