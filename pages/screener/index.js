@@ -35,8 +35,12 @@ import {
   getExistingSymbolInsights,
   getRemoteUserConfigs,
   setRemoteUserConfig,
+  getLikes,
+  likeSymbol,
+  unlikeSymbol,
 } from "../../utils/insights";
 import commonConfigurations from "../../utils/commonConfigurations";
+import { getCalendarPickerSkeletonUtilityClass } from "@mui/lab";
 
 let tempFilters = [{ feature: "", relation: "", value: "", valid: true }];
 let filterChanges = false;
@@ -128,6 +132,8 @@ export default function Insights() {
 
   const gridRef = useRef(null);
 
+  const [likes, setLikes] = useState(new Set());
+
   const handleExtractWorkbook = useCallback((result) => {
     const { cols, selectedCols, sortedCols, rows, wb } = result;
     setCols(cols);
@@ -154,6 +160,7 @@ export default function Insights() {
           if (existing) {
             handleExtractWorkbook(existing);
             setUserConfigs(await getRemoteUserConfigs());
+            setLikes(await getLikes());
           }
           setDownloading(false);
         }
@@ -465,6 +472,7 @@ export default function Insights() {
                   return;
                 }
                 handleExtractWorkbook(await pullRemoteInsights());
+                setUserConfigs(await getRemoteUserConfigs());
                 setDownloading(false);
               }}
               disabled={rows !== undefined}
@@ -690,6 +698,16 @@ export default function Insights() {
                   cols={selectedCols}
                   extractScrollPositionFunction={(func) => {
                     scrollPositionFunction = func;
+                  }}
+                  likes={likes}
+                  onLike={async (symbol) => {
+                    likeSymbol(symbol);
+                    setLikes(new Set(likes).add(symbol));
+                  }}
+                  onUnlike={async (symbol) => {
+                    unlikeSymbol(symbol);
+                    likes.delete(symbol);
+                    setLikes(new Set(likes));
                   }}
                   allCols={sortedCols}
                   rows={pageRows}

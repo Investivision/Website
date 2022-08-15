@@ -24,7 +24,7 @@ export async function getStaticProps(context) {
   const data = [];
   let i = 0;
   for (const tweet of tweets) {
-    if (i > 9) break;
+    if (i > 5) break;
     data.push(tweet);
     i++;
   }
@@ -80,7 +80,7 @@ export default function Home(props) {
             </linearGradient>
           </defs>
         </Wave>
-        <Wave
+        {/* <Wave
           style={{
             height: "70%",
           }}
@@ -100,7 +100,7 @@ export default function Home(props) {
               <stop offset="100%" stopColor="#ffffff00" />
             </linearGradient>
           </defs>
-        </Wave>
+        </Wave> */}
         {browserLoaded && (
           <>
             <div className={`${styles.flexCenter} ${styles.meet}`}>

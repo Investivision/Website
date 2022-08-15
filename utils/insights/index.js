@@ -8,9 +8,13 @@ import {
   setDoc,
   deleteDoc,
   getDocs,
+  getDoc,
   query,
   collection,
   where,
+  arrayUnion,
+  updateDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
@@ -290,4 +294,33 @@ export async function getRemoteUserConfigs() {
 
 export async function setRemoteUserConfig(key, obj) {
   await setDoc(doc(getFirestore(), "configs", key), obj);
+}
+
+export async function getLikes() {
+  const ref = doc(getFirestore(), "likes", getAuth().currentUser.uid);
+  const snapshot = await getDoc(ref);
+  if (snapshot.exists()) {
+    return new Set(snapshot.data().likes);
+  }
+  return new Set();
+}
+
+export async function likeSymbol(symbol) {
+  const ref = doc(getFirestore(), "likes", getAuth().currentUser.uid);
+  try {
+    await updateDoc(ref, {
+      likes: arrayUnion(symbol),
+    });
+  } catch (e) {
+    await setDoc(ref, {
+      likes: [symbol],
+    });
+  }
+}
+
+export async function unlikeSymbol(symbol) {
+  const ref = doc(getFirestore(), "likes", getAuth().currentUser.uid);
+  await updateDoc(ref, {
+    likes: arrayRemove(symbol),
+  });
 }

@@ -79,16 +79,22 @@ export default function Report(props) {
       <h3>Cycle Studies</h3>
       <Cycle {...props} />
       <h3>Notes</h3>
-      {props.global.notes !== undefined ? (
-        <TextArea
-          symbol={props.global.symbol}
-          notes={props.global.notes}
-          port={props.port}
-          localFirebase={props.localFirebase}
-        />
-      ) : (
-        <UpgradeButton port={props.port} />
-      )}
+      <div className={styles.metricZone}>
+        {
+          <div className={styles.metric}>
+            {props.global.notes !== undefined ? (
+              <TextArea
+                symbol={props.global.symbol}
+                notes={props.global.notes}
+                port={props.port}
+                localFirebase={props.localFirebase}
+              />
+            ) : (
+              <UpgradeButton port={props.port} />
+            )}
+          </div>
+        }
+      </div>
     </div>
   );
 }

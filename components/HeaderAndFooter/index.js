@@ -14,6 +14,8 @@ const bottomWaveHeight = 50;
 export default function HeaderAndFooter(props) {
   const theme = useTheme();
 
+  const [isDevMode, setIsDevMode] = useState(false);
+
   const footerColor = theme.palette.mode == "dark" ? "#ffffff10" : "#f5f5f5";
 
   const headerBackground = `#ffffff${
@@ -25,8 +27,8 @@ export default function HeaderAndFooter(props) {
   }`;
 
   useEffect(() => {
-    window.onbeforeunload = undefined;
-  });
+    setIsDevMode(window.location.hostname == "localhost");
+  }, []);
 
   return (
     <>
@@ -53,7 +55,13 @@ export default function HeaderAndFooter(props) {
       <Head>
         <meta name="theme-color" content={theme.palette.background.main} />
       </Head>
-      <Banner />
+      <Banner
+        id="INSIGHT50"
+        title="50% off with checkout code INSIGHT50"
+        link="/pricing"
+      />
+      {isDevMode && <Banner developmentMode />}
+
       <div {...props} className={styles.page}>
         <header
           className={styles.header}

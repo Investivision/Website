@@ -93,9 +93,9 @@
   /* transition: opacity 0.2s ease; */
 }
 
-.symbolCell > svg:hover {
-  opacity: 1 !important;
-  transition: opacity 0.2s ease;
+.liked {
+  opacity: 1;
+  color: rgb(113, 105, 220);
 }
 
 .rowExpandIcon {

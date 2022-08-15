@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { alterHsl } from "tsparticles";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -86,7 +86,7 @@ const termMap = {
   "3mo": "Swing Trade - 3mo",
 };
 
-const orderTimeFrames = (data) => {
+const orderTimeFrames = (data, sort = true) => {
   if (!data) {
     return undefined;
   }
@@ -96,6 +96,11 @@ const orderTimeFrames = (data) => {
       keys.push(key);
     }
   }
+
+  if (!sort) {
+    return keys;
+  }
+
   const out = keys.sort((a, b) => {
     if (a.indexOf("mo") > -1) {
       return 1;
@@ -114,11 +119,29 @@ const orderTimeFrames = (data) => {
 let curtimeframe = undefined;
 
 export default function Ext(props) {
+  const extractDataProp = useCallback(() => {
+    if (props.data) {
+      const formattedData = [];
+      const allFramesSet = new Set();
+      let allFrames = [];
+      for (const symbol of props.data.args) {
+        const formatted = processSymbolData(props.data.insights[symbol]);
+        const frames = orderTimeFrames(formatted);
+        for (const frame of frames) {
+          if (!allFramesSet.has(frame)) {
+            allFramesSet.add(frame);
+            allFrames = [...allFrames, frame];
+          }
+        }
+        formattedData.push(formatted);
+      }
+      console.log("formattedData", formattedData, allFrames);
+      return [formattedData, allFrames];
+    }
+  });
+
   console.log("ext props", props);
-  const formatted = processSymbolData(
-    props.data ? props.data.insights[props.data.args[0]] : undefined
-  );
-  const frames = orderTimeFrames(formatted);
+  const [formatted, frames] = extractDataProp();
   const [data, setData] = useState(formatted);
   const [name, setName] = useState(props.data?.name);
   const [args, setArgs] = useState(props.data?.args);
@@ -139,27 +162,29 @@ export default function Ext(props) {
     }
   }, []);
 
-  useEffect(() => {
-    // handle data formatting and augmentation
-    if (props.data) {
-      const formatted = processSymbolData(
-        props.data ? props.data.insights[props.data.args[0]] : undefined
-      );
-
-      const frames = orderTimeFrames(formatted);
-      if (
-        frames &&
-        (curtimeframe === undefined || !frames.includes(curtimeframe))
-      ) {
-        setCurrentTimeFrame(frames[0]);
-        curtimeframe = frames[0];
-      }
-      setData(formatted);
-      setName(props.data?.name);
-      setArgs(props.data?.args);
-      setTimeFrames(frames);
-    }
-  }, [props.data]);
+  // useEffect(() => {
+  //   // handle data formatting and augmentation
+  //   if (props.data) {
+  //     const formattedData = [];
+  //     for (const symbol of props.data.args) {
+  //       const formatted = processSymbolData(props.data.insights[symbol]);
+  //       const frames = orderTimeFrames(formatted);
+  //       if (
+  //         frames &&
+  //         (curtimeframe === undefined || !frames.includes(curtimeframe))
+  //       ) {
+  //         setCurrentTimeFrame(frames[0]);
+  //         curtimeframe = frames[0];
+  //       }
+  //       formattedData.push(formatted);
+  //     }
+  //     console.log("formattedData", formattedData);
+  //     setData(formattedData);
+  //     setName(props.data?.name);
+  //     setArgs(props.data?.args);
+  //     setTimeFrames(frames);
+  //   }
+  // }, [props.data]);
 
   useEffect(() => {
     if (props.name) {
@@ -331,7 +356,7 @@ export default function Ext(props) {
               </div>
             )}
             <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
-            <h3 className={styles.company}>{data.global.name}</h3>
+            <h3 className={styles.company}>{data[0].global.name}</h3>
             <FormControl>
               <InputLabel>Time Frame</InputLabel>
               <Select
@@ -356,11 +381,11 @@ export default function Ext(props) {
                 })}
               </Select>
             </FormControl>
-            {data[currentTimeFrame] ? (
+            {data[0][currentTimeFrame] ? (
               <>
                 <Report
-                  global={data.global}
-                  data={data[currentTimeFrame]}
+                  global={data[0].global}
+                  data={data[0][currentTimeFrame]}
                   port={port}
                   currentTimeFrame={currentTimeFrame}
                   symbol={args[0]}

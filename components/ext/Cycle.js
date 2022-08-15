@@ -471,7 +471,7 @@ function ArrowBox({ upPercent, downPercent }) {
   // downPercent = -downPercent;
   const origUpPercent = upPercent;
   const origDownPercent = downPercent;
-  debugger;
+  // debugger;
   if (upPercent > downPercent) {
     downPercent *= 1 + upPercent / 100;
   } else {

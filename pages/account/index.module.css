@@ -101,3 +101,13 @@
 .skeletonGroup > * {
   margin-top: 20px;
 }
+
+.likedSymbol {
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.likedSymbol:hover {
+  opacity: 1;
+}

@@ -238,7 +238,21 @@ export default function Grid(props) {
             cells.push(
               <td className={styles.symbolCell}>
                 <div>
-                  <GradeOutlined className={styles.likeIcon} />
+                  {props.likes.has(val) ? (
+                    <Grade
+                      className={styles.likeIcon}
+                      onClick={() => props.onUnlike(val)}
+                      style={{
+                        opacity: 1,
+                        color: theme.palette.primary.main,
+                      }}
+                    />
+                  ) : (
+                    <GradeOutlined
+                      className={styles.likeIcon}
+                      onClick={() => props.onLike(val)}
+                    />
+                  )}
                   <span>{val}</span>
                   <ManageSearchRoundedIcon
                     className={styles.rowExpandIcon}
@@ -336,7 +350,7 @@ export default function Grid(props) {
       //   alert("new rows to render");
       return <tr key={row["Symbol"]}>{cells}</tr>;
     });
-  }, [props.rows, props.cols, props.extSymbol]);
+  }, [props.rows, props.cols, props.extSymbol, props.likes]);
 
   props.extractScrollPositionFunction(() => {
     tableRef.current.scrollLeft = 0;

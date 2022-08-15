@@ -32,7 +32,6 @@ export default function TwitterCarousel(props) {
           animationIterationCount: "infinite",
           margin: "30px 0",
         }}
-        onMouseEnter={() => {}}
       >
         <TwitterTweetEmbed
           key={id + theme.palette.mode + i}
@@ -45,7 +44,18 @@ export default function TwitterCarousel(props) {
   }, [theme.palette.mode]);
 
   return (
-    <div className={styles.carousel}>
+    <div
+      className={styles.carousel}
+      onMouseEnter={() => {
+        document.documentElement.style.setProperty("--tweet-animate", `paused`);
+      }}
+      onMouseLeave={() => {
+        document.documentElement.style.setProperty(
+          "--tweet-animate",
+          `running`
+        );
+      }}
+    >
       <div className={styles.tweets}>
         {tweetComponents}
         {/* <div

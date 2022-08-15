@@ -8,9 +8,9 @@
   /* transform: translateX(-20%); */
 }
 
-.tweets:hover {
+/* .tweets:hover {
   animation-play-state: paused !important;
-}
+} */
 
 /* .tweets > div {
   padding: 0 20px;
@@ -37,9 +37,10 @@
 }
 
 .tweet {
-  min-width: 390px;
-  padding: 0 20px;
+  min-width: 370px;
+  padding: 0 10px;
   /* min-height: 1000px; */
+  animation-play-state: var(--tweet-animate);
 }
 
 

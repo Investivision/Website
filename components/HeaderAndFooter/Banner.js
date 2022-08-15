@@ -5,18 +5,25 @@ import { getAuth } from "firebase/auth";
 import { useTheme } from "@mui/styles";
 import Head from "next/head";
 
-const banner = {
-  id: "50off",
-  title: "50% off for a limited time!",
-  link: "/pricing",
-};
-
 const colors = {
   light: "#46E58B",
   dark: "#008149",
 };
 
-export default function Banner() {
+export default function Banner(props) {
+  if (props.developmentMode) {
+    return (
+      <div
+        className={styles.banner}
+        style={{
+          backgroundColor: "#FF7000",
+        }}
+      >
+        <p>Development Mode</p>
+      </div>
+    );
+  }
+
   const [showing, setShowing] = useState(false);
   const [signedIn, setSignedIn] = useState(undefined);
 
@@ -31,8 +38,9 @@ export default function Banner() {
   });
 
   useEffect(() => {
-    const stored = window.localStorage[banner.id];
+    const stored = window.localStorage.getItem(props.id);
     //
+    console.log("banner stored", stored, props);
     if (!stored) {
       setShowing(true);
     }
@@ -45,7 +53,7 @@ export default function Banner() {
   const color = colors[theme.palette.mode];
 
   return (
-    <Link href={banner.link}>
+    <Link href={props.link}>
       <div
         className={styles.banner}
         style={{
@@ -55,16 +63,16 @@ export default function Banner() {
         <Head>
           <meta name="theme-color" content={color} />
         </Head>
-        <p>{banner.title}</p>
+        <p>{props.title}</p>
         <p
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
             setShowing(false);
-            window.localStorage[banner.id] = true;
+            window.localStorage[props.id] = true;
           }}
         >
-          No thanks.
+          | No thanks.
         </p>
       </div>
     </Link>

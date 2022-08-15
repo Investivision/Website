@@ -21,6 +21,8 @@ import {
 } from "firebase/auth";
 import { useRouter } from "next/router";
 import { NextSeo } from "next-seo";
+import { getLikes } from "../../utils/insights";
+import Link from "next/link";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -48,6 +50,8 @@ export default function Account() {
   const [resetLoading, setResetLoading] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
+
+  const [likes, setLikes] = useState(new Set());
 
   const [role, setRole] = useState(undefined);
 
@@ -100,6 +104,7 @@ export default function Account() {
             window.chrome ? "not installed" : "incompatible browser"
           );
         }
+        setLikes(await getLikes());
       } else {
         router.push("/login");
         // window.location.href = "/login";
@@ -526,6 +531,43 @@ export default function Account() {
                   </Alert>
                 )}
               </div>
+            </div>
+            <h2>Saved Symbols</h2>
+            <h3>Stocks that caught your eye</h3>
+            <div>
+              {role == "buffet" ? (
+                likes.length == 0 ? (
+                  <div>
+                    <a className={styles.likedSymbol}>No likes</a>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      {Array.from(likes)
+                        .sort()
+                        .map((symbol) => (
+                          <Link href={`/compare?symbols=${symbol}`}>
+                            <a className={styles.likedSymbol}>{symbol}</a>
+                          </Link>
+                        ))}
+                    </div>
+                    <div>
+                      <Button
+                        variant="contained"
+                        onClick={() => {
+                          window.location.href = `/compare?symbols=${Array.from(
+                            likes
+                          ).join("%20")}`;
+                        }}
+                      >
+                        View in Compare
+                      </Button>
+                    </div>
+                  </>
+                )
+              ) : (
+                <Alert severity="warning">Buffet Subscription Needed</Alert>
+              )}
             </div>
             <h2>Danger Zone</h2>
             <h3>Be very, very careful</h3>
