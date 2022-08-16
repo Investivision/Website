@@ -28,7 +28,7 @@ Date.prototype.isDstObserved = function () {
   return this.getTimezoneOffset() < this.stdTimezoneOffset();
 };
 
-function getLastInsightUpdateTime() {
+export function getLastInsightUpdateTime() {
   const date = new Date();
   const initialOffset = date.getTimezoneOffset();
   date.setTime(date.getTime() + initialOffset * 60 * 1000); // utc
