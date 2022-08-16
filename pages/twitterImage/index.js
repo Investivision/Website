@@ -25,6 +25,8 @@ const termMap = {
   "3mo": "3mo",
 };
 
+module.exports = { termMap };
+
 const timeframeMap = {
   1: "Short-term",
   5: "Med-term",

@@ -38,3 +38,8 @@
 :global(.dark-mode) .report textarea {
   border-color: #ffffff14;
 }
+
+.sectionHeaderSpan {
+  font-weight: 100;
+  opacity: 0.5;
+}

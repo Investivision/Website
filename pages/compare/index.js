@@ -274,7 +274,7 @@ async function getScopedSymbolData(symbol) {
       new Date() - timestamp > 1000 * 60 * 60 * 24 * 7 // one week
     ) {
       console.log("resetting symbols");
-      symbols = (await setSymbolWhitelist()).basicSymbols.symbols;
+      symbols = (await setSymbolWhitelist()).symbols;
     } else {
       console.log("not resetting symbols");
     }
@@ -378,10 +378,9 @@ async function setSymbolWhitelist() {
   );
   const text = await res.text();
   const symbols = text.split("\n");
-  window.localStorage.setItem(
-    "basicSymbols",
-    JSON.stringify({ symbols: symbols, timestamp: new Date().getTime() })
-  );
+  const out = { symbols: symbols, timestamp: new Date().getTime() };
+  window.localStorage.setItem("basicSymbols", JSON.stringify(out));
+  return out;
 }
 
 async function getSymbolWhitelist() {

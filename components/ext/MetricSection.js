@@ -10,10 +10,16 @@ export default function MetricSection({
   children,
   style,
   className,
+  noDivider,
 }) {
+  if (children && children.length == 1) {
+    return children;
+  }
+
   let newChildren = children
     ? children.map((element) => <div className={styles.element}>{element}</div>)
     : [];
+
   // console.log("metric section children", props.children);
   if (!children) {
     for (let i = 0; i < allData.length; i++) {
@@ -35,7 +41,12 @@ export default function MetricSection({
           <>
             {element}
             {i == newChildren.length - 1 ? null : (
-              <div className={styles.divider} />
+              <div
+                className={styles.divider}
+                style={{
+                  opacity: noDivider ? 0 : 1,
+                }}
+              />
             )}
           </>
         );

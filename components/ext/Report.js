@@ -19,12 +19,51 @@ import Momentum from "./Momentum";
 import Prophet from "./Prophet";
 import Cycle from "./Cycle";
 import MetricSection from "./MetricSection";
+import { termMap } from "../../pages/twitterImage";
+
+function SectionHeader({
+  global,
+  currentTimeFrame,
+  children,
+  toolTip,
+  onlySymbol,
+}) {
+  if (global.length == 1) {
+    return (
+      <ToolTip title={toolTip} arrow>
+        <h3>{children}</h3>
+      </ToolTip>
+    );
+  }
+  return (
+    <MetricSection noDivider>
+      {global.map((glob, i) => (
+        <ToolTip title={toolTip} arrow>
+          <h3>
+            <span className={styles.sectionHeaderSpan}>{`${glob.symbol}`}</span>{" "}
+            {children}
+            {onlySymbol ? null : (
+              <span className={styles.sectionHeaderSpan}>{`, ${
+                termMap[currentTimeFrame[i]]
+              }`}</span>
+            )}
+          </h3>
+        </ToolTip>
+      ))}
+    </MetricSection>
+  );
+}
 
 export default function Report(props) {
   console.log("report props", props);
   return (
     <div className={styles.report}>
-      <h3>Growth</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+      >
+        Growth
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
@@ -32,66 +71,80 @@ export default function Report(props) {
         props={props}
       />
       {/* <Growth {...props} /> */}
-      <h3>Risk Management</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+      >
+        Risk
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
         component={Risk}
         props={props}
       />
-      <h3>Candle Patterns</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+      >
+        Candle Patterns
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
         component={Candle}
         props={props}
       />
-      <ToolTip
-        title={`Prediction computed from ${props.symbol}-specific AI model.`}
-        arrow
+      <SectionHeader
+        toolTip={`Prediction computed from ${props.symbol}-specific AI model.`}
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
       >
-        <h3>
-          AI Forecast
-          <InfoIcon
-            style={{
-              width: 14,
-              marginLeft: 3,
-              marginTop: -2,
-              opacity: 0.3,
-              verticalAlign: "middle",
-            }}
-          />
-        </h3>
-      </ToolTip>
+        AI Forecast
+        <InfoIcon
+          style={{
+            width: 14,
+            marginLeft: 3,
+            marginTop: -2,
+            opacity: 0.3,
+            verticalAlign: "middle",
+          }}
+        />
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
         component={Prophet}
         props={props}
       />
-      <h3>Current Momentum</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+      >
+        Momentum
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
         component={Momentum}
       />
-      <ToolTip
-        title="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
-        arrow
+
+      <SectionHeader
+        toolTip="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
       >
-        <h3>
-          Pivot Points
-          <InfoIcon
-            style={{
-              width: 14,
-              marginLeft: 3,
-              marginTop: -2,
-              opacity: 0.3,
-              verticalAlign: "middle",
-            }}
-          />
-        </h3>
-      </ToolTip>
+        Pivot Points
+        <InfoIcon
+          style={{
+            width: 14,
+            marginLeft: 3,
+            marginTop: -2,
+            opacity: 0.3,
+            verticalAlign: "middle",
+          }}
+        />
+      </SectionHeader>
       {props.data[0].sup !== undefined ? (
         // <Pivots
         //   sup={props.data.sup}
@@ -113,13 +166,24 @@ export default function Report(props) {
       ) : (
         <UpgradeButton port={props.port} />
       )}
-      <h3>Cycle Studies</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+      >
+        Cycle Studies
+      </SectionHeader>
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
         component={Cycle}
       />
-      <h3>Notes</h3>
+      <SectionHeader
+        global={props.global}
+        currentTimeFrame={props.currentTimeFrame}
+        onlySymbol
+      >
+        Notes
+      </SectionHeader>
       {props.global[0].notes !== undefined ? (
         // <TextArea
         //   symbol={props.global.symbol}

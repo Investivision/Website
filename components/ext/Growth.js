@@ -1,6 +1,7 @@
 import Numeric from "./Numeric";
 
 export default function Growth(props) {
+  console.log("Growth props", props);
   return (
     <>
       <Numeric
