@@ -19,7 +19,13 @@ import Momentum from "./Momentum";
 import Prophet from "./Prophet";
 import Cycle from "./Cycle";
 import MetricSection from "./MetricSection";
-import { termMap } from "../../pages/twitterImage";
+
+const termMap = {
+  1: "1yr",
+  5: "5yr",
+  10: "10yr",
+  "3mo": "3mo",
+};
 
 function SectionHeader({
   global,
