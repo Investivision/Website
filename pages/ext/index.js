@@ -293,11 +293,11 @@ export default function Ext(props) {
         {
           width: "100%",
           overflow: "hidden",
-          // overflowY: "scroll",
+          overflowX: "scroll",
           padding: "20px 10px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
+          alignItems: "flex-start",
         },
         props.style
       )}
@@ -345,7 +345,7 @@ export default function Ext(props) {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              width: "100%",
+              minWidth: "100%",
               opacity: loading ? 0.2 : 1,
             }}
           >
