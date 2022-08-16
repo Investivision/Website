@@ -156,6 +156,7 @@ export default function Ext(props) {
         framesPerSymbol,
       ];
     }
+    return [];
   });
 
   console.log("ext props", props);
