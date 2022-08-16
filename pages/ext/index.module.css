@@ -43,7 +43,7 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  margin-bottom: 28px;
+  margin-bottom: 0px;
 }
 
 .header img {

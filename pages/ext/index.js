@@ -10,6 +10,7 @@ import { StylesContext } from "@material-ui/styles";
 import styles from "./index.module.css";
 import ThemeToggle from "../../components/ThemeToggle";
 import InfoScreen from "../../components/ext/InfoScreen";
+import MetricSection from "../../components/ext/MetricSection";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -116,7 +117,7 @@ const orderTimeFrames = (data, sort = true) => {
   return out;
 };
 
-let curtimeframe = undefined;
+// let curtimeframe = undefined;
 
 export default function Ext(props) {
   const extractDataProp = useCallback(() => {
@@ -124,9 +125,17 @@ export default function Ext(props) {
       const formattedData = [];
       const allFramesSet = new Set();
       let allFrames = [];
+      let framesPerSymbol = [];
+      let maxFrames = [];
+      let commonFrameNum = 4;
       for (const symbol of props.data.args) {
         const formatted = processSymbolData(props.data.insights[symbol]);
         const frames = orderTimeFrames(formatted);
+        framesPerSymbol.push(frames);
+        maxFrames.push(frames[0]);
+        if (frames.length < commonFrameNum) {
+          commonFrameNum = frames.length;
+        }
         for (const frame of frames) {
           if (!allFramesSet.has(frame)) {
             allFramesSet.add(frame);
@@ -136,12 +145,23 @@ export default function Ext(props) {
         formattedData.push(formatted);
       }
       console.log("formattedData", formattedData, allFrames);
-      return [formattedData, allFrames];
+      const selectedFrames = props.data.args.map(
+        () => allFrames[allFrames.length - commonFrameNum]
+      );
+      return [
+        formattedData,
+        allFrames,
+        selectedFrames,
+        maxFrames,
+        framesPerSymbol,
+      ];
     }
   });
 
   console.log("ext props", props);
-  const [formatted, frames] = extractDataProp();
+  const [formatted, frames, selectedFrames, maxFrames, framesPerSym] =
+    extractDataProp();
+  console.log("ext formatted", formatted);
   const [data, setData] = useState(formatted);
   const [name, setName] = useState(props.data?.name);
   const [args, setArgs] = useState(props.data?.args);
@@ -150,41 +170,48 @@ export default function Ext(props) {
   const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
   const [timeFrames, setTimeFrames] = useState(frames);
-  const [currentTimeFrame, setCurrentTimeFrame] = useState(
-    frames ? frames[0] : undefined
-  );
+  const [currentTimeFrame, setCurrentTimeFrame] = useState(selectedFrames);
+  const [framesPerSymbol, setFramesPerSymbol] = useState(framesPerSym);
 
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
 
   useEffect(() => {
     if (frames) {
-      curtimeframe = frames[0];
+      // curtimeframe = frames[0];
     }
   }, []);
 
-  // useEffect(() => {
-  //   // handle data formatting and augmentation
-  //   if (props.data) {
-  //     const formattedData = [];
-  //     for (const symbol of props.data.args) {
-  //       const formatted = processSymbolData(props.data.insights[symbol]);
-  //       const frames = orderTimeFrames(formatted);
-  //       if (
-  //         frames &&
-  //         (curtimeframe === undefined || !frames.includes(curtimeframe))
-  //       ) {
-  //         setCurrentTimeFrame(frames[0]);
-  //         curtimeframe = frames[0];
-  //       }
-  //       formattedData.push(formatted);
-  //     }
-  //     console.log("formattedData", formattedData);
-  //     setData(formattedData);
-  //     setName(props.data?.name);
-  //     setArgs(props.data?.args);
-  //     setTimeFrames(frames);
-  //   }
-  // }, [props.data]);
+  useEffect(() => {
+    // handle data formatting and augmentation
+    if (props.data) {
+      const [formatted, frames, _, maxFrames, framesPerSym] = extractDataProp();
+      // debugger;
+      console.log("ext formatted 2", formatted);
+      if (
+        formatted.length == 1 &&
+        frames &&
+        (currentTimeFrame[0] === undefined ||
+          !frames.includes(currentTimeFrame[0]))
+      ) {
+        setCurrentTimeFrame([frames[0]]);
+        // curtimeframe = frames[0];
+      }
+      // debugger;
+      if (props.data.args.length > currentTimeFrame.length) {
+        setCurrentTimeFrame([
+          ...currentTimeFrame,
+          maxFrames[maxFrames.length - 1],
+        ]);
+      }
+      // formattedData.push(formatted);
+      // console.log("formattedData", formattedData);
+      setData(formatted);
+      setName(props.data?.name);
+      setArgs(props.data?.args);
+      setTimeFrames(frames);
+      setFramesPerSymbol(framesPerSym);
+    }
+  }, [props.data]);
 
   useEffect(() => {
     if (props.name) {
@@ -225,11 +252,11 @@ export default function Ext(props) {
               setArgs(data.args);
               const frames = orderTimeFrames(formatted);
               if (
-                curtimeframe === undefined ||
-                !frames.includes(curtimeframe)
+                currentTimeFrame[0] === undefined ||
+                !frames.includes(currentTimeFrame[0])
               ) {
                 setCurrentTimeFrame(frames[0]);
-                curtimeframe = frames[0];
+                // curtimeframe = frames[0];
               }
               setData(formatted);
               setTimeFrames(frames);
@@ -257,7 +284,7 @@ export default function Ext(props) {
   //   postMessage("iframe loaded", "*");
   // });
   //
-
+  console.log("ext before render", data, currentTimeFrame);
   return (
     <div
       className={props.className}
@@ -355,40 +382,69 @@ export default function Ext(props) {
                 </Button>
               </div>
             )}
-            <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1>
-            <h3 className={styles.company}>{data[0].global.name}</h3>
-            <FormControl>
-              <InputLabel>Time Frame</InputLabel>
-              <Select
-                value={currentTimeFrame}
-                style={{
-                  width: 190,
-                }}
-                label="Time Frame"
-                onChange={(event) => {
-                  if (event.target.value) {
-                    setCurrentTimeFrame(event.target.value);
-                    curtimeframe = event.target.value;
-                  }
-                }}
-              >
-                {timeFrames.map((key) => {
-                  return (
-                    <MenuItem value={key} key={key}>
-                      {termMap[key]}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-            {data[0][currentTimeFrame] ? (
+            {/* <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1> */}
+            <MetricSection
+            // style={{
+            //   position: "sticky",
+            //   top: 0,
+            // }}
+            >
+              {args.map((arg) => (
+                <h1 className={styles.symbol}>{arg}</h1>
+              ))}
+            </MetricSection>
+            <MetricSection>
+              {data.map((d) => (
+                <h3 className={styles.company}>{d.global.name}</h3>
+              ))}
+            </MetricSection>
+            {/* <MetricSection>
+              {data.map((d) => (
+                <h3 className={styles.company}>{d.global.name}</h3>
+              ))}
+            </MetricSection> */}
+            {/* <h3 className={styles.company}>{data[0].global.name}</h3> */}
+            <MetricSection>
+              {currentTimeFrame.map((frame, i) => (
+                <FormControl
+                  style={{
+                    marginTop: 20,
+                  }}
+                >
+                  <InputLabel>Time Frame</InputLabel>
+                  <Select
+                    value={frame}
+                    style={{
+                      width: 190,
+                    }}
+                    label="Time Frame"
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        currentTimeFrame[i] = event.target.value;
+                        setCurrentTimeFrame([...currentTimeFrame]);
+                        // curtimeframe = event.target.value;
+                      }
+                    }}
+                  >
+                    {framesPerSymbol[i].map((key) => {
+                      return (
+                        <MenuItem value={key} key={key}>
+                          {termMap[key]}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              ))}
+            </MetricSection>
+            {data[0][currentTimeFrame[0]] ? (
               <>
                 <Report
-                  global={data[0].global}
-                  data={data[0][currentTimeFrame]}
+                  global={data.map((d) => d.global)}
+                  data={data.map((d, i) => d[currentTimeFrame[i]])}
                   port={port}
                   currentTimeFrame={currentTimeFrame}
-                  symbol={args[0]}
+                  symbol={args}
                   localFirebase={props.localFirebase}
                 />
                 {props.data ? null : (

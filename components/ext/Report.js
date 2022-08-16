@@ -18,16 +18,34 @@ import UpgradeButton from "./UpgradeButton";
 import Momentum from "./Momentum";
 import Prophet from "./Prophet";
 import Cycle from "./Cycle";
+import MetricSection from "./MetricSection";
 
 export default function Report(props) {
+  console.log("report props", props);
   return (
     <div className={styles.report}>
       <h3>Growth</h3>
-      <Growth {...props} />
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Growth}
+        props={props}
+      />
+      {/* <Growth {...props} /> */}
       <h3>Risk Management</h3>
-      <Risk {...props} />
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Risk}
+        props={props}
+      />
       <h3>Candle Patterns</h3>
-      <Candle {...props} />
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Candle}
+        props={props}
+      />
       <ToolTip
         title={`Prediction computed from ${props.symbol}-specific AI model.`}
         arrow
@@ -45,11 +63,18 @@ export default function Report(props) {
           />
         </h3>
       </ToolTip>
-      <Prophet {...props} />
-
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Prophet}
+        props={props}
+      />
       <h3>Current Momentum</h3>
-      <Momentum {...props} />
-
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Momentum}
+      />
       <ToolTip
         title="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
         arrow
@@ -67,34 +92,58 @@ export default function Report(props) {
           />
         </h3>
       </ToolTip>
-      {props.data.sup !== undefined ? (
-        <Pivots
-          sup={props.data.sup}
-          res={props.data.res}
-          lastClose={props.global.lastclose}
+      {props.data[0].sup !== undefined ? (
+        // <Pivots
+        //   sup={props.data.sup}
+        //   res={props.data.res}
+        //   lastClose={props.global.lastclose}
+        // />
+        <MetricSection
+          allData={props.data}
+          allGlobal={props.global}
+          propTransform={(elementProps) => {
+            return {
+              sup: elementProps.data.sup,
+              res: elementProps.data.res,
+              lastClose: elementProps.global.lastclose,
+            };
+          }}
+          component={Pivots}
         />
       ) : (
         <UpgradeButton port={props.port} />
       )}
       <h3>Cycle Studies</h3>
-      <Cycle {...props} />
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        component={Cycle}
+      />
       <h3>Notes</h3>
-      <div className={styles.metricZone}>
-        {
-          <div className={styles.metric}>
-            {props.global.notes !== undefined ? (
-              <TextArea
-                symbol={props.global.symbol}
-                notes={props.global.notes}
-                port={props.port}
-                localFirebase={props.localFirebase}
-              />
-            ) : (
-              <UpgradeButton port={props.port} />
-            )}
-          </div>
-        }
-      </div>
+      {props.global[0].notes !== undefined ? (
+        // <TextArea
+        //   symbol={props.global.symbol}
+        //   notes={props.global.notes}
+        //   port={props.port}
+        //   localFirebase={props.localFirebase}
+        // />
+        <MetricSection
+          allData={props.data}
+          allGlobal={props.global}
+          propTransform={(elementProps) => {
+            return {
+              symbol: elementProps.global.symbol,
+              notes: elementProps.global.notes,
+            };
+          }}
+          component={TextArea}
+          props={{
+            localFirebase: props.localFirebase,
+          }}
+        />
+      ) : (
+        <UpgradeButton port={props.port} />
+      )}
     </div>
   );
 }

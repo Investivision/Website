@@ -1,0 +1,25 @@
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.element {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-width: 260px;
+    max-width: 260px;
+}
+    
+.divider {
+    /* height: 100px; */
+    width: 2px;
+    background-color: rgba(0,0,0,0.06);
+    margin: 0 20px;
+}
+
+:global(.dark-mode) .divider {
+    background-color: rgba(255,255,255,0.2);
+}
