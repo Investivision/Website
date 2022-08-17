@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { alterHsl } from "tsparticles";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
@@ -11,6 +11,11 @@ import styles from "./index.module.css";
 import ThemeToggle from "../../components/ThemeToggle";
 import InfoScreen from "../../components/ext/InfoScreen";
 import MetricSection from "../../components/ext/MetricSection";
+import LikeButton from "../../components/insights/LikeButton";
+import IconButton from "@mui/material/IconButton";
+import ClearRoundedIcon from "@material-ui/icons/ClearRounded";
+import { getLikes, likeSymbol, unlikeSymbol } from "../../utils/insights";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -173,6 +178,8 @@ export default function Ext(props) {
   const [timeFrames, setTimeFrames] = useState(frames);
   const [currentTimeFrame, setCurrentTimeFrame] = useState(selectedFrames);
   const [framesPerSymbol, setFramesPerSymbol] = useState(framesPerSym);
+  const [likes, setLikes] = useState(new Set());
+  const [role, setRole] = useState(undefined);
 
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
 
@@ -210,9 +217,29 @@ export default function Ext(props) {
       setName(props.data?.name);
       setArgs(props.data?.args);
       setTimeFrames(frames);
+      // debugger;
       setFramesPerSymbol(framesPerSym);
     }
   }, [props.data]);
+
+  useEffect(() => {
+    if (props.localFirebase) {
+      onAuthStateChanged(getAuth(), async (user) => {
+        if (user) {
+          const token = await user.getIdTokenResult(true);
+
+          if (token.claims.role) {
+            if (["bullish", "buffet"].includes(token.claims.role)) {
+              setLikes(await getLikes());
+            }
+            setRole(token.claims.role);
+          }
+        } else {
+          setRole("");
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (props.name) {
@@ -286,6 +313,33 @@ export default function Ext(props) {
   // });
   //
   console.log("ext before render", data, currentTimeFrame);
+
+  // const likes = new Set();
+
+  // for (let i = 0; i < args.length; i++) {
+  //   debugger;
+  //   if (data[i].liked) {
+  //     likes.add(args[i]);
+  //   }
+  // }
+
+  // for (const arg of data) {
+  //   debugger;
+  //   if (data[arg].liked) {
+  //     likes.add(arg);
+  //   }
+  // }
+
+  // const likes = useMemo(() => {
+  //   const out = new Set();
+  //   for (let i = 0; i < args.length; i++) {
+  //     if (data[i].liked) {
+  //       out.add(args[i]);
+  //     }
+  //   }
+  //   return out;
+  // }, [data]);
+  debugger;
   return (
     <div
       className={props.className}
@@ -390,9 +444,55 @@ export default function Ext(props) {
             //   top: 0,
             // }}
             >
-              {args.map((arg) => (
-                <h1 className={styles.symbol}>{arg}</h1>
-              ))}
+              {args.map((arg, i) => {
+                return (
+                  <h1 className={styles.symbol}>
+                    <LikeButton
+                      onLike={async () => {
+                        if (role !== undefined) {
+                          if (["bullish", "buffet"].includes(role)) {
+                            likes.add(arg);
+                            likeSymbol(arg);
+                            setLikes(new Set(likes));
+                          } else {
+                          }
+                        }
+                      }}
+                      onUnlike={() => {
+                        if (role !== undefined) {
+                          if (["bullish", "buffet"].includes(role)) {
+                            likes.delete(arg);
+                            unlikeSymbol(arg);
+                            setLikes(new Set(likes));
+                          } else {
+                          }
+                        }
+                      }}
+                      likes={likes}
+                      val={arg}
+                    />
+                    {arg}
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        if (props.onClose) {
+                          props.onClose(i);
+                        } else if (port) {
+                          port.postMessage({
+                            message: "close extension from extension",
+                          });
+                        }
+                      }}
+                    >
+                      <ClearRoundedIcon
+                        style={{
+                          opacity: 0.3,
+                        }}
+                      />
+                    </IconButton>
+                  </h1>
+                );
+              })}
             </MetricSection>
             <MetricSection>
               {data.map((d) => (

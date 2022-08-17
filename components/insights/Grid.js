@@ -5,9 +5,9 @@ import { useTheme } from "@mui/styles";
 import { color } from "@mui/system";
 // import AddchartRoundedIcon from "@mui/icons-material/AddchartRounded";
 import PlayListAddRounded from "@material-ui/icons/PlaylistAddRounded";
-import GradeOutlined from "@material-ui/icons/GradeOutlined";
-import Grade from "@material-ui/icons/Grade";
+import LikeButton from "./LikeButton";
 import ManageSearchRoundedIcon from "@mui/icons-material/ManageSearchRounded";
+import IconButton from "@mui/material/IconButton";
 
 let draggedPosition;
 
@@ -238,37 +238,29 @@ export default function Grid(props) {
             cells.push(
               <td className={styles.symbolCell}>
                 <div>
-                  {props.likes.has(val) ? (
-                    <Grade
-                      className={styles.likeIcon}
-                      onClick={() => props.onUnlike(val)}
-                      style={{
-                        opacity: 1,
-                        color: theme.palette.primary.main,
-                      }}
-                    />
-                  ) : (
-                    <GradeOutlined
-                      className={styles.likeIcon}
-                      onClick={() => props.onLike(val)}
-                    />
-                  )}
+                  <LikeButton {...props} val={val} />
+
                   <span>{val}</span>
-                  <ManageSearchRoundedIcon
-                    className={styles.rowExpandIcon}
+                  <IconButton
+                    size="small"
+                    className={styles.symbolIconButton}
                     onClick={(e) => {
                       props.onRowClick(val);
                       e.preventDefault();
                       e.stopPropagation();
                     }}
-                    style={
-                      val == props.extSymbol
-                        ? {
-                            opacity: 1,
-                          }
-                        : {}
-                    }
-                  />
+                  >
+                    <ManageSearchRoundedIcon
+                      className={styles.rowExpandIcon}
+                      style={
+                        val == props.extSymbol
+                          ? {
+                              opacity: 1,
+                            }
+                          : {}
+                      }
+                    />
+                  </IconButton>
                 </div>
               </td>
             );

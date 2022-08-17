@@ -187,7 +187,17 @@ export default function Compare(props) {
     if (data.args.length) {
       return (
         <div className={styles.extHolder}>
-          <Ext data={data} localFirebase hideHeader />
+          <Ext
+            data={data}
+            localFirebase
+            hideHeader
+            onClose={(i) => {
+              // debugger;
+              data.args.splice(i, 1);
+
+              setData({ ...data });
+            }}
+          />
         </div>
       );
     }
