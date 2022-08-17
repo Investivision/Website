@@ -124,101 +124,31 @@ const orderTimeFrames = (data, sort = true) => {
 
 // let curtimeframe = undefined;
 
-export default function Ext(props) {
-  const extractDataProp = useCallback(() => {
-    if (props.data) {
-      const formattedData = [];
-      const allFramesSet = new Set();
-      let allFrames = [];
-      let framesPerSymbol = [];
-      let maxFrames = [];
-      let commonFrameNum = 4;
-      for (const symbol of props.data.args) {
-        const formatted = processSymbolData(props.data.insights[symbol]);
-        const frames = orderTimeFrames(formatted);
-        framesPerSymbol.push(frames);
-        maxFrames.push(frames[0]);
-        if (frames.length < commonFrameNum) {
-          commonFrameNum = frames.length;
-        }
-        for (const frame of frames) {
-          if (!allFramesSet.has(frame)) {
-            allFramesSet.add(frame);
-            allFrames = [...allFrames, frame];
-          }
-        }
-        formattedData.push(formatted);
-      }
-      console.log("formattedData", formattedData, allFrames);
-      const selectedFrames = props.data.args.map(
-        () => allFrames[allFrames.length - commonFrameNum]
-      );
-      return [
-        formattedData,
-        allFrames,
-        selectedFrames,
-        maxFrames,
-        framesPerSymbol,
-      ];
-    }
-    return [];
-  });
+let selectedFrames;
+let currentTimeFrames;
+let prevArgs;
 
-  console.log("ext props", props);
-  const [formatted, frames, selectedFrames, maxFrames, framesPerSym] =
-    extractDataProp();
-  console.log("ext formatted", formatted);
-  const [data, setData] = useState(formatted);
-  const [name, setName] = useState(props.data?.name);
-  const [args, setArgs] = useState(props.data?.args);
+export default function Ext(props) {
+  const [rawData, setRawData] = useState(props.data);
+  // const [name, setName] = useState(props.data?.name);
+  // const [args, setArgs] = useState(props.data?.args);
   const [loading, setLoading] = useState(!props.data);
   const [forbidden, setForbidden] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [port, setPort] = useState(undefined);
-  const [timeFrames, setTimeFrames] = useState(frames);
-  const [currentTimeFrame, setCurrentTimeFrame] = useState(selectedFrames);
-  const [framesPerSymbol, setFramesPerSymbol] = useState(framesPerSym);
+  // const [timeFrames, setTimeFrames] = useState(frames);
+  // const [currentTimeFrame, setCurrentTimeFrame] = useState(selectedFrames);
+  // const [framesPerSymbol, setFramesPerSymbol] = useState(framesPerSym);
   const [likes, setLikes] = useState(new Set());
   const [role, setRole] = useState(undefined);
 
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
 
   useEffect(() => {
-    if (frames) {
-      // curtimeframe = frames[0];
-    }
-  }, []);
-
-  useEffect(() => {
     // handle data formatting and augmentation
     if (props.data) {
-      const [formatted, frames, _, maxFrames, framesPerSym] = extractDataProp();
-      // debugger;
-      console.log("ext formatted 2", formatted);
-      if (
-        formatted.length == 1 &&
-        frames &&
-        (currentTimeFrame[0] === undefined ||
-          !frames.includes(currentTimeFrame[0]))
-      ) {
-        setCurrentTimeFrame([frames[0]]);
-        // curtimeframe = frames[0];
-      }
-      // debugger;
-      if (props.data.args.length > currentTimeFrame.length) {
-        setCurrentTimeFrame([
-          ...currentTimeFrame,
-          maxFrames[maxFrames.length - 1],
-        ]);
-      }
-      // formattedData.push(formatted);
-      // console.log("formattedData", formattedData);
-      setData(formatted);
-      setName(props.data?.name);
-      setArgs(props.data?.args);
-      setTimeFrames(frames);
-      // debugger;
-      setFramesPerSymbol(framesPerSym);
+      console.log("ext data before render new props", props.data);
+      setRawData(props.data);
     }
   }, [props.data]);
 
@@ -266,33 +196,7 @@ export default function Ext(props) {
         } else if (data.status == "done") {
           setLoading(false);
         } else {
-          // do we need to test data.status == 'done'
-          if (data.name) {
-            setName(data.name);
-          }
-          if (data.removeName) {
-            setName(undefined);
-          }
-          if (data.insights && data.args.length == 1) {
-            if (Object.keys(data.insights).length > 0) {
-              // if insights exist for this symbol
-              const formatted = processSymbolData(data.insights[data.args[0]]);
-              setArgs(data.args);
-              const frames = orderTimeFrames(formatted);
-              if (
-                currentTimeFrame[0] === undefined ||
-                !frames.includes(currentTimeFrame[0])
-              ) {
-                setCurrentTimeFrame(frames[0]);
-                // curtimeframe = frames[0];
-              }
-              setData(formatted);
-              setTimeFrames(frames);
-            }
-            setLoading(false);
-            setForbidden(false);
-          }
-          setHaveMadeRequest(true);
+          setRawData(data);
         }
       });
       port.onDisconnect.addListener(function () {
@@ -312,7 +216,7 @@ export default function Ext(props) {
   //   postMessage("iframe loaded", "*");
   // });
   //
-  console.log("ext before render", data, currentTimeFrame);
+  // console.log("ext before render", data, currentTimeFrame);
 
   // const likes = new Set();
 
@@ -321,7 +225,70 @@ export default function Ext(props) {
   //   if (data[i].liked) {
   //     likes.add(args[i]);
   //   }
-  // }
+  // }]
+
+  const args = rawData?.args;
+  const name = data?.name;
+
+  const [data, framesPerSymbol, currentTimeFramesForRender] = useMemo(() => {
+    // debugger;
+    if (rawData) {
+      prevArgs = args;
+      const formattedData = [];
+      const framesPerSymbol = [];
+      let commonFrameNum = 4;
+      for (const symbol of rawData.args) {
+        const formatted = processSymbolData(rawData.insights[symbol]);
+        const frames = orderTimeFrames(formatted);
+        framesPerSymbol.push(frames);
+        // maxFrames.push(frames[0]);
+        if (frames.length < commonFrameNum) {
+          commonFrameNum = frames.length;
+        }
+        // for (const frame of frames) {
+        //   if (!allFramesSet.has(frame)) {
+        //     allFramesSet.add(frame);
+        //     allFrames = [...allFrames, frame];
+        //   }
+        // }
+        formattedData.push(formatted);
+      }
+      if (!currentTimeFrames) {
+        currentTimeFrames = rawData.args.map(
+          () => framesPerSymbol[0][4 - commonFrameNum]
+        );
+      }
+
+      if (
+        formattedData.length == 1 &&
+        framesPerSymbol &&
+        (!currentTimeFrames ||
+          !currentTimeFrames[0] ||
+          !framesPerSymbol[0].includes(currentTimeFrames[0]))
+      ) {
+        currentTimeFrames = [framesPerSymbol[0][0]];
+        // curtimeframe = frames[0];
+      }
+      // debugger;
+      if (rawData.args.length > currentTimeFrames.length) {
+        currentTimeFrames = [
+          ...currentTimeFrames,
+          framesPerSymbol[framesPerSymbol.length - 1][0],
+        ];
+      }
+
+      // else if (rawData.args.length < currentTimeFrames.length && prevArgs) {
+      //   let missingIndex = -1;
+      //   for (let i = 0; i < args.length; i++) {
+
+      //   }
+      //   currentTimeFrames =
+      // }
+
+      return [formattedData, framesPerSymbol, [...currentTimeFrames]];
+    }
+    return [];
+  }, [rawData]);
 
   // for (const arg of data) {
   //   debugger;
@@ -339,7 +306,13 @@ export default function Ext(props) {
   //   }
   //   return out;
   // }, [data]);
-  debugger;
+  // debugger;
+  console.log(
+    "ext data before render",
+    data,
+    currentTimeFramesForRender,
+    currentTimeFrames
+  );
   return (
     <div
       className={props.className}
@@ -393,7 +366,7 @@ export default function Ext(props) {
             text="You've already accessed 10 insights in the past 24 hours."
             styles={styles}
           />
-        ) : timeFrames ? (
+        ) : currentTimeFramesForRender ? (
           <div
             style={{
               display: "flex",
@@ -476,6 +449,8 @@ export default function Ext(props) {
                       size="small"
                       onClick={() => {
                         if (props.onClose) {
+                          // debugger;
+                          currentTimeFrames.splice(i, 1);
                           props.onClose(i);
                         } else if (port) {
                           port.postMessage({
@@ -506,7 +481,7 @@ export default function Ext(props) {
             </MetricSection> */}
             {/* <h3 className={styles.company}>{data[0].global.name}</h3> */}
             <MetricSection>
-              {currentTimeFrame.map((frame, i) => (
+              {currentTimeFramesForRender.map((frame, i) => (
                 <FormControl
                   style={{
                     marginTop: 20,
@@ -521,8 +496,9 @@ export default function Ext(props) {
                     label="Time Frame"
                     onChange={(event) => {
                       if (event.target.value) {
-                        currentTimeFrame[i] = event.target.value;
-                        setCurrentTimeFrame([...currentTimeFrame]);
+                        currentTimeFrames[i] = event.target.value;
+                        // setCurrentTimeFrame([...currentTimeFrame]);
+                        setRawData({ ...rawData });
                         // curtimeframe = event.target.value;
                       }
                     }}
@@ -538,13 +514,13 @@ export default function Ext(props) {
                 </FormControl>
               ))}
             </MetricSection>
-            {data[0][currentTimeFrame[0]] ? (
+            {data[0][currentTimeFramesForRender[0]] ? (
               <>
                 <Report
                   global={data.map((d) => d.global)}
-                  data={data.map((d, i) => d[currentTimeFrame[i]])}
+                  data={data.map((d, i) => d[currentTimeFramesForRender[i]])}
                   port={port}
-                  currentTimeFrame={currentTimeFrame}
+                  currentTimeFrame={currentTimeFramesForRender}
                   symbol={args}
                   localFirebase={props.localFirebase}
                 />

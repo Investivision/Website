@@ -57,7 +57,7 @@ export default function HeaderAndFooter(props) {
       </Head>
       <Banner
         id="INSIGHT50"
-        title="50% off with checkout code INSIGHT50"
+        title="50% off with code INSIGHT50"
         link="/pricing"
       />
       {isDevMode && <Banner developmentMode />}
