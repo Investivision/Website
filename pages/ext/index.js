@@ -228,7 +228,7 @@ export default function Ext(props) {
   // }]
 
   const args = rawData?.args;
-  const name = data?.name;
+  const name = rawData?.name;
 
   const [data, framesPerSymbol, currentTimeFramesForRender] = useMemo(() => {
     // debugger;
