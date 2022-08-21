@@ -12,7 +12,15 @@ export default function LikeButton({ likes, onUnlike, onLike, val }) {
     <IconButton
       size="small"
       className={styles.symbolIconButton}
-      onClick={() => {
+      // sx={{
+      //   cursor: "pointer",
+      // }}
+      // style={{
+      //   cursor: "pointer",
+      // }}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         likes.has(val) ? onUnlike(val) : onLike(val);
       }}
     >

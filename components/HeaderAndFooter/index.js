@@ -77,32 +77,43 @@ export default function HeaderAndFooter(props) {
                 cursor: "pointer",
               }}
             >
-              <div
-                className={styles.imgWrapper}
+              <h1
                 style={{
-                  backgroundColor:
-                    theme.palette.mode == "light" ||
-                    props.overlayHeader === true
-                      ? "white"
-                      : "black",
-                  boxShadow: `0 0 20px 0 ${
-                    theme.palette.mode == "light" ||
-                    props.overlayHeader === true
-                      ? `rgba(0, 0, 0, 0.1)`
-                      : `rgba(255, 255, 255, 0.05)`
-                  }`,
+                  display: "flex",
+                  // flexDir
+                  justifyContent: "center",
+                  alignItems: "center",
+                  // color: "#0C1D59",
                 }}
               >
-                <img
-                  src={`/images/${
-                    theme.palette.mode == "light" ||
-                    props.overlayHeader === true
-                      ? ""
-                      : "dark_"
-                  }logo.svg`}
-                />
-              </div>
-              <h1>Investivision</h1>
+                <div
+                  className={styles.imgWrapper}
+                  // style={{
+                  //   backgroundColor:
+                  //     theme.palette.mode == "light" ||
+                  //     props.overlayHeader === true
+                  //       ? "white"
+                  //       : "black",
+                  //   boxShadow: `0 0 20px 0 ${
+                  //     theme.palette.mode == "light" ||
+                  //     props.overlayHeader === true
+                  //       ? `rgba(0, 0, 0, 0.1)`
+                  //       : `rgba(255, 255, 255, 0.05)`
+                  //   }`,
+                  // }}
+                >
+                  <img
+                    // src={`/images/${
+                    //   theme.palette.mode == "light" ||
+                    //   props.overlayHeader === true
+                    //     ? ""
+                    //     : "dark_"
+                    // }logo.svg`}
+                    src="/images/tensor_logo.svg"
+                  />
+                </div>
+                Tensor Investor
+              </h1>
             </div>
           </Link>
           <nav>

@@ -2,13 +2,27 @@ import HeaderAndFooter from "../../components/HeaderAndFooter";
 import Ext from "../ext";
 import styles from "./index.module.css";
 import TextField from "@mui/material/TextField";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import AddCircleRoundedIcon from "@mui/icons-material/AddCircleRounded";
-import { getAuth } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import CircularProgress from "@mui/material/CircularProgress";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  collection,
+  where,
+} from "firebase/firestore";
 import { getLastInsightUpdateTime } from "../../utils/insights";
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+import { useRouter } from "next/router";
+import { useTheme } from "@mui/styles";
+import { getLikes } from "../../utils/insights";
 
 export default function Compare(props) {
   const [data, setData] = useState({
@@ -16,26 +30,101 @@ export default function Compare(props) {
     insights: {},
   });
 
+  const router = useRouter();
+
+  const theme = useTheme();
+
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarIsOpen, setSnackbarIsOpen] = useState(false);
+  const [snackbarSeverity, setSnackbarSeverity] = useState("");
+  const [likes, setLikes] = useState(undefined);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(async () => {
+    if (router.isReady) {
+      let symbols = router.query.symbols;
+      if (!symbols) return;
+      symbols = symbols.split(" ");
+      setLoading(true);
+      onAuthStateChanged(getAuth(), async (user) => {
+        const [symbolData, message] = await getScopedSymbolData(symbols);
+        if (message) {
+          setSnackbarSeverity("warning");
+          setSnackbarMessage(message);
+          setSnackbarIsOpen(true);
+        }
+        console.log("initial message", message);
+        if (symbolData.args.length) {
+          setData(symbolData);
+          setLoading(false);
+        }
+      });
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
+    onAuthStateChanged(getAuth(), async (user) => {
+      if (user) {
+        const token = await user.getIdTokenResult(true);
+
+        if (token.claims.role) {
+          if (["bullish", "buffet"].includes(token.claims.role)) {
+            setLikes(await getLikes());
+            return;
+          }
+        }
+      }
+      setLikes(new Set());
+    });
+  }, []);
+
+  useEffect(() => {
+    let nextUrl;
+    if (data?.args.length) {
+      nextUrl =
+        window.location.href.split("?")[0] +
+        "?symbols=" +
+        encodeURIComponent(`${data.args.join(" ")}`);
+    } else if (window.location.search.startsWith("?symbol=")) {
+      nextUrl = window.location.href.split("?")[0];
+    }
+    if (nextUrl) {
+      window.history.replaceState(undefined, undefined, nextUrl);
+    }
+  }, [data]);
+
   const extElement = useMemo(() => {
-    if (data.args.length) {
+    if (data.args.length && likes) {
       return (
         <div className={styles.extHolder}>
           <Ext
             data={data}
             localFirebase
             hideHeader
+            initialLikes={likes}
             onClose={(i) => {
               // debugger;
               data.args.splice(i, 1);
-
               setData({ ...data });
             }}
+            // onLike={(symbol) => {
+            //   likes.add(symbol);
+            //   likeSymbol(symbol);
+            //   setLikes(new Set(likes));
+            // }}
+            // onUnlike={(symbol) => {
+            //   likes.delete(symbol);
+            //   unlikeSymbol(symbol);
+            //   setLikes(new Set(likes));
+
+            // }}
           />
         </div>
       );
     }
     return null;
-  }, [data]);
+  }, [data, likes]);
 
   const [newSymbol, setNewSymbol] = useState("");
 
@@ -62,28 +151,77 @@ export default function Compare(props) {
           endAdornment: (
             <InputAdornment position="end">
               <IconButton
+                style={{
+                  pointerEvents: loading || !newSymbol ? "none" : "all",
+                }}
                 onClick={async () => {
-                  if (newSymbol) {
-                    const scopedData = await getScopedSymbolData(newSymbol);
-                    console.log("scoped data", scopedData);
-                    data.args.push(newSymbol);
-                    data.insights[newSymbol] = scopedData;
+                  if (newSymbol && !loading) {
+                    setLoading(true);
+                    const [scopedData, message] = await getScopedSymbolData([
+                      newSymbol,
+                    ]);
+
+                    if (message) {
+                      setSnackbarSeverity("warning");
+                      setSnackbarMessage(message);
+                      setSnackbarIsOpen(true);
+                      setLoading(false);
+                      return;
+                    }
+
+                    data.args = data.args.concat(scopedData.args);
+                    data.insights = {
+                      ...data.insights,
+                      ...scopedData.insights,
+                    };
+
+                    // data.args.push(newSymbol);
+                    // data.insights[newSymbol] = scopedData;
                     setData(JSON.parse(JSON.stringify(data)));
+                    setLoading(false);
                   }
                 }}
               >
-                <AddCircleRoundedIcon color="primary" />
+                {loading ? (
+                  <CircularProgress size={20} thickness={6} />
+                ) : (
+                  <AddCircleRoundedIcon
+                    style={{
+                      color:
+                        theme.palette.mode == "dark"
+                          ? theme.palette.secondary.main
+                          : theme.palette.primary.main,
+                      opacity: !newSymbol ? 0.5 : 1,
+                    }}
+                  />
+                )}
               </IconButton>
             </InputAdornment>
           ),
         }}
       ></TextField>
       {extElement}
+      <Snackbar
+        open={snackbarIsOpen}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+          zIndex: 9999,
+        }}
+        onClose={() => {
+          setSnackbarIsOpen(false);
+        }}
+        autoHideDuration={3000}
+      >
+        <Alert severity={snackbarSeverity} sx={{ zIndex: 99999 }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </HeaderAndFooter>
   );
 }
 
-async function getScopedSymbolData(symbol) {
+async function getScopedSymbolData(symbolList) {
   const currentUser = getAuth().currentUser;
   let queryAllSymbols = false;
   let token;
@@ -92,6 +230,7 @@ async function getScopedSymbolData(symbol) {
     await currentUser.getIdToken(true);
     token = await currentUser.getIdTokenResult();
     console.log("got token for user", token);
+    // debugger;
     role = token?.claims?.role;
     if (["bullish", "buffet"].includes(role)) {
       queryAllSymbols = true;
@@ -109,6 +248,9 @@ async function getScopedSymbolData(symbol) {
   //   }
   // }
 
+  let errorMessage = "";
+  const noAccessSymbols = [];
+
   if (!queryAllSymbols) {
     let { symbols, timestamp } = await getSymbolWhitelist();
     if (
@@ -121,15 +263,30 @@ async function getScopedSymbolData(symbol) {
     } else {
       console.log("not resetting symbols");
     }
-    if (!symbols.includes(symbol)) {
-      //forbidden
-      alert("forbidden");
-      return;
-    } else {
+    symbols = new Set(symbols);
+    const newSymbolList = [];
+    for (const symbol of symbolList) {
+      if (symbols.has(symbol)) {
+        newSymbolList.push(symbol);
+      } else {
+        noAccessSymbols.push(symbol);
+      }
+    }
+    symbolList = newSymbolList;
+    if (noAccessSymbols.length) {
+      errorMessage +=
+        noAccessSymbols.join(", ") + " not available in your current plan. ";
     }
   }
-  // debugger;
-  const docData = await getSymbolInsights(symbol);
+  const [docData, notFound] = await getSymbolInsights(symbolList);
+  console.log("not found symbols", notFound);
+  if (notFound.length) {
+    errorMessage += notFound.join(", ") + " not tracked. ";
+    const notFoundSet = new Set(notFound);
+    symbolList = symbolList.filter((symbol) => !notFoundSet.has(symbol));
+  }
+
+  console.log("filtered docData", docData, symbolList);
   if (Object.keys(docData).length > 0) {
     if (
       !(
@@ -138,6 +295,12 @@ async function getScopedSymbolData(symbol) {
         ["bullish", "buffet"].includes(token.claims.role)
       )
     ) {
+      // console.log(
+      //   "weird access",
+      //   currentUser,
+      //   token.claims,
+      //   ["bullish", "buffet"].includes(token.claims.role)
+      // );
       // remove insights from free user
       for (const symbol in docData) {
         for (const key in docData[symbol]) {
@@ -150,7 +313,8 @@ async function getScopedSymbolData(symbol) {
             key.startsWith("sup") ||
             key.startsWith("res") ||
             key.startsWith("adx") ||
-            key.startsWith("rsi")
+            key.startsWith("rsi") ||
+            key.startsWith("phase")
           ) {
             delete docData[symbol][key];
           }
@@ -159,60 +323,118 @@ async function getScopedSymbolData(symbol) {
       }
     }
   }
+  let out = {
+    args: symbolList,
+    insights: docData,
+  };
+  console.log("8/21/22 formed out", out);
+  if (
+    Object.keys(out.insights).length &&
+    token &&
+    token.claims &&
+    token.claims.role == "buffet"
+  ) {
+    const proms = [];
 
-  if (Object.keys(docData).length && token?.claims?.role == "buffet") {
-    const document = await getDoc(
-      doc(getFirestore(), "notes", `${currentUser.uid}-${symbol}`)
-    );
-    console.log("got notes doc data", document.data());
-    docData.notes =
-      document.exists && document.data() ? document.data().notes || "" : "";
-  }
+    const symbs = Object.keys(out.insights);
 
-  return docData;
-}
-
-async function getSymbolInsights(symbol) {
-  const stored = validCacheEntries(symbol);
-  console.log("scoped data stored", stored);
-  if (!stored) {
-    const docRef = doc(getFirestore(), "quotes", symbol);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      window.localStorage.setItem(
-        symbol,
-        JSON.stringify({
-          insights: docSnap.data(),
-          timestamp: new Date().getTime(),
-        })
+    for (const key of symbs) {
+      proms.push(
+        getDoc(doc(getFirestore(), "notes", `${currentUser.uid}-${key}`))
       );
-      return docSnap.data();
+
+      const document = await getDoc(
+        doc(getFirestore(), "notes", `${currentUser.uid}-${key}`)
+      );
+      out.insights[key].notes =
+        document.exists && document.data() ? document.data().notes || "" : "";
     }
-    return {};
+
+    const snapshots = await Promise.all(proms);
+
+    for (let i = 0; i < snapshots.length; i++) {
+      const document = snapshots[i];
+      out.insights[symbs[i]].notes =
+        document.exists && document.data() ? document.data().notes || "" : "";
+    }
+
+    console.log("8/21/22 processed notes", out);
   }
-  return stored;
+
+  return [out, errorMessage];
 }
 
-export function validCacheEntries(symbol) {
+async function getSymbolInsights(symbols) {
+  let { docData, neededSymbols } = await validCacheEntries(symbols);
+  console.log("got cache entries", docData, neededSymbols);
+  neededSymbols = Array.from(new Set(neededSymbols));
+  // console.log("neededSymbols", neededSymbols);
+  const notFound = [];
+  if (neededSymbols.length > 0) {
+    const querySnapshot = await getDocs(
+      query(
+        collection(getFirestore(), "quotes"),
+        where("symbol", "in", neededSymbols)
+      )
+    );
+
+    console.log("query snapshot:", querySnapshot);
+    if (querySnapshot.empty) {
+      console.log("query snapshot is empty");
+    } else {
+      querySnapshot.forEach(async (doc) => {
+        console.log(doc.id, "=>", doc.data());
+        docData[doc.id] = doc.data();
+        window.localStorage.setItem(
+          doc.id,
+          JSON.stringify({
+            insights: docData[doc.id],
+            timestamp: new Date().getTime(),
+          })
+        );
+      });
+    }
+
+    for (const symbol of symbols) {
+      // debugger;
+      if (!docData[symbol]) {
+        notFound.push(symbol);
+      }
+    }
+  }
+  return [docData, notFound];
+}
+
+export async function validCacheEntries(symbols) {
+  let docData = {};
+  let neededSymbols = [];
   const timestampCutoff = getLastInsightUpdateTime();
-
-  let stored = window.localStorage.getItem(symbol);
-  if (!stored) {
-    return;
+  for (const symbol of symbols) {
+    let stored = window.localStorage.getItem(symbol);
+    // debugger;
+    if (!stored) {
+      console.log("no cached insight for", symbol);
+      neededSymbols.push(symbol);
+      continue;
+    }
+    stored = JSON.parse(stored);
+    if (!stored || !stored.timestamp || !stored.insights) {
+      console.log("no cached insight for", symbol);
+      neededSymbols.push(symbol);
+      continue;
+    }
+    console.log("stored", stored);
+    let { insights, timestamp } = stored;
+    if (timestamp < timestampCutoff) {
+      console.log("found expired cached insight for", symbol);
+      neededSymbols.push(symbol);
+    } else {
+      console.log("found valid cached insight for", symbol);
+      docData[symbol] = insights;
+    }
   }
-
-  stored = JSON.parse(stored);
-
-  console.log("stored", stored);
-  let { insights, timestamp } = stored;
-  if (timestamp < timestampCutoff) {
-    console.log("found expired cached insight for", symbol);
-    return;
-  } else {
-    console.log("found valid cached insight for", symbol);
-    return insights;
-  }
+  console.log("valid cache entries", { docData, neededSymbols });
+  return { docData, neededSymbols };
 }
 
 async function setSymbolWhitelist() {

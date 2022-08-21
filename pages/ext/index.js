@@ -16,6 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import ClearRoundedIcon from "@material-ui/icons/ClearRounded";
 import { getLikes, likeSymbol, unlikeSymbol } from "../../utils/insights";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useRouter } from "next/router";
 
 const extId = "lfmnoeincmlialalcloklfkmfcnhfian";
 
@@ -128,8 +129,11 @@ let selectedFrames;
 let currentTimeFrames;
 let prevArgs;
 
+let raw = {}; // for some reason, rawData reads as undefined from inside component
+
 export default function Ext(props) {
   const [rawData, setRawData] = useState(props.data);
+  // const [name, setName] = useState(undefined)
   // const [name, setName] = useState(props.data?.name);
   // const [args, setArgs] = useState(props.data?.args);
   const [loading, setLoading] = useState(!props.data);
@@ -139,10 +143,12 @@ export default function Ext(props) {
   // const [timeFrames, setTimeFrames] = useState(frames);
   // const [currentTimeFrame, setCurrentTimeFrame] = useState(selectedFrames);
   // const [framesPerSymbol, setFramesPerSymbol] = useState(framesPerSym);
-  const [likes, setLikes] = useState(new Set());
+  const [likes, setLikes] = useState(props.initialLikes || new Set());
   const [role, setRole] = useState(undefined);
 
   const [haveMadeRequest, setHaveMadeRequest] = useState(props.data);
+
+  const router = useRouter();
 
   useEffect(() => {
     // handle data formatting and augmentation
@@ -151,6 +157,13 @@ export default function Ext(props) {
       setRawData(props.data);
     }
   }, [props.data]);
+
+  useEffect(() => {
+    // alert("new likes");
+    if (props.newLikes) {
+      setLikes(props.newLikes);
+    }
+  }, [props.newLikes]);
 
   useEffect(() => {
     if (props.localFirebase) {
@@ -171,6 +184,12 @@ export default function Ext(props) {
     }
   }, []);
 
+  // useEffect(() => {
+  //   if (props.likes) {
+  //     setLikes(props.likes)
+  //   }
+  // }, [props.likes]);
+
   useEffect(() => {
     if (props.name) {
       return;
@@ -184,20 +203,39 @@ export default function Ext(props) {
       //   port.disconnect();
       // };
       port.onMessage.addListener(function (data) {
+        console.log("got data from port", data, rawData);
         setRateLimited(data.status == "rateLimited");
-        if (["forbidden", "rateLimited"].includes(data.status)) {
-          setLoading(false);
-        }
-        if (data.status == "forbidden") {
-          setForbidden(true);
-        }
-        if (data.status == "loading") {
-          setLoading(true);
-        } else if (data.status == "done") {
-          setLoading(false);
-        } else {
+        setForbidden(data.status == "forbidden");
+        setLoading(data.status == "loading");
+
+        if (data.insights) {
+          raw = data;
           setRawData(data);
+        } else if (data.name) {
+          raw.name = data.name;
+          setRawData({ ...raw });
+        } else if (data.removeName) {
+          // debugger;
+          delete raw.name;
+          setRawData({ ...raw });
         }
+
+        // if (data.status == 'rateLimited') {
+        //   setRateLimited(true)
+        // } else if (data.status == 'forbidden') {
+        //   setForbidden(false)
+        // }
+        // setForbidden(data.status == 'forbidden')
+        // if (data.status == "loading") {
+        //   setLoading(true);
+        // } else if (data.status == "done") {
+        //   setLoading(false);
+        // } else {
+        //   setRawData(data);
+        //   setForbidden(false);
+        //   setRateLimited()
+        //   setLoading(false);
+        // }
       });
       port.onDisconnect.addListener(function () {
         setPort(undefined);
@@ -427,7 +465,16 @@ export default function Ext(props) {
                             likes.add(arg);
                             likeSymbol(arg);
                             setLikes(new Set(likes));
+                            if (props.onLike) {
+                              props.onLike(arg);
+                            }
                           } else {
+                            if (props.port) {
+                              // send like attempt to ext background
+                            } else {
+                              router.prefetch("/pricing");
+                              router.push("/pricing");
+                            }
                           }
                         }
                       }}
@@ -437,7 +484,16 @@ export default function Ext(props) {
                             likes.delete(arg);
                             unlikeSymbol(arg);
                             setLikes(new Set(likes));
+                            if (props.onUnlike) {
+                              props.onUnlike(arg);
+                            }
                           } else {
+                            if (props.port) {
+                              // send like attempt to ext background
+                            } else {
+                              router.prefetch("/pricing");
+                              router.push("/pricing");
+                            }
                           }
                         }
                       }}
@@ -447,15 +503,19 @@ export default function Ext(props) {
                     {arg}
                     <IconButton
                       size="small"
+                      style={
+                        props.onClose
+                          ? {}
+                          : {
+                              pointerEvents: "none",
+                              opacity: 0,
+                            }
+                      }
                       onClick={() => {
                         if (props.onClose) {
                           // debugger;
                           currentTimeFrames.splice(i, 1);
                           props.onClose(i);
-                        } else if (port) {
-                          port.postMessage({
-                            message: "close extension from extension",
-                          });
                         }
                       }}
                     >

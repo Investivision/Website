@@ -42,9 +42,10 @@
 }
 
 .imgWrapper {
-  padding: 7px;
-  border-radius: 12px;
+  /* padding: 7px; */
+  /* border-radius: 12px; */
   margin-right: 14px;
+  margin-left: 14px;
   width: 46px;
   height: 46px;
   justify-content: center;

@@ -397,8 +397,34 @@ export default function Insights() {
     if (!dataForExt) {
       return null;
     }
-    return <ExtView hideHeader localFirebase data={dataForExt} />;
-  }, [dataForExt]);
+    return (
+      <ExtView
+        hideHeader
+        localFirebase
+        data={dataForExt}
+        onClose={() => {
+          setExtOpen(false);
+          symbolForExt = undefined;
+        }}
+        initialLikes={likes}
+        newLikes={likes}
+        onLike={(symb) => {
+          likes.add(symb);
+          setLikes(new Set(likes));
+          // if (symb == symbolForExt) {
+          //   setDataForExt(JSON.parse);
+          // }
+        }}
+        onUnlike={(symb) => {
+          likes.delete(symb);
+          setLikes(new Set(likes));
+          // if (symb == symbolForExt) {
+          //   setDataForExt({ ...dataForExt });
+          // }
+        }}
+      />
+    );
+  }, [dataForExt, likes]);
 
   return (
     <HeaderAndFooter
@@ -1110,18 +1136,6 @@ export default function Insights() {
                     e.stopPropagation();
                   }}
                 >
-                  <CloseRoundedIcon
-                    className={styles.extCloseIcon}
-                    style={{
-                      color: theme.palette.text.primary,
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setExtOpen(false);
-                      symbolForExt = undefined;
-                    }}
-                  />
                   {extView}
                 </div>
                 {/* <DataGrid
