@@ -27,16 +27,16 @@ export default function InfoScreen(props) {
       >
         {props.text}
       </p>
-      {props.message ? (
+      {props.buttonText && props.message ? (
         <Button
           variant="contained"
           onClick={() => {
             props.port.postMessage({
-              message: "see pricing",
+              message: props.message,
             });
           }}
         >
-          Upgrade for Unlimited Coverage
+          {props.buttonText}
         </Button>
       ) : null}
     </div>

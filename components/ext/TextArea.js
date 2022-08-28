@@ -14,17 +14,15 @@ import Skeleton from "@mui/material/Skeleton";
 let savedValue;
 let autosaveInterval;
 
-const notesCache = {};
-
 const getValidCacheEntry = (symbol) => {
-  const stored = notesCache[symbol];
+  const stored = window.localStorage.getItem(symbol + "-notes");
   if (!stored) {
     return undefined;
   }
-  const { timestamp, notes } = stored;
+  const { timestamp, notes } = JSON.parse(stored);
   if (timestamp + 1000 * 60 * 15 < Date.now()) {
     // expired entry
-    delete notesCache[symbol];
+    window.localStorage.removeItem(symbol + "-notes");
     return undefined;
   }
   return notes;
@@ -33,7 +31,7 @@ const getValidCacheEntry = (symbol) => {
 export default function TextArea(props) {
   const [notesText, setNotesText] = useState(props.notes);
   const [saved, setSaved] = useState(true);
-  const [notesLoading, setNotesLoading] = useState(props.localFirebase);
+  const [notesLoading, setNotesLoading] = useState(true);
 
   //
 
@@ -43,7 +41,7 @@ export default function TextArea(props) {
   }, [props.symbol]);
 
   useEffect(async () => {
-    if (props.localFirebase) {
+    if (window.location.pathname != "/") {
       const cached = getValidCacheEntry(props.symbol);
       if (cached) {
         setNotesText(cached);
@@ -60,18 +58,23 @@ export default function TextArea(props) {
         )
       );
       if (docSnap.exists()) {
-        notesCache[props.symbol] = {
-          timestamp: new Date(),
-          notes: docSnap.data().notes,
-        };
+        window.localStorage.setItem(
+          props.symbol + "-notes",
+          JSON.stringify({
+            timestamp: new Date(),
+            notes: docSnap.data().notes,
+          })
+        );
         setNotesText(docSnap.data().notes);
       }
+      setNotesLoading(false);
+    } else {
       setNotesLoading(false);
     }
   }, [props.symbol]);
 
   const saveNotes = async (curr) => {
-    if (props.localFirebase) {
+    if (window.location.pathname != "/") {
       await setDoc(
         doc(
           collection(getFirestore(), "notes"),
@@ -84,19 +87,17 @@ export default function TextArea(props) {
           merge: true,
         }
       );
-      notesCache[props.symbol] = {
-        timestamp: new Date(),
-        notes: curr,
-      };
-    } else if (props.port) {
-      props.port.postMessage({
-        symbol: props.symbol,
-        notes: curr,
-      });
+      window.localStorage.setItem(
+        props.symbol + "-notes",
+        JSON.stringify({
+          timestamp: new Date(),
+          notes: curr,
+        })
+      );
+      //
+      savedValue = curr;
+      //
     }
-    //
-    savedValue = curr;
-    //
   };
 
   //

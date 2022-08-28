@@ -9,7 +9,7 @@ import LocalOfferRoundedIcon from "@material-ui/icons/LocalOfferRounded";
 import LiveHelpRounded from "@material-ui/icons/LiveHelpRounded";
 import LayersRounded from "@material-ui/icons/LayersRounded";
 import { useTheme } from "@mui/styles";
-import ExtView from "./ext";
+import ExtView from "../components/ext";
 import Link from "next/link";
 import Button from "@mui/material/Button";
 import TwitterCarousel from "../components/TwitterCoursel";

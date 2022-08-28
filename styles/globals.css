@@ -89,7 +89,7 @@ a {
 
 .MuiTooltip-popper,
 .MuiModal-root {
-  z-index: 999999 !important;
+  z-index: 99999999999999 !important;
   /* background-color: red; */
 }
 
@@ -105,4 +105,8 @@ a {
 
 *::selection {
   background-color: rgba(35, 218, 81, 0.365);
+}
+
+.MuiSnackbar-root {
+  z-index: 999999999999;
 }

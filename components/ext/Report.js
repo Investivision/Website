@@ -133,6 +133,7 @@ export default function Report(props) {
         allData={props.data}
         allGlobal={props.global}
         component={Momentum}
+        props={props}
       />
 
       <SectionHeader
@@ -181,6 +182,10 @@ export default function Report(props) {
       <MetricSection
         allData={props.data}
         allGlobal={props.global}
+        props={{
+          ...props,
+          sup: props.data.sup,
+        }}
         component={Cycle}
       />
       <SectionHeader
@@ -191,12 +196,6 @@ export default function Report(props) {
         Notes
       </SectionHeader>
       {props.global[0].notes !== undefined ? (
-        // <TextArea
-        //   symbol={props.global.symbol}
-        //   notes={props.global.notes}
-        //   port={props.port}
-        //   localFirebase={props.localFirebase}
-        // />
         <MetricSection
           allData={props.data}
           allGlobal={props.global}
@@ -206,10 +205,8 @@ export default function Report(props) {
               notes: elementProps.global.notes,
             };
           }}
+          props={props}
           component={TextArea}
-          props={{
-            localFirebase: props.localFirebase,
-          }}
         />
       ) : (
         <UpgradeButton port={props.port} />

@@ -13,6 +13,11 @@
     max-width: 270px;
     align-items: flex-start;
 }
+
+.single > .element {
+    min-width: none !important;
+    max-width: 450px !important;
+}
     
 .divider {
     /* height: 100px; */

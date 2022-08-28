@@ -10,7 +10,7 @@ export default function UpgradeButton(props) {
       onClick={() => {
         if (props.port) {
           props.port.postMessage({
-            message: "see pricing",
+            redirect: window.location.origin + "/pricing",
           });
         } else {
           router.prefetch("/pricing");

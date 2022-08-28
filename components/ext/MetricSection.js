@@ -35,7 +35,12 @@ export default function MetricSection({
   }
 
   return (
-    <div className={`${styles.container} ${className || ""}`} style={style}>
+    <div
+      className={`${styles.container} ${className || ""} ${
+        newChildren.length == 1 ? styles.single : ""
+      }`}
+      style={style}
+    >
       {newChildren.map((element, i) => {
         return (
           <>

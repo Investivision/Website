@@ -71,6 +71,7 @@ export default function Account() {
       } else {
         setRole(undefined);
         if (remaining == 0) {
+          router.prefetch("/account");
           router.push(`/account`, undefined, {
             shallow: true,
           });
@@ -106,6 +107,7 @@ export default function Account() {
         }
         setLikes(await getLikes());
       } else {
+        router.prefetch("/login");
         router.push("/login");
         // window.location.href = "/login";
       }
@@ -384,7 +386,10 @@ export default function Account() {
                         <Button
                           color="inherit"
                           size="medium"
-                          onClick={() => router.push("/pricing")}
+                          onClick={() => {
+                            router.prefetch("/pricing");
+                            router.push("/pricing");
+                          }}
                         >
                           View Plans
                         </Button>
@@ -400,6 +405,7 @@ export default function Account() {
                                 window.location.origin +
                                 "/account?success=true",
                             });
+                            router.prefetch(res.data);
                             router.push(res.data);
                           }}
                         >
@@ -443,7 +449,10 @@ export default function Account() {
                       <Button
                         color="inherit"
                         size="medium"
-                        onClick={() => router.push("/pricing")}
+                        onClick={() => {
+                          router.prefetch("/pricing");
+                          router.push("/pricing");
+                        }}
                       >
                         View Plans
                       </Button>
@@ -555,9 +564,11 @@ export default function Account() {
                       <Button
                         variant="contained"
                         onClick={() => {
-                          window.location.href = `/compare?symbols=${Array.from(
+                          const url = `/compare?symbols=${Array.from(
                             likes
                           ).join("%20")}`;
+                          router.prefetch(url);
+                          router.push(url);
                         }}
                       >
                         View in Compare

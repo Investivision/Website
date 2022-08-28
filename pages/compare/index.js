@@ -1,5 +1,5 @@
 import HeaderAndFooter from "../../components/HeaderAndFooter";
-import Ext from "../ext";
+import Ext from "../../components/ext";
 import styles from "./index.module.css";
 import TextField from "@mui/material/TextField";
 import { useMemo, useState, useEffect } from "react";
@@ -35,7 +35,7 @@ export default function Compare(props) {
   const theme = useTheme();
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarIsOpen, setSnackbarIsOpen] = useState(false);
+  const [snackbarIsOpen, setSnackbarIsOpen] = useState(true);
   const [snackbarSeverity, setSnackbarSeverity] = useState("");
   const [likes, setLikes] = useState(undefined);
 
@@ -100,8 +100,6 @@ export default function Compare(props) {
         <div className={styles.extHolder}>
           <Ext
             data={data}
-            localFirebase
-            hideHeader
             initialLikes={likes}
             onClose={(i) => {
               // debugger;
@@ -209,7 +207,7 @@ export default function Compare(props) {
           zIndex: 9999,
         }}
         onClose={() => {
-          setSnackbarIsOpen(false);
+          // setSnackbarIsOpen(false);
         }}
         autoHideDuration={3000}
       >
@@ -221,7 +219,7 @@ export default function Compare(props) {
   );
 }
 
-async function getScopedSymbolData(symbolList) {
+export async function getScopedSymbolData(symbolList) {
   const currentUser = getAuth().currentUser;
   let queryAllSymbols = false;
   let token;
@@ -314,12 +312,12 @@ async function getScopedSymbolData(symbolList) {
             key.startsWith("res") ||
             key.startsWith("adx") ||
             key.startsWith("rsi") ||
-            key.startsWith("phase")
+            key.startsWith("phase") ||
+            key.startsWith("pattern")
           ) {
             delete docData[symbol][key];
           }
         }
-        delete docData[symbol].pattern;
       }
     }
   }
@@ -364,7 +362,7 @@ async function getScopedSymbolData(symbolList) {
   return [out, errorMessage];
 }
 
-async function getSymbolInsights(symbols) {
+export async function getSymbolInsights(symbols) {
   let { docData, neededSymbols } = await validCacheEntries(symbols);
   console.log("got cache entries", docData, neededSymbols);
   neededSymbols = Array.from(new Set(neededSymbols));

@@ -51,7 +51,7 @@ export default function Cycle(props) {
       props.data.phase !== undefined
     )
   ) {
-    if (props.localFirebase) {
+    if (props.data.sup) {
       return <NotFound message="No fluctuating cycle found" />;
     }
     return <UpgradeButton port={props.port} />;

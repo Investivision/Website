@@ -25,7 +25,7 @@ import DeleteForeverRoundedIcon from "@material-ui/icons/DeleteForeverRounded";
 import { v4 as uuidv4 } from "uuid";
 import Alert from "@mui/material/Alert";
 import { Snackbar } from "@material-ui/core";
-import ExtView from "../ext";
+import ExtView from "../../components/ext";
 import { useRouter } from "next/router";
 import Slider from "@mui/material/Slider";
 import { NextSeo } from "next-seo";
@@ -158,9 +158,13 @@ export default function Insights() {
           setDownloading(true);
           const existing = await tryToExtractExistingInsights();
           if (existing) {
+            const [res1, res2] = await Promise.all([
+              getRemoteUserConfigs(),
+              getLikes(),
+            ]);
+            setUserConfigs(res1);
+            setLikes(res2);
             handleExtractWorkbook(existing);
-            setUserConfigs(await getRemoteUserConfigs());
-            setLikes(await getLikes());
           }
           setDownloading(false);
         }
@@ -400,7 +404,6 @@ export default function Insights() {
     return (
       <ExtView
         hideHeader
-        localFirebase
         data={dataForExt}
         onClose={() => {
           setExtOpen(false);
@@ -497,8 +500,14 @@ export default function Insights() {
                   router.push("/pricing");
                   return;
                 }
+                const [res1, res2] = await Promise.all([
+                  getRemoteUserConfigs(),
+                  getLikes(),
+                ]);
+                setUserConfigs(res1);
+                setLikes(res2);
                 handleExtractWorkbook(await pullRemoteInsights());
-                setUserConfigs(await getRemoteUserConfigs());
+
                 setDownloading(false);
               }}
               disabled={rows !== undefined}
