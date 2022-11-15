@@ -106,21 +106,24 @@ const NullItem = function (props) {
   );
 };
 
-export default function Pattern(props) {
-  const bullish = [];
-  const bearish = [];
-  for (const [pattern, value] of Object.entries(props.pattern)) {
-    if (value > 0) {
-      bullish.push(candleMap[pattern]);
-    } else if (value < 0) {
-      bearish.push(candleMap[pattern]);
-    }
-  }
+export default function Pattern({ bullish = [], bearish = [], style = {} }) {
+  // const bullish = [];
+  // const bearish = [];
+  // for (const [pattern, value] of Object.entries(props.pattern)) {
+  //   if (value > 0) {
+  //     bullish.push(candleMap[pattern]);
+  //   } else if (value < 0) {
+  //     bearish.push(candleMap[pattern]);
+  //   }
+  // }
+
+  bullish = bullish.map((name) => candleMap[name]);
+  bearish = bearish.map((name) => candleMap[name]);
 
   const theme = useTheme();
 
   return (
-    <div className={styles.container} style={props.style}>
+    <div className={styles.container} style={style}>
       <div>
         <h4>Bullish</h4>
         {bullish.length == 0 ? (

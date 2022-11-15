@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import Skeleton from "@mui/material/Skeleton";
+import UpgradeButton from "./UpgradeButton";
 
 let savedValue;
 let autosaveInterval;
@@ -41,7 +42,7 @@ export default function TextArea(props) {
   }, [props.symbol]);
 
   useEffect(async () => {
-    if (window.location.pathname != "/") {
+    if (window.location.pathname != "/" && props.notes !== undefined) {
       const cached = getValidCacheEntry(props.symbol);
       if (cached) {
         setNotesText(cached);
@@ -72,6 +73,10 @@ export default function TextArea(props) {
       setNotesLoading(false);
     }
   }, [props.symbol]);
+
+  if (props.notes === undefined) {
+    return <UpgradeButton port={props.port} />;
+  }
 
   const saveNotes = async (curr) => {
     if (window.location.pathname != "/") {

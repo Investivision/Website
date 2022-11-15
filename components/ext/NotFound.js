@@ -11,7 +11,7 @@ export default function NotFound(props) {
             ? `rgba(255, 255, 255, 0.05)`
             : `rgba(0, 0, 0, 0.1)`,
         borderRadius: 12,
-        width: "calc(100% - 20px)",
+        width: "calc(100% - 0px)",
         padding: 30,
       }}
     >

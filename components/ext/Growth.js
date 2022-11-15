@@ -14,6 +14,15 @@ export default function Growth(props) {
         toolTip="Annualized share price growth per year, exponentially"
       />
       <Numeric
+        percentile={props.data["div%"] || 0}
+        value={`${Math.round((props.data.div || 0) * 100 * 10) / 10}%`}
+        desc={"Dividend"}
+        style={{
+          margin: 4,
+        }}
+        toolTip="Average annual compounding dividend yield"
+      />
+      <Numeric
         percentile={1 - props.data["beta%"]}
         value={`${Math.round(props.data.beta * 100 * 10) / 10}%`}
         desc={"Beta"}

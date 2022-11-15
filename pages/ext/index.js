@@ -51,10 +51,11 @@ export default function ExtPage(props) {
   const [message, setMessage] = useState();
 
   useEffect(() => {
-    onAuthStateChanged(getAuth(), async (user) => {
-      setUser(user || null);
-      console.log("user change", user, data);
-      if (user && lastArgs) {
+    onAuthStateChanged(getAuth(), async (u) => {
+      // port.postMessage({ redirect: window.location.origin + "/login" });
+      setUser(u || null);
+      console.log("user change", u, data);
+      if (u && lastArgs) {
         const [symbolData, message] = await getScopedSymbolData(lastArgs);
         if (message) {
           setMessage(message);
@@ -71,6 +72,7 @@ export default function ExtPage(props) {
   useEffect(() => {
     const port = chrome.runtime.connect(extId, { name: "" + Math.random() });
     port.onMessage.addListener(async function (data) {
+      console.log("11/14 got chrome data", data);
       if (data.args) {
         setLoading(true);
         lastArgs = data.args;
@@ -128,6 +130,7 @@ export default function ExtPage(props) {
           text={message}
           message={"forbidden"}
           port={port}
+          url="/pricing"
           buttonText={"Upgrade for Unlimited Access"}
         />
       );

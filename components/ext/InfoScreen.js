@@ -31,8 +31,8 @@ export default function InfoScreen(props) {
         <Button
           variant="contained"
           onClick={() => {
-            props.port.postMessage({
-              message: props.message,
+            port.postMessage({
+              redirect: window.location.origin + props.url,
             });
           }}
         >

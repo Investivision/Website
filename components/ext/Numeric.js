@@ -60,6 +60,8 @@ export default function Numeric(props) {
       style={Object.assign(
         {
           width: 120,
+          margin: 4,
+          marginBottom: 14,
         },
         props.style || {}
       )}

@@ -1,8 +1,10 @@
 import styles from "./pivots.module.css";
 import { useTheme } from "@mui/styles";
 import { absoluteAngleDegrees } from "@nivo/core";
+import UpgradeButton from "./UpgradeButton";
 
 export default function Pivots(props) {
+  console.log("11/14 pivot props", props);
   const theme = useTheme();
   let res;
   let sup;
@@ -11,6 +13,10 @@ export default function Pivots(props) {
   }
   if (props.sup) {
     sup = (props.sup + 1) * props.lastClose;
+  }
+
+  if (!props.res) {
+    return <UpgradeButton port={props.port} />;
   }
 
   return (

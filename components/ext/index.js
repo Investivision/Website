@@ -61,7 +61,7 @@ const processSymbolData = (data) => {
   prophet.sort((a, b) => {
     return a.days - b.days;
   });
-  const roundedClose = Math.round(out.global.lastclose, 1);
+  const roundedClose = Math.round(out.global.lastClose, 1);
   prophet.unshift({
     days: 0,
     low: roundedClose,
@@ -272,38 +272,7 @@ export default function Ext(props) {
             }}
           />
         )}
-        {/* {props.hideHeader ? null : (
-              <div className={styles.header}>
-                <h2>
-                  {name ? "Welcome, " + name.split(" ")[0] : "Investivision"}
-                </h2>
-                <Button
-                  onClick={() => {
-                    if (name) {
-                      port.postMessage({ message: "sign out from extension" });
-                    } else {
-                      port.postMessage({ message: "sign in from extension" });
-                    }
-                  }}
-                  sx={{
-                    minWidth: 100,
-                    padding: "2px 10px",
-                  }}
-                  // style={{
-                  //   marginTop: 0,
-                  // }}
-                >
-                  {name ? "Sign out" : "Sign in"}
-                </Button>
-              </div>
-            )} */}
-        {/* <h1 className={styles.symbol}>{args ? args[0] : "no args yet"}</h1> */}
-        <MetricSection
-        // style={{
-        //   position: "sticky",
-        //   top: 0,
-        // }}
-        >
+        <MetricSection>
           {args.map((arg, i) => {
             return (
               <h1 className={styles.symbol}>
@@ -442,25 +411,6 @@ export default function Ext(props) {
               currentTimeFrame={currentTimeFramesForRender}
               symbol={args}
             />
-            {/* {props.data ? null : (
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    style={{
-                      marginTop: 50,
-                      marginBottom: 20,
-                      fontWeight: 400,
-                    }}
-                    disableElevation
-                    onClick={() => {
-                      port.postMessage({
-                        message: "redirect to investivision",
-                      });
-                    }}
-                  >
-                    More on Investivision.com
-                  </Button>
-                )} */}
           </>
         ) : null}
       </div>

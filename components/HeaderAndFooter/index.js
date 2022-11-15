@@ -109,7 +109,7 @@ export default function HeaderAndFooter(props) {
                     //     ? ""
                     //     : "dark_"
                     // }logo.svg`}
-                    src="/images/tensor_logo.svg"
+                    src="/matrix_icon.svg"
                   />
                 </div>
                 Tensor Investor

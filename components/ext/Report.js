@@ -28,13 +28,13 @@ const termMap = {
 };
 
 function SectionHeader({
-  global,
+  symbol,
   currentTimeFrame,
   children,
   toolTip,
   onlySymbol,
 }) {
-  if (global.length == 1) {
+  if (symbol.length == 1) {
     return (
       <ToolTip title={toolTip} arrow>
         <h3>{children}</h3>
@@ -43,10 +43,10 @@ function SectionHeader({
   }
   return (
     <MetricSection noDivider>
-      {global.map((glob, i) => (
+      {symbol.map((symb, i) => (
         <ToolTip title={toolTip} arrow>
           <h3>
-            <span className={styles.sectionHeaderSpan}>{`${glob.symbol}`}</span>{" "}
+            <span className={styles.sectionHeaderSpan}>{`${symb}`}</span>{" "}
             {children}
             {onlySymbol ? null : (
               <span className={styles.sectionHeaderSpan}>{`, ${
@@ -61,11 +61,11 @@ function SectionHeader({
 }
 
 export default function Report(props) {
-  console.log("report props", props);
+  console.log("11/14 report props", props);
   return (
     <div className={styles.report}>
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Growth
@@ -78,7 +78,7 @@ export default function Report(props) {
       />
       {/* <Growth {...props} /> */}
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Risk
@@ -90,7 +90,7 @@ export default function Report(props) {
         props={props}
       />
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Candle Patterns
@@ -103,7 +103,7 @@ export default function Report(props) {
       />
       <SectionHeader
         toolTip={`Prediction computed from ${props.symbol}-specific AI model.`}
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         AI Forecast
@@ -124,7 +124,7 @@ export default function Report(props) {
         props={props}
       />
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Momentum
@@ -138,7 +138,7 @@ export default function Report(props) {
 
       <SectionHeader
         toolTip="Movement is often bound between demonstrated support and resistance levels. However, when price exceeds these bounds, movement tends to break-out in that direction."
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Pivot Points
@@ -152,29 +152,22 @@ export default function Report(props) {
           }}
         />
       </SectionHeader>
-      {props.data[0].sup !== undefined ? (
-        // <Pivots
-        //   sup={props.data.sup}
-        //   res={props.data.res}
-        //   lastClose={props.global.lastclose}
-        // />
-        <MetricSection
-          allData={props.data}
-          allGlobal={props.global}
-          propTransform={(elementProps) => {
-            return {
-              sup: elementProps.data.sup,
-              res: elementProps.data.res,
-              lastClose: elementProps.global.lastclose,
-            };
-          }}
-          component={Pivots}
-        />
-      ) : (
-        <UpgradeButton port={props.port} />
-      )}
+
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        propTransform={(elementProps) => {
+          console.log("11/14 elementProps", elementProps);
+          return {
+            sup: elementProps.data.sup,
+            res: elementProps.data.res,
+            lastClose: elementProps.global.lastClose,
+          };
+        }}
+        component={Pivots}
+      />
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
       >
         Cycle Studies
@@ -189,28 +182,24 @@ export default function Report(props) {
         component={Cycle}
       />
       <SectionHeader
-        global={props.global}
+        symbol={props.symbol}
         currentTimeFrame={props.currentTimeFrame}
         onlySymbol
       >
         Notes
       </SectionHeader>
-      {props.global[0].notes !== undefined ? (
-        <MetricSection
-          allData={props.data}
-          allGlobal={props.global}
-          propTransform={(elementProps) => {
-            return {
-              symbol: elementProps.global.symbol,
-              notes: elementProps.global.notes,
-            };
-          }}
-          props={props}
-          component={TextArea}
-        />
-      ) : (
-        <UpgradeButton port={props.port} />
-      )}
+      <MetricSection
+        allData={props.data}
+        allGlobal={props.global}
+        propTransform={(elementProps) => {
+          return {
+            symbol: elementProps.global.symbol,
+            notes: elementProps.global.notes,
+          };
+        }}
+        props={props}
+        component={TextArea}
+      />
     </div>
   );
 }

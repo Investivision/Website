@@ -35,7 +35,7 @@ export default function Prophet(props) {
       />
       <RangePlot
         points={props.data.prophet}
-        lastClose={props.global.lastclose}
+        lastClose={props.global.lastClose}
         plotStyles={props.plotStyles}
       />
     </>
